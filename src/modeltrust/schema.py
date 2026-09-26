@@ -18,6 +18,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         "name": "frame_not_empty",
         "status": "performed",
         "result": result,
+        "reason_code": None,
         "detail": "0 rows or 0 columns" if result == "fail" else ""
     })
     
@@ -27,6 +28,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         "name": "columns_unique",
         "status": "performed",
         "result": result,
+        "reason_code": None,
         "detail": str(meta.get("duplicate_headers")) if result == "fail" else ""
     })
     
@@ -36,6 +38,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         "name": "column_names_nonempty",
         "status": "performed",
         "result": result,
+        "reason_code": None,
         "detail": str(meta.get("unnamed_columns")) if result == "fail" else ""
     })
     
@@ -44,8 +47,9 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         checks.append({
             "name": "target_present",
             "status": "not_assessable",
-            "result": "null",
-            "detail": "not_provided"
+            "result": None,
+            "reason_code": "not_provided",
+            "detail": ""
         })
     else:
         result = "pass" if spec.target in frame.columns else "fail"
@@ -53,34 +57,42 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
             "name": "target_present",
             "status": "performed",
             "result": result,
+            "reason_code": None,
             "detail": f"Missing column: {spec.target}" if result == "fail" else ""
         })
         
     # 5. target_numeric
     if spec.target is not None and spec.target in frame.columns:
         s = pd.to_numeric(frame[spec.target], errors="coerce")
-        fails = s.isna() & frame[spec.target].notna()
-        if fails.any():
-            bad_vals = frame.loc[fails, spec.target].head(3).tolist()
+        original_na = frame[spec.target].isna().sum()
+        coerced_na = s.isna().sum()
+        failed_parse = coerced_na - original_na
+        
+        if failed_parse >= 1:
+            fails_mask = s.isna() & frame[spec.target].notna()
+            bad_vals = frame.loc[fails_mask, spec.target].head(3).tolist()
             checks.append({
                 "name": "target_numeric",
                 "status": "performed",
                 "result": "fail",
-                "detail": f"{fails.sum()} rows failed to parse as numeric. Examples: {bad_vals}"
+                "reason_code": None,
+                "detail": f"{failed_parse} rows failed to parse as numeric. Examples: {bad_vals}"
             })
         else:
             checks.append({
                 "name": "target_numeric",
                 "status": "performed",
                 "result": "pass",
+                "reason_code": None,
                 "detail": ""
             })
     else:
         checks.append({
             "name": "target_numeric",
-            "status": "skipped",
-            "result": "null",
-            "detail": "Target missing or not provided"
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "not_provided",
+            "detail": ""
         })
         
     # 6. optional_columns_present
@@ -93,8 +105,9 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
     if not has_any_opt:
         checks.append({
             "name": "optional_columns_present",
-            "status": "skipped",
-            "result": "null",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "not_provided",
             "detail": ""
         })
     else:
@@ -103,6 +116,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
                 "name": "optional_columns_present",
                 "status": "performed",
                 "result": "fail",
+                "reason_code": None,
                 "detail": f"Missing columns: {missing_opts}"
             })
         else:
@@ -110,12 +124,12 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
                 "name": "optional_columns_present",
                 "status": "performed",
                 "result": "pass",
+                "reason_code": None,
                 "detail": ""
             })
             
     # 7. time_column_parseable
     if spec.time is not None and spec.time in frame.columns:
-        # Check parseability
         s = pd.to_datetime(frame[spec.time], errors="coerce")
         fails = s.isna() & frame[spec.time].notna()
         if fails.any():
@@ -124,6 +138,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
                 "name": "time_column_parseable",
                 "status": "performed",
                 "result": "fail",
+                "reason_code": None,
                 "detail": f"{fails.sum()} rows failed to parse as datetime. Examples: {bad_vals}"
             })
         else:
@@ -131,25 +146,28 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
                 "name": "time_column_parseable",
                 "status": "performed",
                 "result": "pass",
+                "reason_code": None,
                 "detail": ""
             })
     else:
         checks.append({
             "name": "time_column_parseable",
-            "status": "skipped",
-            "result": "null",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "not_provided",
             "detail": ""
         })
         
     # 8. group_column_cardinality
     if spec.group is not None and spec.group in frame.columns:
-        n_groups = frame[spec.group].nunique()
+        n_groups = frame[spec.group].nunique(dropna=True)
         if n_groups <= 1:
-            meta.setdefault("warnings", []).append("insufficient_groups")
+            meta.setdefault("warnings", []).append("single_group")
             checks.append({
                 "name": "group_column_cardinality",
                 "status": "performed",
                 "result": "pass",
+                "reason_code": None,
                 "detail": "single_group"
             })
         else:
@@ -157,13 +175,15 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
                 "name": "group_column_cardinality",
                 "status": "performed",
                 "result": "pass",
+                "reason_code": None,
                 "detail": ""
             })
     else:
         checks.append({
             "name": "group_column_cardinality",
-            "status": "skipped",
-            "result": "null",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "not_provided",
             "detail": ""
         })
 
@@ -172,6 +192,7 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         "skipped": sum(1 for c in checks if c["status"] == "skipped"),
         "not_assessable": sum(1 for c in checks if c["status"] == "not_assessable"),
         "fail": sum(1 for c in checks if c["result"] == "fail"),
+        "total": len(checks)
     }
     
     return {"checks": checks, "summary": summary}

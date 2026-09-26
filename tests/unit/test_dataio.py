@@ -56,16 +56,17 @@ def test_max_rows():
     assert loaded.meta["truncated"] is True
 
 def test_parquet_support():
-    path = Path("tests/fixtures/dummy.parquet")
-    # if pyarrow is installed, this will fail on file not found
-    # if not, it will fail on pyarrow missing
-    try:
-        import pyarrow
-    except ImportError:
-        with pytest.raises(InputError, match=r"\[parquet\]"):
-            read_table(path, fmt="parquet")
-    else:
-        pytest.skip("pyarrow installed, skipping absent-extra test")
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        path = Path(td) / "dummy.parquet"
+        path.write_text("dummy", encoding="utf-8")
+        try:
+            import pyarrow
+        except ImportError:
+            with pytest.raises(InputError, match=r"\[parquet\]"):
+                read_table(path, fmt="parquet")
+        else:
+            pytest.skip("pyarrow installed, skipping absent-extra test")
 
 def test_columns_sha256_order():
     from modeltrust.dataio import LoadedTable

@@ -37,4 +37,7 @@ tzdata          2026.4
 ```
 - **.venv Python Sürümü:** Python 3.12.8
 - **Not:** `pandas 3.x` kullanıldığından string dtype'ları object/string davranışı açısından kontrol edilir; sabit object varsayımı yapılmamaktadır.
+- **Bilinen Kısıtlamalar:**
+  - `tmp_path` fixture'ı test çalıştırıcısında ara sıra `PermissionError: [WinError 5] Access is denied: 'C:\\Users\\agah\\AppData\\Local\\Temp\\pytest-of-agah'` hatası vermiştir (tek seferlik gözlem, yetki sorunu atlatılmıştır).
+  - `tempfile.mkdtemp()` üzerinde geçici dosya okuma-yazma testi başarılıdır (Çıktı: `temp_write: ok`).
 - **Sapmalar / Notlar:** Bulunmamaktadır.

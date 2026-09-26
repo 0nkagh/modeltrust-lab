@@ -26,3 +26,5 @@ Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir kara
 | D-020 | Max rows: Açıkça verilirse uygulanır, sessiz kırpma yasaktır. Truncation durumu rapora yazılır. |
 | D-021 | Hata yönetimi: Şema kontrolleri fail üretirse araç Exit Code 4 ile sonlanır. "not_assessable" uyarı mahiyetindedir. |
 | D-022 | CLI: `inspect` alt komutu kanonik JSON basar. `--out-dir` bu aşamada reserve edilmiştir. |
+| D-023 | Kontrol durum modeli (`reason_code`): `performed` (null), `not_assessable` (not_provided vb.), `skipped` (tool_not_implemented). `result="fail"` yalnızca koşul sağlanmadı demektir, model güvenliği hakkında karar vermez. |
+| D-024 | Fixture hijyeni: Tüm fixture'lar `tests/fixtures/README.md` içinde belgelenmeli, `turkish_bom_semicolon.csv` istisnası dışında BOM'suz ve LF satır sonlu UTF-8 olmalıdır. |

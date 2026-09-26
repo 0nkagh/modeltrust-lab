@@ -18,7 +18,7 @@ def test_help_flag():
 
 def test_subcommand_not_implemented():
     result = subprocess.run(
-        [sys.executable, "-m", "modeltrust", "profile", "--input", "x.csv"],
+        [sys.executable, "-m", "modeltrust", "leakage", "--input", "x.csv"],
         capture_output=True, text=True
     )
     assert result.returncode == 3

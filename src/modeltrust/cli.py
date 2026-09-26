@@ -97,14 +97,14 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.run_timestamp:
                 prov["run_metadata"]["generated_at"] = datetime.now(timezone.utc).isoformat()
                 
-            # print json
-            print(json.dumps(prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
-            
             if prov["schema"]["summary"]["fail"] > 0:
                 for check in prov["schema"]["checks"]:
                     if check["result"] == "fail":
                         print(check["detail"], file=sys.stderr)
-                        return 4
+                return 4
+                
+            # print json
+            print(json.dumps(prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
             
             return 0
             
