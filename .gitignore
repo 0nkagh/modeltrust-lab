@@ -17,3 +17,8 @@ scratch/
 out*.json
 
 test_out*.txt
+split_*_all.json
+exit4_*.txt
+tmp*.json
+leak_out.json
+pytest_summary.txt

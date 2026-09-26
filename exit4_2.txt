@@ -1,2 +1,0 @@
-Error: --mode temporal requires --time-col
-4
