@@ -68,3 +68,4 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-044 | Random split yöntemi `numpy.random.default_rng(seed).permutation`; tekrarlanabilirlik kapsamı aynı ortam + aynı numpy sürümü; sürümler arası kararlılık iddia edilmez. |
 | D-045 | Her bölmenin train/test satır indeksleri SHA-256 ile kayda geçirilir (`*_row_indices_sha256`); bölme karşılaştırmaları bu hash'ler üzerinden yapılır. |
 | D-046 | Group split kuralı: gruplar (satır sayısı azalan, ad artan) sıralanır, test kümesi hedefe ulaşana kadar sırayla doldurulur; deterministiktir. |
+| D-047 | Commit edilmiş içerik ile çalışma ağacı ayrışamaz: commit her zaman testler yeşilken ve çalışma ağacında commit edilmemiş düzeltme bırakmadan atılır. |

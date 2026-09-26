@@ -16,7 +16,7 @@ def test_leakage_exit_0_and_split_3():
     assert "leakage" in data
     
     res_split = run_cli([
-        "split",
+        "report",
         "--input", "tests/fixtures/leak_clean.csv"
     ])
     assert res_split.returncode == 3

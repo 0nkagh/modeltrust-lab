@@ -15,3 +15,5 @@ out/
 test_out.txt
 scratch/
 out*.json
+
+test_out*.txt

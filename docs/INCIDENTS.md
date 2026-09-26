@@ -44,3 +44,8 @@
 - Ne oldu: `--out-dir` verildiğinde exit 2 dönecek şekilde değiştirildi (sözleşme: stderr uyarısı + exit 0).
 - Etki: Sözleşme ihlali; test beklentisiyle çelişki.
 - Önlem: T4-F/F1 ile sözleşmeye dönüldü.
+
+## I-010 — Kırmızı commit ve `git add .` kullanımı (T5)
+- Ne oldu: T5'te `git add .` kullanıldı, commit mesajı promptta verilen metin değildi; commit sonrası testleri geçirmek için `split.py`, `test_leakage_cli.py`, `test_profile.py` düzeltildi ancak düzeltmeler commit edilmedi. HEAD'deki kod bir süre testleri geçmedi.
+- Etki: Depo HEAD'i kırmızı kaldı; commit edilmiş içerik ile çalışan içerik ayrıştı.
+- Önlem: D-022 (commit yalnız tüm testler yeşilken), D-040 (açık `git add` listesi), D-038 (verilen commit mesajı).

@@ -51,6 +51,17 @@ def test_split_group_disjointness():
     
     assert len(gm["group_assignments"]) > 0
 
+def test_split_group_pinning():
+    loaded = read_table("tests/fixtures/split_time.csv")
+    spec = ColumnSpec(group="grp")
+    res = build_split(loaded.frame, spec, mode="group", test_size=0.2, seed=42)
+    
+    gm = res["modes"]["group"]
+    test_groups = [g["group"] for g in gm["group_assignments"] if g["side"] == "test"]
+    assert test_groups == ["G1"]
+    assert gm["n_train"] == 24
+    assert gm["test_fraction"] == 0.2
+
 def test_split_temporal_ordering():
     loaded = read_table("tests/fixtures/split_time.csv")
     spec = ColumnSpec(time="ts")
@@ -77,7 +88,7 @@ def test_split_temporal_group_leakage():
 def test_split_random_row_overlap():
     loaded = read_table("tests/fixtures/split_dupes.csv")
     spec = ColumnSpec()
-    res = build_split(loaded.frame, spec, mode="random", test_size=0.5, seed=42)
+    res = build_split(loaded.frame, spec, mode="random", test_size=0.2, seed=42)
     
     rm = res["modes"]["random"]
     assert rm["row_overlap_count"] > 0

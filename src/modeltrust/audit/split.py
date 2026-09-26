@@ -73,7 +73,7 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
         
         df_str = df[cols].astype(str)
         
-        row_hashes = df_str.apply(lambda row: hashlib.sha256("".join(row).encode('utf-8')).hexdigest(), axis=1)
+        row_hashes = df_str.apply(lambda row: hashlib.sha256("".join(str(v) for v in row).encode('utf-8')).hexdigest(), axis=1)
         
         train_h = set(row_hashes.iloc[train_idx])
         test_h = set(row_hashes.iloc[test_idx])
