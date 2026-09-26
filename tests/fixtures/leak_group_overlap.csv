@@ -1,0 +1,9 @@
+grp,subset,y
+A,train,1
+A,train,1
+B,train,0
+B,train,0
+C,train,1
+C,train,0
+A,test,1
+B,test,0

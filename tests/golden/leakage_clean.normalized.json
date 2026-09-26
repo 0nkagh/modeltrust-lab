@@ -1,0 +1,188 @@
+{
+  "column_spec": {
+    "group": "grp",
+    "prediction": null,
+    "subset": "subset",
+    "target": "y",
+    "time": null
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "y",
+      "x1",
+      "x2",
+      "grp",
+      "subset"
+    ],
+    "columns_sha256": "4397a0c7878d32b1f64a0c46dcb30f0fe6dfd12b060225a18515d0723e65c1f8",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 5,
+    "nrows_read": 30,
+    "nrows_total": 30,
+    "path": "tests/fixtures/leak_clean.csv",
+    "sha256": "1e9791f91c542ffa4a8db35e425612b79ad9890e7b7949d8c607ad1def609f2b",
+    "size_bytes": 2016,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": {
+      "group_not_provided": false,
+      "insufficient_rows": false,
+      "non_finite_excluded": false,
+      "subset_not_provided": false,
+      "target_not_provided": false,
+      "time_not_provided": true,
+      "truncated_input": false
+    }
+  },
+  "leakage": {
+    "checks": [
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "target_copy_exact",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "target_copy_near",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "index_like_feature",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_row_overlap",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_group_overlap",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_time_ranges",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "leakage_schema_version": 1,
+    "summary": {
+      "fail": 0,
+      "not_assessable": 1,
+      "performed": 5,
+      "skipped": 0,
+      "suspicion_count": 0,
+      "total": 6
+    },
+    "thresholds": {
+      "ATOL_NUMERIC_EQUALITY": 1e-12,
+      "EXACT_COPY_EQUALITY_RATIO": 1.0,
+      "EXAMPLE_LIMIT": 5,
+      "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
+      "MIN_PAIRS_FOR_CORRELATION": 20,
+      "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "NEAR_COPY_CORR_ABS_MIN": 0.999
+    }
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 1,
+      "performed": 7,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}
