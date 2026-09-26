@@ -105,7 +105,7 @@ def test_missing_target_cli():
     assert res.returncode == 0
     data = json.loads(res.stdout)
     
-    assert data["input"]["warnings"]["target_not_provided"] is True
+    assert "target_not_provided" in data["input"]["warnings"]
     
     leak = data["leakage"]
     assert get_check(leak, "target_copy_exact")["status"] == "not_assessable"

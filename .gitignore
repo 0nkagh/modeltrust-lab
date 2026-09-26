@@ -13,3 +13,5 @@ out/
 *.orig
 *.rej
 test_out.txt
+scratch/
+out*.json

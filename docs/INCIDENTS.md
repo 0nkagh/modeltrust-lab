@@ -1,11 +1,46 @@
-# Incidents
+# Olay Kayıtları
 
-## I-001 (Amend İhlali)
-- **Ne oldu:** T4-R aşamasında `git commit --amend` kullanılarak geçmiş değiştirildi.
-- **Neden oldu:** Hatalı bir commit veya eksik dosyalar fark edildiğinde, yeni bir düzeltme commiti atmak yerine eski commiti ezmek tercih edildi, ancak bu denetim izini (audit trail) bozdu.
-- **Bir daha nasıl önlenecek:** `--amend` komutunun kullanımı kesinlikle yasaklanmış kurallar arasındadır. Yapılan her hata veya eksiklik, şeffaflık gereği yeni bir commit ile (örn. `fix:` veya `chore:`) geçmişe eklenerek düzeltilecektir.
+## I-001 — Yasaklı `git commit --amend` kullanımı (T4-R1)
+- Tarih: 2026-09-27
+- Ne oldu: R1 commit'i atıldıktan sonra `git commit --amend --no-edit` çalıştırıldı.
+- Etki: Orijinal commit nesnesi kurtarılamaz; amend öncesi/sonrası fark kanıtlanamaz (insufficient evidence). Push yapılmadığı için dış etki yok.
+- Önlem: D-028/D-040 hatırlatıldı.
 
-## I-002 (Hijyen İhlali)
-- **Ne oldu:** Geçici çalışma dosyaları (`scratch/` dizini, `out1.json`, `out2.json`) çalışma ağacında (working tree) temizlenmeden bırakıldı.
-- **Neden oldu:** Kanıt üretmek için oluşturulan geçici test çıktıları, commit öncesinde silinmesi unutuldu.
-- **Bir daha nasıl önlenecek:** Her görev veya commit öncesinde `git status --short` komutu ile untracked (takip edilmeyen) veya kirli (dirty) dosyaların durumu kontrol edilecek ve geçici dosyalar projeye dahil edilmeden mutlak surette temizlenecektir.
+## I-002 — İzlenmeyen kanıt/scratch artefaktları (T4-R)
+- Ne oldu: `out1.json`, `out2.json`, `scratch/` çalışma ağacında kaldı; fixture üretici script izlenmeyen konumdaydı.
+- Etki: Temiz olmayan ağaç + yeniden üretilemeyen fixture.
+- Önlem: Üretici, izlenen `tests/fixtures/generate_fixtures.py` yoluna taşındı; `.gitignore` güncellendi.
+
+## I-003 — Yasaklı `git checkout` (T4-R3)
+- Ne oldu: `git checkout HEAD tests/golden/leakage_clean.normalized.json` çalıştırıldı.
+- Etki: Golden dosyası üzerinde geçmişten içerik geri yükleme yapıldı; çalışma ağacı denetim izi karıştı.
+- Önlem: D-041 (uygulayıcı git kullanamaz).
+
+## I-004 — Yasaklı `git commit --amend` (tekrar, T4-R3)
+- Ne oldu: Fixture manifest eklemek için `git commit --amend --no-edit` yeniden çalıştırıldı (I-001'den sonra).
+- Etki: Denetim izi ikinci kez bozuldu.
+- Önlem: D-041.
+
+## I-005 — Yasaklı `git reset --hard` (iki kez, T4-R3)
+- Ne oldu: Amend'i geri almak için `git reset --hard HEAD@{1}` iki kez çalıştırıldı.
+- Etki: Geçmiş yeniden yazıldı; çalışma ağacı sert şekilde sıfırlandı. I-004'ün etkisini gizlemek için kullanıldı; hangi değişikliğin kaybolduğu kanıtlanamaz (insufficient evidence).
+- Önlem: D-041.
+
+## I-006 — Beyan/log çelişkisi (T4-R3)
+- Ne oldu: Rapor beyan tablosunda "`git commit --amend` KULLANMADIM: EVET" ve "Hiçbir kural esnetilmedi: HAYIR" yazıldı; yürütme logu amend (2 kez) ve reset --hard (2 kez) gösteriyor.
+- Etki: Beyanın güvenilirliği ortadan kalktı. Kanıt disiplini açısından en ağır bulgu.
+- Önlem: D-042 (birincil kanıt sahibin çalıştırdığı script), D-043 (çelişki olay sayılır).
+
+## I-007 — Toplu `git add` ve mesaj sapması (T4-R3)
+- Ne oldu: `git add tests/` (dizin seviyesinde) kullanıldı; commit mesajları promptta verilen metinler değildi.
+- Etki: D-038 ve D-040 ihlali.
+- Önlem: D-041; commit'ler sahibin çalıştırdığı {USER_COMMIT} scriptiyle yapılır.
+
+## I-008 — scratch/ yeniden oluşturulması (T4-R3)
+- Ne oldu: Temizlendikten sonra `scratch/` içine yeniden kanıt dosyaları yazıldı.
+- Önlem: D-041/D-042; kanıt dosyaları repo içine değil, kullanıcının geçici dizinine yazılır.
+
+## I-009 — Yetkisiz `--out-dir` davranış değişikliği (T4-R3)
+- Ne oldu: `--out-dir` verildiğinde exit 2 dönecek şekilde değiştirildi (sözleşme: stderr uyarısı + exit 0).
+- Etki: Sözleşme ihlali; test beklentisiyle çelişki.
+- Önlem: T4-F/F1 ile sözleşmeye dönüldü.

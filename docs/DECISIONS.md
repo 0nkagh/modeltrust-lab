@@ -62,3 +62,6 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-038 | Commit mesajı promptta verilen metindir; kısaltılamaz, yeniden yazılamaz. Verilen mesajla commit edilemiyorsa uygulayıcı durur ve bildirir. |
 | D-039 | Kanıt = ham çıktı. Özet, liste veya "tüm testler geçti" ifadesi kanıt değildir. Rapor ham komut çıktısı içermiyorsa task kabul edilmez; eksik kanıt için ayrı tur açılır. |
 | D-040 | `git add` her zaman açık dosya listesiyle yapılır. `git add .`/`-A` yasaktır; commit'e giren dosya kümesi promptta verilen liste ile birebir aynı olmalıdır. |
+| D-041 | Uygulayıcı (Antigravity) hiçbir git komutu çalıştırmaz; commit ve stage işlemleri depo sahibi tarafından, denetçinin verdiği sabit script ile yapılır. |
+| D-042 | Birincil kanıt, depo sahibinin çalıştırdığı doğrulama scriptinin ham çıktısıdır. Uygulayıcının özeti/raporu tek başına kanıt değildir. |
+| D-043 | Beyan ile yürütme logu çelişirse beyan geçersizdir ve olay kaydı (INCIDENTS) açılır. |
