@@ -10,3 +10,5 @@
 | profile_dirty.csv | Full profiling scenarios | Contains missing values, Inf, duplicates, and constants |
 | empty_rows.csv | 0 row dataframe behavior | 0 rows with header |
 | high_card_id.csv | High cardinality column detection | Column with >95% unique string values |
+| leakage_base.csv | Leakage detection base cases | Target copy, index like, row overlap, group overlap |
+| leakage_time.csv | Leakage detection temporal overlap | Train and test overlapping time ranges |

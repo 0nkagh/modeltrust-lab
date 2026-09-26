@@ -137,6 +137,10 @@ def main(argv: Optional[list[str]] = None) -> int:
                 from modeltrust.profile import build_profile
                 prov["profile"] = build_profile(loaded.frame, loaded.meta, spec)
                 
+            if args.command == "leakage":
+                from modeltrust.audit.leakage import build_leakage
+                prov["leakage"] = build_leakage(loaded.frame, spec)
+                
             if prov["schema"]["summary"]["fail"] > 0:
                 for check in prov["schema"]["checks"]:
                     if check["result"] == "fail":
