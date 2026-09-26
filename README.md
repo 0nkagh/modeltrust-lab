@@ -6,7 +6,12 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 ## 2. Status
 | Phase | Task | Status | Description |
 |---|---|---|---|
-| PHASE 2 | T1 | Repo skeleton only | Audit modules not implemented |
+| PHASE 2 | T1 | ✅ repo skeleton | Repo initialization |
+| PHASE 2 | T2 | ✅ inspect | CSV/Parquet okuma, şema doğrulama, provenance |
+| PHASE 2 | T3 | ✅ profile | Dataset profiling |
+| PHASE 2 | T4 | ✅ leakage (this task) | Leakage audit |
+
+**Unimplemented modules:** `split`, `report`.
 
 ## 3. Requirements
 - Python >=3.10
@@ -15,7 +20,7 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 ```bash
 python -m venv .venv
 # Activate your venv, then:
-pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 modeltrust --version
 pytest
 ```
@@ -48,3 +53,10 @@ Generates comprehensive dataset profile along with schema validation and provena
 ```bash
 modeltrust profile --input data.csv --target-col y
 ```
+
+### `leakage`
+Performs diagnostic checks for potential data leakage indicators (e.g., target copy, index-like features, subset row/group/time overlap).
+```bash
+modeltrust leakage --input data.csv --target-col y --subset-col subset --group-col grp
+```
+*Note: Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.*

@@ -8,6 +8,7 @@ class ColumnSpec:
     prediction: Optional[str] = None
     group: Optional[str] = None
     time: Optional[str] = None
+    subset: Optional[str] = None
 
 def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
     checks = []
@@ -159,10 +160,11 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         })
         
     # 8. group_column_cardinality
+    session_warnings = []
     if spec.group is not None and spec.group in frame.columns:
         n_groups = frame[spec.group].nunique(dropna=True)
         if n_groups <= 1:
-            meta.setdefault("warnings", []).append("single_group")
+            session_warnings.append("single_group")
             checks.append({
                 "name": "group_column_cardinality",
                 "status": "performed",
@@ -195,4 +197,4 @@ def validate_input(frame: pd.DataFrame, meta: dict, spec: ColumnSpec) -> dict:
         "total": len(checks)
     }
     
-    return {"checks": checks, "summary": summary}
+    return {"checks": checks, "summary": summary, "session_warnings": session_warnings}

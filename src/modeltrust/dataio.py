@@ -122,22 +122,13 @@ def read_table(
         nrows_total = pq_file.metadata.num_rows
         meta["nrows_total"] = nrows_total
         
-        if max_rows is not None and max_rows < nrows_total:
-            # We must truncate
-            meta["truncated"] = True
-            # Read first max_rows
-            # A simple way for small max_rows: read full and slice (for prototype)
-            # A better way is read row groups, but pd.read_parquet doesn't support max_rows.
-            pass
-            
+
         df = pd.read_parquet(path_obj)
         if max_rows is not None:
             df = df.head(max_rows)
             
         meta["nrows_read"] = len(df)
-        if max_rows is None:
-            meta["truncated"] = False
-            
+
     else:
         # CSV
         try:
@@ -189,9 +180,7 @@ def read_table(
             raise InputError(f"Failed to parse CSV: {e}")
             
         meta["nrows_read"] = len(df)
-        if max_rows is not None and meta["nrows_total"] > max_rows:
-            meta["truncated"] = True
-            
+
         # Check decimal comma
         if decimal is None:
             suspect_col = _check_decimal_comma(df, delimiter)
@@ -227,5 +216,7 @@ def read_table(
         warnings.append("unnamed_columns")
         
     meta["columns_sha256"] = hashlib.sha256("\n".join(str(c) for c in cols).encode("utf-8")).hexdigest()
+    
+    meta["truncated"] = (max_rows is not None) and (meta["nrows_total"] > max_rows)
     
     return LoadedTable(frame=df, meta=meta)

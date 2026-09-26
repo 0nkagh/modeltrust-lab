@@ -2,6 +2,7 @@
   "column_spec": {
     "group": null,
     "prediction": null,
+    "subset": null,
     "target": "y",
     "time": null
   },

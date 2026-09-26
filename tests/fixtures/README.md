@@ -9,3 +9,4 @@
 | quoted_commas.csv | Correct delimiter detection with quoted text | Text contains commas |
 | profile_dirty.csv | Full profiling scenarios | Contains missing values, Inf, duplicates, and constants |
 | empty_rows.csv | 0 row dataframe behavior | 0 rows with header |
+| high_card_id.csv | High cardinality column detection | Column with >95% unique string values |

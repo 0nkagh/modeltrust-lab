@@ -29,7 +29,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
     
     # Existing commands (not implemented)
-    commands = ["leakage", "split", "report"]
+    commands = ["split", "report"]
     for cmd in commands:
         sub_parser = subparsers.add_parser(cmd)
         sub_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -45,6 +45,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     inspect_parser.add_argument("--pred-col", help="Prediction column")
     inspect_parser.add_argument("--group-col", help="Group column")
     inspect_parser.add_argument("--time-col", help="Time column")
+    inspect_parser.add_argument("--subset-col", help="Subset column")
     inspect_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
     inspect_parser.add_argument("--delimiter", help="CSV delimiter")
     inspect_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
@@ -61,6 +62,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     profile_parser.add_argument("--pred-col", help="Prediction column")
     profile_parser.add_argument("--group-col", help="Group column")
     profile_parser.add_argument("--time-col", help="Time column")
+    profile_parser.add_argument("--subset-col", help="Subset column")
     profile_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
     profile_parser.add_argument("--delimiter", help="CSV delimiter")
     profile_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
@@ -69,6 +71,23 @@ def main(argv: Optional[list[str]] = None) -> int:
     profile_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
     profile_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
     profile_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+
+    # Leakage command
+    leakage_parser = subparsers.add_parser("leakage")
+    leakage_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
+    leakage_parser.add_argument("--target-col", help="Target column")
+    leakage_parser.add_argument("--pred-col", help="Prediction column")
+    leakage_parser.add_argument("--group-col", help="Group column")
+    leakage_parser.add_argument("--time-col", help="Time column")
+    leakage_parser.add_argument("--subset-col", help="Subset column")
+    leakage_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
+    leakage_parser.add_argument("--delimiter", help="CSV delimiter")
+    leakage_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
+    leakage_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
+    leakage_parser.add_argument("--max-rows", type=int, help="Max rows to read")
+    leakage_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
+    leakage_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
+    leakage_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
 
     args = parser.parse_args(argv)
 
@@ -81,7 +100,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("not implemented yet (planned: PHASE 2 / T4+)", file=sys.stderr)
         return 3
 
-    if args.command in ["inspect", "profile"]:
+    if args.command in ["inspect", "profile", "leakage"]:
         if args.out_dir:
             print("--out-dir is reserved; no files are written in this version", file=sys.stderr)
 
@@ -105,7 +124,8 @@ def main(argv: Optional[list[str]] = None) -> int:
                 target=args.target_col,
                 prediction=args.pred_col,
                 group=args.group_col,
-                time=args.time_col
+                time=args.time_col,
+                subset=args.subset_col
             )
             
             prov = build_provenance(loaded, spec, seed=args.seed, path_as_given=args.input)

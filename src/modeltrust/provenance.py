@@ -9,8 +9,11 @@ from modeltrust import __version__
 def build_provenance(loaded: LoadedTable, spec: ColumnSpec, *, seed: int, path_as_given: str) -> dict:
     schema_res = validate_input(loaded.frame, loaded.meta, spec)
     
+    session_warnings = schema_res.pop("session_warnings", [])
+    
     # Handle the meta.warnings correctly
     warnings = list(loaded.meta.get("warnings", []))
+    warnings.extend(session_warnings)
     
     return {
         "tool": {"name": "modeltrust", "version": __version__},
@@ -38,7 +41,8 @@ def build_provenance(loaded: LoadedTable, spec: ColumnSpec, *, seed: int, path_a
             "target": spec.target,
             "prediction": spec.prediction,
             "group": spec.group,
-            "time": spec.time
+            "time": spec.time,
+            "subset": spec.subset
         },
         "schema": schema_res,
         "environment": {

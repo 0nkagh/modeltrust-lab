@@ -28,3 +28,27 @@ Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir kara
 | D-022 | CLI: `inspect` alt komutu kanonik JSON basar. `--out-dir` bu aşamada reserve edilmiştir. |
 | D-023 | Kontrol durum modeli (`reason_code`): `performed` (null), `not_assessable` (not_provided vb.), `skipped` (tool_not_implemented). `result="fail"` yalnızca koşul sağlanmadı demektir, model güvenliği hakkında karar vermez. |
 | D-024 | Fixture hijyeni: Tüm fixture'lar `tests/fixtures/README.md` içinde belgelenmeli, `turkish_bom_semicolon.csv` istisnası dışında BOM'suz ve LF satır sonlu UTF-8 olmalıdır. |
+| D-025 | Golden normalizasyonu: Environment alanı exclude edilerek normalized test gerçekleştirilir. |
+| D-026 | Profil çıktısı bir teşhis göstergesidir; veriyi temizlemez, hiçbir kalite iddiası üretmez. |
+| D-027 | Karar metinleri her zaman promptun içinde verilir; ayrı bir dosyaya atıf yapılmaz. |
+| D-028 | İdempotency: bir task'ın çıktısı repoda zaten mevcutsa uygulayıcı düzenleme yapmaz; durur, durumu bildirir ve onay bekler. Kendi düzeltmesini `git restore`/`checkout`/`reset` ile geri alması yasaktır. |
+| D-029 | `tests/conftest.py` repo kökü `parents[1]` ile bulunur (dosya `tests/` altındadır). Mimardan gelen `parents[2]` talimatı hatalıydı; mimar hatası kayda geçirilmiştir. |
+| D-030 | High-cardinality eşiği 0.95'tir; `profile_dirty.csv`'deki `txt` (0.875) flag'lenmez. Pozitif yol için `high_card_id.csv` eklenir. Mimardan gelen 4.3 beklentisi hatalıydı. |
+| D-031 | `ColumnSpec`'e `subset` alanı, CLI'ya `--subset-col` eklendi (D-005'teki `subset_id`). Verilmezse alt küme bağımlı kontroller `not_assessable` + `not_provided`. |
+| D-032 | Her denetim çıktısında zorunlu `interpretation` alanı: "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage." |
+| D-033 | Satır çakışması ölçütü: subset kolonu hariç tüm kolonların string birleşimi üzerinden SHA-256 satır parmak izi; aynı parmak izi iki subset'te görünüyorsa çakışma sayılır. |
+| D-034 | Tüm eşikler kodda adlandırılmış sabit olarak tanımlanır ve çıktıda `thresholds` bloğunda raporlanır. |
+| D-035 | `pyproject.toml`'a `[tool.pytest.ini_options] pythonpath = ["."]` eklendi; `tests.conftest` importu çağrı dizininden bağımsız hale getirildi. |
+| D-036 | `docs/METHODS.md` zorunlu: her kontrolün ne ölçtüğü/ölçmediği, eşik gerekçeleri ve kapsam dışı sızıntı türleri (preprocessing, feature engineering, örnekleme bias'ı, etiket gürültüsü, join kaynaklı sızıntı, temporal nedensellik). |
+
+### Errata — D-017…D-022
+D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uygulayıcı tarafından farklı içerikle doldurulmuştur. Aşağıdaki metinler bu kararların geçerli (authoritative) halidir; eski satırlar silinmez ve `superseded` sayılır.
+
+| # | Geçerli metin |
+|---|---|
+| D-017 | `provenance.py` T3'ten T2'ye taşındı: provenance, yüklenen girdi artefaktının özelliğidir; rapor entegrasyonu T6'da yapılır. |
+| D-018 | `reason_code` kontrollü sözlüğü: `not_provided`, `dependency_missing`, `ambiguous_input`, `unsupported_dtype`, `insufficient_rows`, `insufficient_groups`, `time_column_missing`, `tool_not_implemented`. |
+| D-019 | Girdi yolu rapora kullanıcının verdiği haliyle yazılır; mutlak yola genişletilmez. |
+| D-020 | CLI sözleşmesi: stdout **yalnızca** kanonik JSON içerir; tüm uyarılar stderr'e gider. |
+| D-021 | Satır sonu politikası: `.gitattributes` ile repo kanonik LF; `tests/fixtures/**` byte kararlılığı için korunur. |
+| D-022 | Commit yalnızca **tüm testler geçtikten sonra** atılır; bitmemiş iş commit edilmez. |

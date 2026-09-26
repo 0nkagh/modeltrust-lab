@@ -90,8 +90,8 @@ def test_cli_routing():
     res = run_cli(["profile", "--input", "nonexistent.csv"])
     assert res.returncode == 4
     
-    # leakage -> exit 3
-    res2 = run_cli(["leakage", "--input", "tests/fixtures/profile_dirty.csv"])
+    # split -> exit 3
+    res2 = run_cli(["split", "--input", "tests/fixtures/profile_dirty.csv"])
     assert res2.returncode == 3
 
 def test_target_available_for_summary():
