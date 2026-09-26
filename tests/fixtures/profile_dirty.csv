@@ -1,0 +1,9 @@
+id,y,grp,txt,const,empty,score
+1,10,A,alpha,X,,1.5
+2,,A,beta,X,,inf
+3,10,B,gamma,X,,2.5
+3,10,B,gamma,X,,2.5
+4,12.5,B,delta,X,,3.0
+5,15,C,epsilon,X,,4.0
+6,,C,zeta,X,,-1.0
+7,10,C,eta,X,,5.5

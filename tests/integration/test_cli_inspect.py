@@ -28,7 +28,4 @@ def test_inspect_max_rows_and_outdir():
     assert data["input"]["truncated"] is True
     assert "--out-dir is reserved" in res.stderr
     
-def test_profile_not_implemented():
-    res = run_cli(["profile", "--input", "tests/fixtures/simple_ok.csv"], cwd=Path("."))
-    assert res.returncode == 3
-    assert "not implemented" in res.stderr
+

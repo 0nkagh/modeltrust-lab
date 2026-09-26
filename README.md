@@ -36,8 +36,15 @@ pytest
 - `3`: Not implemented yet
 - `4`: Input or validation error (schema fail, file not found, bad format)
 
-## 8. CLI `inspect` Command
+## 8. CLI Commands
+### `inspect`
 Validates schema and prints canonical JSON provenance to stdout:
 ```bash
 modeltrust inspect --input data.csv --target-col y --delimiter "," --decimal dot
+```
+
+### `profile`
+Generates comprehensive dataset profile along with schema validation and provenance:
+```bash
+modeltrust profile --input data.csv --target-col y
 ```

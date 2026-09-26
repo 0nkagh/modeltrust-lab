@@ -29,7 +29,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
     
     # Existing commands (not implemented)
-    commands = ["profile", "leakage", "split", "report"]
+    commands = ["leakage", "split", "report"]
     for cmd in commands:
         sub_parser = subparsers.add_parser(cmd)
         sub_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -54,6 +54,22 @@ def main(argv: Optional[list[str]] = None) -> int:
     inspect_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
     inspect_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
 
+    # Profile command
+    profile_parser = subparsers.add_parser("profile")
+    profile_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
+    profile_parser.add_argument("--target-col", help="Target column")
+    profile_parser.add_argument("--pred-col", help="Prediction column")
+    profile_parser.add_argument("--group-col", help="Group column")
+    profile_parser.add_argument("--time-col", help="Time column")
+    profile_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
+    profile_parser.add_argument("--delimiter", help="CSV delimiter")
+    profile_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
+    profile_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
+    profile_parser.add_argument("--max-rows", type=int, help="Max rows to read")
+    profile_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
+    profile_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
+    profile_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+
     args = parser.parse_args(argv)
 
     if args.version:
@@ -62,10 +78,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 0
 
     if args.command in commands:
-        print("not implemented yet (planned: PHASE 2 / T3+)", file=sys.stderr)
+        print("not implemented yet (planned: PHASE 2 / T4+)", file=sys.stderr)
         return 3
 
-    if args.command == "inspect":
+    if args.command in ["inspect", "profile"]:
         if args.out_dir:
             print("--out-dir is reserved; no files are written in this version", file=sys.stderr)
 
@@ -96,6 +112,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             
             if args.run_timestamp:
                 prov["run_metadata"]["generated_at"] = datetime.now(timezone.utc).isoformat()
+                
+            if args.command == "profile":
+                from modeltrust.profile import build_profile
+                prov["profile"] = build_profile(loaded.frame, loaded.meta, spec)
                 
             if prov["schema"]["summary"]["fail"] > 0:
                 for check in prov["schema"]["checks"]:
