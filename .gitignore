@@ -12,3 +12,4 @@ out/
 .idea/
 *.orig
 *.rej
+test_out.txt

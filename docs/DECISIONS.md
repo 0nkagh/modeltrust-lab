@@ -52,3 +52,13 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-020 | CLI sözleşmesi: stdout **yalnızca** kanonik JSON içerir; tüm uyarılar stderr'e gider. |
 | D-021 | Satır sonu politikası: `.gitattributes` ile repo kanonik LF; `tests/fixtures/**` byte kararlılığı için korunur. |
 | D-022 | Commit yalnızca **tüm testler geçtikten sonra** atılır; bitmemiş iş commit edilmez. |
+
+### Errata & Sapmalar (T4-R2)
+* `run_leakage_audit` adı `build_leakage` olarak uygulandı.
+
+| # | Karar |
+|---|---|
+| D-037 | Dosya listesi sözleşmedir. Promptta listelenmeyen bir dosyanın değiştirilmesi gerekiyorsa uygulayıcı durur, gerekçesini yazar ve onay bekler. Onay alınmadan yapılan liste dışı değişiklik, sonradan beyan edilse bile ihlal sayılır. |
+| D-038 | Commit mesajı promptta verilen metindir; kısaltılamaz, yeniden yazılamaz. Verilen mesajla commit edilemiyorsa uygulayıcı durur ve bildirir. |
+| D-039 | Kanıt = ham çıktı. Özet, liste veya "tüm testler geçti" ifadesi kanıt değildir. Rapor ham komut çıktısı içermiyorsa task kabul edilmez; eksik kanıt için ayrı tur açılır. |
+| D-040 | `git add` her zaman açık dosya listesiyle yapılır. `git add .`/`-A` yasaktır; commit'e giren dosya kümesi promptta verilen liste ile birebir aynı olmalıdır. |

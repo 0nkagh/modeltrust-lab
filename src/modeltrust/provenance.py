@@ -11,9 +11,17 @@ def build_provenance(loaded: LoadedTable, spec: ColumnSpec, *, seed: int, path_a
     
     session_warnings = schema_res.pop("session_warnings", [])
     
-    # Handle the meta.warnings correctly
-    warnings = list(loaded.meta.get("warnings", []))
-    warnings.extend(session_warnings)
+    old_warnings = list(loaded.meta.get("warnings", [])) + session_warnings
+    
+    warnings = {
+        "target_not_provided": spec.target is None,
+        "subset_not_provided": spec.subset is None,
+        "group_not_provided": spec.group is None,
+        "time_not_provided": spec.time is None,
+        "insufficient_rows": loaded.meta["nrows_total"] < 5,
+        "truncated_input": loaded.meta["truncated"],
+        "non_finite_excluded": "non_finite_excluded" in old_warnings
+    }
     
     return {
         "tool": {"name": "modeltrust", "version": __version__},

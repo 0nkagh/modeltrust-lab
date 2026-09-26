@@ -27,7 +27,15 @@
     "size_bytes": 25,
     "truncated": false,
     "unnamed_columns": [],
-    "warnings": []
+    "warnings": {
+      "group_not_provided": true,
+      "insufficient_rows": true,
+      "non_finite_excluded": false,
+      "subset_not_provided": true,
+      "target_not_provided": false,
+      "time_not_provided": true,
+      "truncated_input": false
+    }
   },
   "profile": {
     "all_missing_columns": [],
