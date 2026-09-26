@@ -29,15 +29,9 @@
     "size_bytes": 2016,
     "truncated": false,
     "unnamed_columns": [],
-    "warnings": {
-      "group_not_provided": false,
-      "insufficient_rows": false,
-      "non_finite_excluded": false,
-      "subset_not_provided": false,
-      "target_not_provided": false,
-      "time_not_provided": true,
-      "truncated_input": false
-    }
+    "warnings": [
+      "time_not_provided"
+    ]
   },
   "leakage": {
     "checks": [
@@ -108,7 +102,10 @@
       "MIN_PAIRS_FOR_CORRELATION": 20,
       "MIN_ROWS_FOR_COPY_CHECK": 5,
       "NEAR_COPY_CORR_ABS_MIN": 0.999
-    }
+    },
+    "warnings": [
+      "time_not_provided"
+    ]
   },
   "run_metadata": {
     "generated_at": null,

@@ -13,15 +13,14 @@ def build_provenance(loaded: LoadedTable, spec: ColumnSpec, *, seed: int, path_a
     
     old_warnings = list(loaded.meta.get("warnings", [])) + session_warnings
     
-    warnings = {
-        "target_not_provided": spec.target is None,
-        "subset_not_provided": spec.subset is None,
-        "group_not_provided": spec.group is None,
-        "time_not_provided": spec.time is None,
-        "insufficient_rows": loaded.meta["nrows_total"] < 5,
-        "truncated_input": loaded.meta["truncated"],
-        "non_finite_excluded": "non_finite_excluded" in old_warnings
-    }
+    warnings = []
+    if spec.target is None: warnings.append("target_not_provided")
+    if spec.subset is None: warnings.append("subset_not_provided")
+    if spec.group is None: warnings.append("group_not_provided")
+    if spec.time is None: warnings.append("time_not_provided")
+    if loaded.meta["nrows_total"] < 5: warnings.append("insufficient_rows")
+    if loaded.meta["truncated"]: warnings.append("truncated_input")
+    if "non_finite_excluded" in old_warnings: warnings.append("non_finite_excluded")
     
     return {
         "tool": {"name": "modeltrust", "version": __version__},

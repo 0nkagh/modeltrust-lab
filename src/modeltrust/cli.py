@@ -103,6 +103,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     if args.command in ["inspect", "profile", "leakage"]:
         if args.out_dir:
             print("--out-dir is reserved; no files are written in this version", file=sys.stderr)
+            return 2
 
         try:
             loaded = read_table(

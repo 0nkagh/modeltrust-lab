@@ -37,13 +37,19 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
         else:
             target_s = df[spec.target]
             target_is_num = pd.api.types.is_numeric_dtype(target_s)
+            target_na = target_s.isna()
+            
             for col in feature_cols:
                 col_s = df[col]
+                col_na = col_s.isna()
+                both_na = target_na & col_na
+                
                 if target_is_num and pd.api.types.is_numeric_dtype(col_s):
                     diff = (col_s - target_s).abs()
-                    match_ratio = (diff <= ATOL_NUMERIC_EQUALITY).sum() / n_rows
+                    num_match = (diff <= ATOL_NUMERIC_EQUALITY)
+                    match_ratio = (num_match | both_na).sum() / n_rows
                 else:
-                    match_ratio = (col_s.astype(str) == target_s.astype(str)).sum() / n_rows
+                    match_ratio = ((col_s.astype(str) == target_s.astype(str)) | both_na).sum() / n_rows
                     
                 if match_ratio >= EXACT_COPY_EQUALITY_RATIO:
                     target_exact_fail = True
@@ -82,6 +88,7 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
             })
         else:
             target_s = df[spec.target]
+            target_na = target_s.isna()
             if pd.api.types.is_numeric_dtype(target_s):
                 for col in feature_cols:
                     col_s = df[col]
@@ -91,7 +98,9 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
                             corr = target_s[mask].corr(col_s[mask])
                             if pd.notna(corr) and abs(corr) >= NEAR_COPY_CORR_ABS_MIN:
                                 diff = (col_s - target_s).abs()
-                                match_ratio = (diff <= ATOL_NUMERIC_EQUALITY).sum() / n_rows
+                                col_na = col_s.isna()
+                                both_na = target_na & col_na
+                                match_ratio = ((diff <= ATOL_NUMERIC_EQUALITY) | both_na).sum() / n_rows
                                 if match_ratio < EXACT_COPY_EQUALITY_RATIO:
                                     target_near_fail = True
                                     near_evidence.append({"column": str(col), "abs_correlation": round(float(abs(corr)), 6), "equality_ratio": round(float(match_ratio), 6)})
@@ -119,13 +128,33 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
     index_evidence = []
     if n_rows > 0:
         for col in feature_cols:
-            if pd.api.types.is_float_dtype(df[col]):
-                continue
-            n_unique = df[col].nunique(dropna=True)
+            col_s = df[col]
+            is_int = pd.api.types.is_integer_dtype(col_s)
+            if not is_int and pd.api.types.is_numeric_dtype(col_s):
+                # Check if all non-null values are integers
+                valid_mask = col_s.notna()
+                if valid_mask.any():
+                    is_int = (col_s[valid_mask] == col_s[valid_mask].astype(int)).all()
+
+            n_unique = col_s.nunique(dropna=True)
             unique_ratio = n_unique / n_rows
-            if unique_ratio >= INDEX_LIKE_UNIQUE_RATIO_MIN:
+            
+            is_monotonic = False
+            if is_int:
+                valid_mask = col_s.notna()
+                if valid_mask.any():
+                    # check if strictly monotonically increasing
+                    diffs = col_s[valid_mask].diff().dropna()
+                    is_monotonic = bool((diffs > 0).all()) if len(diffs) > 0 else True
+                    
+            if is_int and unique_ratio >= INDEX_LIKE_UNIQUE_RATIO_MIN and is_monotonic:
                 index_like_fail = True
-                index_evidence.append({"column": str(col), "unique_ratio": round(float(unique_ratio), 6)})
+                index_evidence.append({
+                    "column": str(col), 
+                    "unique_ratio": round(float(unique_ratio), 6),
+                    "is_monotonic_increasing": True,
+                    "is_integer_dtype": True
+                })
         
         checks.append({
             "name": "index_like_feature",
@@ -153,18 +182,50 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
             
         hashes = df[cols_to_hash].apply(row_hash, axis=1)
         temp_df = pd.DataFrame({"hash": hashes, "subset": df[spec.subset]})
-        hash_subsets = temp_df.groupby("hash")["subset"].nunique()
-        overlapping_hashes = hash_subsets[hash_subsets > 1].index.tolist()
+        
+        hash_subsets = temp_df.groupby("hash")["subset"].unique()
+        overlapping_hashes = hash_subsets[hash_subsets.apply(len) > 1].index.tolist()
         
         overlap_count = int(temp_df["hash"].isin(overlapping_hashes).sum())
         if overlap_count > 0:
+            subset_counts = temp_df["subset"].value_counts()
+            pairs = []
+            
+            # Analyze pair-wise overlaps
+            for h in overlapping_hashes:
+                subs = sorted(list(hash_subsets[h]))
+                for i in range(len(subs)):
+                    for j in range(i + 1, len(subs)):
+                        a, b = subs[i], subs[j]
+                        # Find or create pair
+                        pair = next((p for p in pairs if p["subset_a"] == a and p["subset_b"] == b), None)
+                        if not pair:
+                            pair = {"subset_a": a, "subset_b": b, "overlap_count": 0}
+                            pairs.append(pair)
+                        
+                        # Add occurrences of this hash in both subsets
+                        cnt_a = (temp_df[temp_df["hash"] == h]["subset"] == a).sum()
+                        cnt_b = (temp_df[temp_df["hash"] == h]["subset"] == b).sum()
+                        pair["overlap_count"] += min(cnt_a, cnt_b) # count distinct overlapping instances
+                        
+            # Finalize pairs
+            for pair in pairs:
+                a, b = pair["subset_a"], pair["subset_b"]
+                smaller_size = min(subset_counts.get(a, 0), subset_counts.get(b, 0))
+                pair["overlap_ratio_of_smaller"] = round(float(pair["overlap_count"] / smaller_size), 6) if smaller_size > 0 else 0.0
+                
+            pairs.sort(key=lambda x: (x["subset_a"], x["subset_b"]))
+            
             checks.append({
                 "name": "subset_row_overlap",
                 "status": "performed",
                 "result": "fail",
                 "reason_code": None,
                 "detail": "Row overlaps across subsets",
-                "evidence": {"overlap_count": overlap_count}
+                "evidence": {
+                    "overlap_count": overlap_count,
+                    "pairs": pairs[:EXAMPLE_LIMIT]
+                }
             })
         else:
             checks.append({
@@ -277,9 +338,17 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
         "suspicion_count": suspicion_count
     }
     
+    warnings = []
+    if spec.target is None: warnings.append("target_not_provided")
+    if spec.subset is None: warnings.append("subset_not_provided")
+    if spec.group is None: warnings.append("group_not_provided")
+    if spec.time is None: warnings.append("time_not_provided")
+    if n_rows < 5: warnings.append("insufficient_rows")
+
     return {
         "leakage_schema_version": 1,
         "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+        "warnings": warnings,
         "checks": checks,
         "summary": summary,
         "thresholds": {
