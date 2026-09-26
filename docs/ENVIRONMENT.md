@@ -35,4 +35,6 @@ tzdata          2026.4
 ```text
 3.0.6 2.5.3
 ```
+- **.venv Python Sürümü:** Python 3.12.8
+- **Not:** `pandas 3.x` kullanıldığından string dtype'ları object/string davranışı açısından kontrol edilir; sabit object varsayımı yapılmamaktadır.
 - **Sapmalar / Notlar:** Bulunmamaktadır.

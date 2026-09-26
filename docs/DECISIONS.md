@@ -20,3 +20,9 @@ Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir kara
 | D-014 | Sessiz kırpma yok; `--max-rows` açıkça verilirse uygulanır ve `truncated=true` olarak rapora ve provenance'a yazılır. |
 | D-015 | Opsiyonel ekstralar: `[parquet]`=pyarrow, `[ml]`=scikit-learn; çekirdek kurulumda yok; kurulu değilse ilgili kontrol `not_assessable`. |
 | D-016 | Dil: kod/CLI/JSON anahtarları/README = İngilizce; `docs/PHASE-*.md` ve `DECISIONS.md` = Türkçe. LICENSE seçimi PHASE 2 sonunda kullanıcı kararı. |
+| D-017 | Veri okuma: CSV varsayılan olarak utf-8-sig ile okunur ve BOM varsa temizlenir. Parquet opsiyonel ekstra gerektirir. |
+| D-018 | Ayırıcı ve ondalık tespiti: Deterministik sniff (ilk 50 satır/64KB) yapılır. Ambiguous durumlarda sessiz fallback yapılmaz. |
+| D-019 | Path raporlama: Kullanıcının verdiği dosya yolu olduğu gibi provenance'a yazılır (mutlak yola genişletilmez). |
+| D-020 | Max rows: Açıkça verilirse uygulanır, sessiz kırpma yasaktır. Truncation durumu rapora yazılır. |
+| D-021 | Hata yönetimi: Şema kontrolleri fail üretirse araç Exit Code 4 ile sonlanır. "not_assessable" uyarı mahiyetindedir. |
+| D-022 | CLI: `inspect` alt komutu kanonik JSON basar. `--out-dir` bu aşamada reserve edilmiştir. |

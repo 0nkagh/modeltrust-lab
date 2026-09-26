@@ -29,4 +29,15 @@ pytest
 ## 6. Limitations & evidence status
 - Current scenarios tested: Diagnostic indicator only.
 - No untested safety claims.
-- See docs for more details.
+## 7. Exit Codes
+- `0`: Success
+- `1`: Unexpected internal error
+- `2`: Usage error (CLI arg mismatch)
+- `3`: Not implemented yet
+- `4`: Input or validation error (schema fail, file not found, bad format)
+
+## 8. CLI `inspect` Command
+Validates schema and prints canonical JSON provenance to stdout:
+```bash
+modeltrust inspect --input data.csv --target-col y --delimiter "," --decimal dot
+```

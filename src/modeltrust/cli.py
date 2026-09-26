@@ -3,21 +3,32 @@ Research prototype. No audit functionality in this version.
 
 Exit code convention:
 0: Success
+1: Unexpected internal error
 2: Usage error (argparse default)
 3: Not implemented yet
-4: Input/validation error (T2+)
+4: Input/validation error (schema fail, file not found, etc.)
 """
 
 import argparse
 import sys
+import json
+import traceback
+from datetime import datetime, timezone
 from typing import Optional
+
+from modeltrust.dataio import read_table
+from modeltrust.schema import ColumnSpec
+from modeltrust.provenance import build_provenance
+from modeltrust.errors import ModelTrustError, InputError
 
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(prog="modeltrust", description="Diagnostic audits for ML evaluation trustworthiness.")
     parser.add_argument("--version", action="store_true", help="Show version and exit")
+    parser.add_argument("--traceback", action="store_true", help="Show full traceback on internal errors")
     
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
     
+    # Existing commands (not implemented)
     commands = ["profile", "leakage", "split", "report"]
     for cmd in commands:
         sub_parser = subparsers.add_parser(cmd)
@@ -27,6 +38,22 @@ def main(argv: Optional[list[str]] = None) -> int:
         sub_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
         sub_parser.add_argument("--out-dir", help="Output directory for reports")
 
+    # New command: inspect
+    inspect_parser = subparsers.add_parser("inspect")
+    inspect_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
+    inspect_parser.add_argument("--target-col", help="Target column")
+    inspect_parser.add_argument("--pred-col", help="Prediction column")
+    inspect_parser.add_argument("--group-col", help="Group column")
+    inspect_parser.add_argument("--time-col", help="Time column")
+    inspect_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
+    inspect_parser.add_argument("--delimiter", help="CSV delimiter")
+    inspect_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
+    inspect_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
+    inspect_parser.add_argument("--max-rows", type=int, help="Max rows to read")
+    inspect_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
+    inspect_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
+    inspect_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+
     args = parser.parse_args(argv)
 
     if args.version:
@@ -35,8 +62,60 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 0
 
     if args.command in commands:
-        print("not implemented yet (planned: PHASE 2 / T2+)", file=sys.stderr)
+        print("not implemented yet (planned: PHASE 2 / T3+)", file=sys.stderr)
         return 3
+
+    if args.command == "inspect":
+        if args.out_dir:
+            print("--out-dir is reserved; no files are written in this version", file=sys.stderr)
+
+        try:
+            loaded = read_table(
+                args.input,
+                fmt=args.format,
+                delimiter=args.delimiter,
+                encoding=args.encoding,
+                decimal=args.decimal,
+                max_rows=args.max_rows
+            )
+            
+            # set decimal for provenance if provided
+            if args.decimal:
+                loaded.meta["decimal"] = args.decimal
+            else:
+                loaded.meta["decimal"] = "dot"
+                
+            spec = ColumnSpec(
+                target=args.target_col,
+                prediction=args.pred_col,
+                group=args.group_col,
+                time=args.time_col
+            )
+            
+            prov = build_provenance(loaded, spec, seed=args.seed, path_as_given=args.input)
+            
+            if args.run_timestamp:
+                prov["run_metadata"]["generated_at"] = datetime.now(timezone.utc).isoformat()
+                
+            # print json
+            print(json.dumps(prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
+            
+            if prov["schema"]["summary"]["fail"] > 0:
+                for check in prov["schema"]["checks"]:
+                    if check["result"] == "fail":
+                        print(check["detail"], file=sys.stderr)
+                        return 4
+            
+            return 0
+            
+        except InputError as e:
+            print(str(e), file=sys.stderr)
+            return 4
+        except Exception as e:
+            print(f"Internal error: {e}", file=sys.stderr)
+            if args.traceback:
+                traceback.print_exc(file=sys.stderr)
+            return 1
 
     parser.print_help()
     return 0
