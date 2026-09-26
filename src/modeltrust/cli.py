@@ -29,7 +29,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
     
     # Existing commands (not implemented)
-    commands = ["split", "report"]
+    commands = ["report"]
     for cmd in commands:
         sub_parser = subparsers.add_parser(cmd)
         sub_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -38,56 +38,39 @@ def main(argv: Optional[list[str]] = None) -> int:
         sub_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
         sub_parser.add_argument("--out-dir", help="Output directory for reports")
 
+    def _add_common_args(p):
+        p.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
+        p.add_argument("--target-col", help="Target column")
+        p.add_argument("--pred-col", help="Prediction column")
+        p.add_argument("--group-col", help="Group column")
+        p.add_argument("--time-col", help="Time column")
+        p.add_argument("--subset-col", help="Subset column")
+        p.add_argument("--format", choices=["csv", "parquet"], help="File format")
+        p.add_argument("--delimiter", help="CSV delimiter")
+        p.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
+        p.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
+        p.add_argument("--max-rows", type=int, help="Max rows to read")
+        p.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
+        p.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
+        p.add_argument("--out-dir", help="Output directory for reports (reserved)")
+
     # New command: inspect
     inspect_parser = subparsers.add_parser("inspect")
-    inspect_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
-    inspect_parser.add_argument("--target-col", help="Target column")
-    inspect_parser.add_argument("--pred-col", help="Prediction column")
-    inspect_parser.add_argument("--group-col", help="Group column")
-    inspect_parser.add_argument("--time-col", help="Time column")
-    inspect_parser.add_argument("--subset-col", help="Subset column")
-    inspect_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
-    inspect_parser.add_argument("--delimiter", help="CSV delimiter")
-    inspect_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
-    inspect_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
-    inspect_parser.add_argument("--max-rows", type=int, help="Max rows to read")
-    inspect_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
-    inspect_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
-    inspect_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+    _add_common_args(inspect_parser)
 
     # Profile command
     profile_parser = subparsers.add_parser("profile")
-    profile_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
-    profile_parser.add_argument("--target-col", help="Target column")
-    profile_parser.add_argument("--pred-col", help="Prediction column")
-    profile_parser.add_argument("--group-col", help="Group column")
-    profile_parser.add_argument("--time-col", help="Time column")
-    profile_parser.add_argument("--subset-col", help="Subset column")
-    profile_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
-    profile_parser.add_argument("--delimiter", help="CSV delimiter")
-    profile_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
-    profile_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
-    profile_parser.add_argument("--max-rows", type=int, help="Max rows to read")
-    profile_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
-    profile_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
-    profile_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+    _add_common_args(profile_parser)
 
     # Leakage command
     leakage_parser = subparsers.add_parser("leakage")
-    leakage_parser.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
-    leakage_parser.add_argument("--target-col", help="Target column")
-    leakage_parser.add_argument("--pred-col", help="Prediction column")
-    leakage_parser.add_argument("--group-col", help="Group column")
-    leakage_parser.add_argument("--time-col", help="Time column")
-    leakage_parser.add_argument("--subset-col", help="Subset column")
-    leakage_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
-    leakage_parser.add_argument("--delimiter", help="CSV delimiter")
-    leakage_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
-    leakage_parser.add_argument("--decimal", choices=["dot", "comma"], help="Decimal separator")
-    leakage_parser.add_argument("--max-rows", type=int, help="Max rows to read")
-    leakage_parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
-    leakage_parser.add_argument("--run-timestamp", action="store_true", help="Add wall-clock timestamp to provenance")
-    leakage_parser.add_argument("--out-dir", help="Output directory for reports (reserved)")
+    _add_common_args(leakage_parser)
+    
+    # Split command
+    split_parser = subparsers.add_parser("split")
+    _add_common_args(split_parser)
+    split_parser.add_argument("--mode", choices=["random", "group", "temporal", "all"], default="all")
+    split_parser.add_argument("--test-size", type=float, default=0.2)
 
     args = parser.parse_args(argv)
 
@@ -100,9 +83,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("not implemented yet (planned: PHASE 2 / T4+)", file=sys.stderr)
         return 3
 
-    if args.command in ["inspect", "profile", "leakage"]:
+    if args.command in ["inspect", "profile", "leakage", "split"]:
         if args.out_dir:
             print("--out-dir is reserved; no files are written in this version", file=sys.stderr)
+
+        if args.command == "split":
+            if args.mode in ["group", "temporal"]:
+                if args.mode == "group" and not args.group_col:
+                    print("Error: --mode group requires --group-col", file=sys.stderr)
+                    return 4
+                if args.mode == "temporal" and not args.time_col:
+                    print("Error: --mode temporal requires --time-col", file=sys.stderr)
+                    return 4
 
         try:
             loaded = read_table(
@@ -140,6 +132,11 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.command == "leakage":
                 from modeltrust.audit.leakage import build_leakage
                 prov["leakage"] = build_leakage(loaded.frame, spec)
+                
+            if args.command == "split":
+                from modeltrust.audit.split import build_split
+                prov["split"] = build_split(loaded.frame, spec, args.mode, args.test_size, args.seed)
+
                 
             if prov["schema"]["summary"]["fail"] > 0:
                 for check in prov["schema"]["checks"]:

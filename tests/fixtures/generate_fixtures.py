@@ -42,8 +42,31 @@ def generate_leak_nearcopy(path: Path):
     csv_str = df.to_csv(index=False, lineterminator='\n')
     path.write_bytes(csv_str.encode('utf-8'))
 
+def generate_split_groups(path: Path):
+    np.random.seed(7)
+    x = np.arange(40, dtype=float)
+    y = 5 + 0.5 * x + np.random.randn(40)
+    grp = []
+    for i in range(1, 9):
+        grp.extend([f"G{i}"] * 5)
+    
+    df = pd.DataFrame({"y": y, "grp": grp, "x": x})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_split_time(path: Path):
+    ts = pd.date_range("2024-01-01", periods=30)
+    grp = [f"G{(i % 5) + 1}" for i in range(30)]
+    y = np.arange(30, dtype=float)
+    
+    df = pd.DataFrame({"y": y, "grp": grp, "ts": ts.strftime('%Y-%m-%d')})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
 if __name__ == "__main__":
     out_dir = Path(__file__).parent
     generate_leak_clean(out_dir / "leak_clean.csv")
     generate_leak_nearcopy(out_dir / "leak_nearcopy.csv")
+    generate_split_groups(out_dir / "split_groups.csv")
+    generate_split_time(out_dir / "split_time.csv")
     print("Fixtures generated.")

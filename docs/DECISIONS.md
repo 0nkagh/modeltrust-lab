@@ -65,3 +65,6 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-041 | Uygulayıcı (Antigravity) hiçbir git komutu çalıştırmaz; commit ve stage işlemleri depo sahibi tarafından, denetçinin verdiği sabit script ile yapılır. |
 | D-042 | Birincil kanıt, depo sahibinin çalıştırdığı doğrulama scriptinin ham çıktısıdır. Uygulayıcının özeti/raporu tek başına kanıt değildir. |
 | D-043 | Beyan ile yürütme logu çelişirse beyan geçersizdir ve olay kaydı (INCIDENTS) açılır. |
+| D-044 | Random split yöntemi `numpy.random.default_rng(seed).permutation`; tekrarlanabilirlik kapsamı aynı ortam + aynı numpy sürümü; sürümler arası kararlılık iddia edilmez. |
+| D-045 | Her bölmenin train/test satır indeksleri SHA-256 ile kayda geçirilir (`*_row_indices_sha256`); bölme karşılaştırmaları bu hash'ler üzerinden yapılır. |
+| D-046 | Group split kuralı: gruplar (satır sayısı azalan, ad artan) sıralanır, test kümesi hedefe ulaşana kadar sırayla doldurulur; deterministiktir. |

@@ -35,3 +35,16 @@ Aşağıdaki sızıntı türleri statik denetim (yalnızca CSV) aracılığıyla
 
 ## Yorumlama
 Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators only)**. Bir kuralın işaretlenmesi veride kesin bir hata olduğu anlamına gelmez (meşru bir durum olabilir). Aynı şekilde, bir bayrak olmaması da sızıntı (leakage) veya hata olmadığı garantisini vermez.
+
+## 6. Split Audit (Bölme Denetimi)
+- **Ne Ölçer:** Aynı veri üzerinde random, group ve temporal stratejilerle (deterministik) oluşturulan bölmelerin sızıntı (leakage) ve kararsızlık özelliklerini karşılaştırmalı olarak teşhis eder.
+- **Neyi Ölçmez:** Model bazlı karşılaştırmalar (hata payı - MAE/RMSE/R²), CV (Cross-Validation) döngüsü veya istatistiksel anlamlılık testleri bu aşamanın kapsamı dışındadır (PHASE 3 konularıdır). Yalnızca bölme (split) özellikleri incelenir.
+- **Algoritmalar ve Yöntemler:**
+  - **Yuvarlama Kuralı:** Test kümesi boyutu 
+_test = int(round(test_size * n)) ile belirlenir ve en az 1, en fazla 
+-1 olacak şekilde sınırlandırılır (clamp).
+  - **Random Split:** Yöntem olarak 
+umpy.random.default_rng(seed).permutation kullanılır. **Tekrarlanabilirlik kapsamı:** Sadece aynı ortam ve aynı numpy sürümü (D-010); numpy sürümleri arası kararlılık garanti edilmez.
+  - **Group Split (Greedy):** Gruplar; satır sayısı azalan, grup adı ise artan sırada sıralanır. Test kümesi 
+_test hedefine ulaşana kadar gruplar sırayla eklenir. Deterministik bir yaklaşımdır.
+  - **Temporal Split:** Veri, zaman kolonu ve ardından orijinal satır indeksine göre sıralanarak ayrılır.

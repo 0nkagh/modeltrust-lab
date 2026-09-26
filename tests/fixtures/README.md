@@ -21,3 +21,6 @@
 | leak_clean.csv | No leakage | Suspicion count 0 | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | leak_copy_nan.csv | NaN handling in exact target copy | Creates exact NaN patterns between feature and target |
 
+| split_groups.csv | Group split overlap | Random mode fails, group mode passes | .\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py |
+| split_time.csv | Temporal split group leakage | Time ranges ordered, group leak fails | .\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py |
+| split_dupes.csv | Random split row overlap | Duplicate rows cross split | Manually generated |

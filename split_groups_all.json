@@ -1,0 +1,396 @@
+{
+  "column_spec": {
+    "group": "grp",
+    "prediction": null,
+    "subset": null,
+    "target": "y",
+    "time": null
+  },
+  "environment": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.8"
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "y",
+      "grp",
+      "x"
+    ],
+    "columns_sha256": "53356d4a4b6b418aed68958c45928bab692117ce870c2c65096c7b608e364d99",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 40,
+    "nrows_total": 40,
+    "path": "tests/fixtures/split_groups.csv",
+    "sha256": "d3add55b198879f5c98e5252fbf367b2ebb917a186cb6bc850a4e646ef103d46",
+    "size_bytes": 1062,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "time_not_provided"
+    ]
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 1,
+      "performed": 7,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "split": {
+    "checks": [
+      {
+        "detail": "",
+        "evidence": {
+          "n_test": 8,
+          "n_train": 32
+        },
+        "name": "split_sizes_sane",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Groups leak across random split",
+        "evidence": {
+          "count": 5,
+          "groups": [
+            "G1",
+            "G2",
+            "G4",
+            "G7",
+            "G8"
+          ],
+          "ratio_of_smaller": 1.0
+        },
+        "name": "random_split_group_leakage",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "count": 0
+        },
+        "name": "random_split_row_overlap",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "n_test": 10,
+          "n_train": 30
+        },
+        "name": "split_sizes_sane",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "count": 0,
+          "groups": []
+        },
+        "name": "group_split_disjointness",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "comparison": [
+      {
+        "abs_std_mean_diff": 0.010105,
+        "group_overlap_count": 5,
+        "mode": "random",
+        "n_test": 8,
+        "n_train": 32,
+        "row_overlap_count": 0,
+        "test_fraction": 0.2,
+        "time_ranges_overlap": null,
+        "train_row_indices_sha256": "724a161442567a6953a6d92ab6d0737a35bb051d3945980e374b9a7bae224d41"
+      },
+      {
+        "abs_std_mean_diff": 2.852896,
+        "group_overlap_count": 0,
+        "mode": "group",
+        "n_test": 10,
+        "n_train": 30,
+        "row_overlap_count": 0,
+        "test_fraction": 0.25,
+        "time_ranges_overlap": null,
+        "train_row_indices_sha256": "36f4986cf10061635e510f0c35a46f8e5a0e8600e36646199b4225fb74dfe190"
+      },
+      {
+        "abs_std_mean_diff": null,
+        "group_overlap_count": null,
+        "mode": "temporal",
+        "n_test": 0,
+        "n_train": 0,
+        "row_overlap_count": 0,
+        "test_fraction": 0.0,
+        "time_ranges_overlap": null,
+        "train_row_indices_sha256": ""
+      }
+    ],
+    "config": {
+      "fingerprint_excludes": [],
+      "mode": "all",
+      "random_method": "numpy.random.default_rng(seed).permutation",
+      "seed": 42,
+      "test_size": 0.2
+    },
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "modes": {
+      "group": {
+        "group_assignments": [
+          {
+            "group": "G1",
+            "rows": 5,
+            "side": "test"
+          },
+          {
+            "group": "G2",
+            "rows": 5,
+            "side": "test"
+          },
+          {
+            "group": "G3",
+            "rows": 5,
+            "side": "train"
+          },
+          {
+            "group": "G4",
+            "rows": 5,
+            "side": "train"
+          },
+          {
+            "group": "G5",
+            "rows": 5,
+            "side": "train"
+          },
+          {
+            "group": "G6",
+            "rows": 5,
+            "side": "train"
+          },
+          {
+            "group": "G7",
+            "rows": 5,
+            "side": "train"
+          },
+          {
+            "group": "G8",
+            "rows": 5,
+            "side": "train"
+          }
+        ],
+        "group_overlap": {
+          "count": 0,
+          "groups": [],
+          "ratio_of_smaller": 0.0,
+          "reason_code": null,
+          "status": "performed"
+        },
+        "n_test": 10,
+        "n_train": 30,
+        "reason_code": null,
+        "row_overlap_count": 0,
+        "status": "performed",
+        "target_summary": {
+          "abs_std_mean_diff": 2.852896,
+          "test": {
+            "mean": 7.324061,
+            "q25": 6.330939,
+            "q50": 6.826396,
+            "q75": 7.874849,
+            "std": 1.650301
+          },
+          "train": {
+            "mean": 17.091662,
+            "q25": 13.571905,
+            "q50": 16.802657,
+            "q75": 20.020944,
+            "std": 4.551991
+          }
+        },
+        "test_fraction": 0.25,
+        "test_row_indices_sha256": "f4972c7d08e0c80337aff8d177d66062c2be8a625f71e02b927f3c9aa3a2f48e",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": null,
+          "reason_code": "not_provided",
+          "status": "not_assessable",
+          "test_max": null,
+          "test_min": null,
+          "train_max": null,
+          "train_min": null
+        },
+        "train_row_indices_sha256": "36f4986cf10061635e510f0c35a46f8e5a0e8600e36646199b4225fb74dfe190"
+      },
+      "random": {
+        "group_assignments": [],
+        "group_overlap": {
+          "count": 5,
+          "groups": [
+            "G1",
+            "G2",
+            "G4",
+            "G7",
+            "G8"
+          ],
+          "ratio_of_smaller": 1.0,
+          "reason_code": null,
+          "status": "performed"
+        },
+        "n_test": 8,
+        "n_train": 32,
+        "reason_code": null,
+        "row_overlap_count": 0,
+        "status": "performed",
+        "target_summary": {
+          "abs_std_mean_diff": 0.010105,
+          "test": {
+            "mean": 14.596118,
+            "q25": 7.312868,
+            "q50": 13.91452,
+            "q75": 20.55434,
+            "std": 7.607976
+          },
+          "train": {
+            "mean": 14.663172,
+            "q25": 10.271463,
+            "q50": 15.633598,
+            "q75": 19.127006,
+            "std": 5.494152
+          }
+        },
+        "test_fraction": 0.2,
+        "test_row_indices_sha256": "c242a3f627b5b0dbba99d0c5b4a7df3781a492eb6fcd92cf669ad0cddc9579b6",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": null,
+          "reason_code": "not_provided",
+          "status": "not_assessable",
+          "test_max": null,
+          "test_min": null,
+          "train_max": null,
+          "train_min": null
+        },
+        "train_row_indices_sha256": "724a161442567a6953a6d92ab6d0737a35bb051d3945980e374b9a7bae224d41"
+      },
+      "temporal": {
+        "group_assignments": [],
+        "group_overlap": {
+          "count": 0,
+          "groups": [],
+          "ratio_of_smaller": 0.0,
+          "reason_code": "not_provided",
+          "status": "not_assessable"
+        },
+        "n_test": 0,
+        "n_train": 0,
+        "reason_code": "not_provided",
+        "row_overlap_count": 0,
+        "status": "not_assessable",
+        "target_summary": null,
+        "test_fraction": 0.0,
+        "test_row_indices_sha256": "",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": null,
+          "reason_code": "not_provided",
+          "status": "not_assessable",
+          "test_max": null,
+          "test_min": null,
+          "train_max": null,
+          "train_min": null
+        },
+        "train_row_indices_sha256": ""
+      }
+    },
+    "split_schema_version": 1,
+    "warnings": [
+      "time_not_provided"
+    ]
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}
