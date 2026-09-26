@@ -60,3 +60,9 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
   - **Random Split:** Yöntem olarak `numpy.random.default_rng(seed).permutation` kullanılır. **Tekrarlanabilirlik kapsamı:** Sadece aynı ortam ve aynı numpy sürümü (D-010); numpy sürümleri arası kararlılık garanti edilmez.
   - **Group Split (Greedy):** Gruplar satır sayısı azalan, grup adı ise artan sırada sıralanır. En kalabalık gruptan başlanarak, test kümesindeki toplam satır sayısı `n_test` hedefine ulaşana kadar gruplar sırayla test kümesine atanır. (Eğer son eklenen grup ile `n_test` sınırı aşılırsa, o grup da teste dahil edilir; dolayısıyla gerçek `test_fraction` her zaman `test_size` ile birebir aynı olmayabilir). Kalan tüm gruplar train kümesine atanır. Deterministik bir yaklaşımdır.
   - **Temporal Split:** Veri, zaman kolonu ve ardından orijinal satır indeksine göre sıralanarak ayrılır.
+
+## 7. Rapor Üretimi (Report Generation)
+- **Kapsam ve İçerik:** `tool`, `run_metadata`, `environment`, `input`, `column_spec`, `schema`, `profile`, `leakage` ve isteğe bağlı `split` bloklarını içeren kanonik bir JSON üretir.
+- **Markdown İzdüşümü:** JSON ile birlikte oluşturulan `report.md` dosyası, JSON çıktısının doğrudan izdüşümüdür. JSON yapısında bulunmayan hiçbir ek bilgi Markdown'a eklenmez.
+- **Determinizm:** Markdown raporundaki listeler ve tablolar deterministik bir sırada tutulur, ondalık sayılar formatlanarak verilir ve `not_assessable` olan kontroller atlanmaz, özel bir bölümde (`What could NOT be assessed`) raporlanır.
+- **Yorumlama Dili:** Rapor, modelin güvende olduğuna veya sızıntı olmadığına dair kesin sonuç cümleleri ("leakage-proof", "safe", "fully reliable" vb.) içermez. Sadece teşhis göstergesi olduğunu belirten uyarılar içerir.

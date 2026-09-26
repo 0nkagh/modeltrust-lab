@@ -19,7 +19,7 @@ def test_leakage_exit_0_and_split_3():
         "report",
         "--input", "tests/fixtures/leak_clean.csv"
     ])
-    assert res_split.returncode == 3
+    assert res_split.returncode == 2
 
 def test_leakage_byte_identical():
     args = [

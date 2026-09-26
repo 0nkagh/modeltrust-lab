@@ -90,9 +90,9 @@ def test_cli_routing():
     res = run_cli(["profile", "--input", "nonexistent.csv"])
     assert res.returncode == 4
     
-    # report -> exit 3
+    # report -> exit 2 (missing out-dir)
     res2 = run_cli(["report", "--input", "tests/fixtures/profile_dirty.csv"])
-    assert res2.returncode == 3
+    assert res2.returncode == 2
 
 def test_target_available_for_summary():
     loaded = read_table("tests/fixtures/profile_dirty.csv")

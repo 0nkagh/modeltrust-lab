@@ -25,9 +25,8 @@ def test_inspect_file_not_found():
 def test_inspect_max_rows_and_outdir():
     res = run_cli(["inspect", "--input", "tests/fixtures/simple_ok.csv", "--max-rows", "1", "--out-dir", "out"])
     assert res.returncode == 0
-    data = json.loads(res.stdout)
-    assert data["input"]["truncated"] is True
-    assert "--out-dir is reserved" in res.stderr
+    assert 'use "modeltrust report --out-dir"' in res.stderr
+    assert not res.stdout.strip()
 
 def test_run_cli_is_cwd_independent():
     # Call with default cwd

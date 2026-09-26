@@ -9,9 +9,10 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 | PHASE 2 | T1 | ✅ repo skeleton | Repo initialization |
 | PHASE 2 | T2 | ✅ inspect | CSV/Parquet okuma, şema doğrulama, provenance |
 | PHASE 2 | T3 | ✅ profile | Dataset profiling |
-| PHASE 2 | T4 | ✅ leakage (this task) | Leakage audit |
+| PHASE 2 | T5 | ✅ split | Data splitting |
+| PHASE 2 | T6 | ✅ report (this task) | JSON and Markdown report generation |
 
-**Unimplemented modules:** `split`, `report`.
+**Unimplemented modules:** None.
 
 ## 3. Requirements
 - Python >=3.10
@@ -38,7 +39,7 @@ pytest
 - `0`: Success
 - `1`: Unexpected internal error
 - `2`: Usage error (CLI arg mismatch)
-- `3`: Not implemented yet
+- `3`: Reserved/unused (formerly not implemented)
 - `4`: Input or validation error (schema fail, file not found, bad format)
 
 ## 8. CLI Commands
@@ -60,3 +61,17 @@ Performs diagnostic checks for potential data leakage indicators (e.g., target c
 modeltrust leakage --input data.csv --target-col y --subset-col subset --group-col grp
 ```
 *Note: Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.*
+
+### `split`
+Performs data splitting logic and overlap checks (random, group, temporal).
+```bash
+modeltrust split --input data.csv --target-col y --group-col grp --time-col ts
+```
+
+### `report`
+Generates full JSON and Markdown diagnostic reports, writing them to a directory.
+```bash
+modeltrust report --input data.csv --target-col y --group-col grp --out-dir ./reports
+# Produces: ./reports/report.json and ./reports/report.md
+```
+*Note: This tool produces diagnostic indicators. It is not a certificate.*

@@ -1,0 +1,374 @@
+{
+  "column_spec": {
+    "group": null,
+    "prediction": null,
+    "subset": null,
+    "target": "y",
+    "time": null
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "id",
+      "y",
+      "grp"
+    ],
+    "columns_sha256": "20d0bf31425248cc8f0a29d9ae6913deae2540aba092b6399ebb1e7e547d9ba3",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 2,
+    "nrows_total": 2,
+    "path": "tests/fixtures/simple_ok.csv",
+    "sha256": "97cbacf19b1474861bafe4ad7dd3f34a98ec7759d812eeedc34a8a4d84246529",
+    "size_bytes": 25,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided",
+      "time_not_provided",
+      "insufficient_rows",
+      "split_not_requested"
+    ]
+  },
+  "leakage": {
+    "checks": [
+      {
+        "detail": "Not enough rows for exact copy check",
+        "evidence": null,
+        "name": "target_copy_exact",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "Not enough rows for near copy correlation check",
+        "evidence": null,
+        "name": "target_copy_near",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "Index-like feature found",
+        "evidence": [
+          {
+            "column": "id",
+            "is_integer_dtype": true,
+            "is_monotonic_increasing": true,
+            "unique_ratio": 1.0
+          }
+        ],
+        "name": "index_like_feature",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_row_overlap",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_group_overlap",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_time_ranges",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "leakage_schema_version": 1,
+    "summary": {
+      "fail": 1,
+      "not_assessable": 5,
+      "performed": 1,
+      "skipped": 0,
+      "suspicion_count": 1,
+      "total": 6
+    },
+    "thresholds": {
+      "ATOL_NUMERIC_EQUALITY": 1e-12,
+      "EXACT_COPY_EQUALITY_RATIO": 1.0,
+      "EXAMPLE_LIMIT": 5,
+      "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
+      "MIN_PAIRS_FOR_CORRELATION": 20,
+      "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "NEAR_COPY_CORR_ABS_MIN": 0.999
+    },
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided",
+      "time_not_provided",
+      "insufficient_rows"
+    ]
+  },
+  "profile": {
+    "all_missing_columns": [],
+    "checks": [
+      {
+        "detail": "",
+        "name": "rows_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "missing_values_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "duplicate_rows_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "constant_columns_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "all_missing_columns_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "1",
+        "name": "high_cardinality_columns_observed",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "non_finite_values_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_available_for_summary",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "column_count": 3,
+    "columns": [
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": true,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 2,
+        "name": "id",
+        "non_finite_count": 0,
+        "observed_dtype": "int64",
+        "role": "feature",
+        "stats": {
+          "max": 2.0,
+          "mean": 1.5,
+          "min": 1.0,
+          "q05": 1.05,
+          "q25": 1.25,
+          "q50": 1.5,
+          "q75": 1.75,
+          "q95": 1.95,
+          "std": 0.707107
+        },
+        "top_values": [],
+        "unique_ratio": 1.0
+      },
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": true,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 2,
+        "name": "y",
+        "non_finite_count": 0,
+        "observed_dtype": "float64",
+        "role": "target",
+        "stats": {
+          "max": 3.1,
+          "mean": 2.8,
+          "min": 2.5,
+          "q05": 2.53,
+          "q25": 2.65,
+          "q50": 2.8,
+          "q75": 2.95,
+          "q95": 3.07,
+          "std": 0.424264
+        },
+        "top_values": [],
+        "unique_ratio": 1.0
+      },
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": false,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 2,
+        "name": "grp",
+        "non_finite_count": null,
+        "observed_dtype": "str",
+        "role": "feature",
+        "stats": null,
+        "top_values": [
+          {
+            "count": 1,
+            "raw_type": "str",
+            "value": "A"
+          },
+          {
+            "count": 1,
+            "raw_type": "str",
+            "value": "B"
+          }
+        ],
+        "unique_ratio": 1.0
+      }
+    ],
+    "constant_columns": [],
+    "duplicate_rows": {
+      "duplicate_row_ratio": 0.0,
+      "exact_duplicate_count": 0,
+      "example_row_indices": [],
+      "null_equals_null": true
+    },
+    "high_cardinality_columns": [
+      "grp"
+    ],
+    "profile_schema_version": 1,
+    "row_count": 2,
+    "target_summary": {
+      "count": 2,
+      "max": 3.1,
+      "mean": 2.8,
+      "min": 2.5,
+      "missing_count": 0,
+      "non_finite_count": 0,
+      "q05": 2.53,
+      "q25": 2.65,
+      "q50": 2.8,
+      "q75": 2.95,
+      "q95": 3.07,
+      "std": 0.424264
+    },
+    "warnings": [
+      "high_cardinality_columns_present"
+    ]
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 3,
+      "performed": 5,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "split": null,
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}

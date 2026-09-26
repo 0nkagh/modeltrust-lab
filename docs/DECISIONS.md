@@ -69,3 +69,5 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-045 | Her bölmenin train/test satır indeksleri SHA-256 ile kayda geçirilir (`*_row_indices_sha256`); bölme karşılaştırmaları bu hash'ler üzerinden yapılır. |
 | D-046 | Group split kuralı: gruplar (satır sayısı azalan, ad artan) sıralanır, test kümesi hedefe ulaşana kadar sırayla doldurulur; deterministiktir. |
 | D-047 | Commit edilmiş içerik ile çalışma ağacı ayrışamaz: commit her zaman testler yeşilken ve çalışma ağacında commit edilmemiş düzeltme bırakmadan atılır. |
+| D-048 | CLI exit code 3 (not implemented) kullanımdan kaldırıldı. `--out-dir` artık `report` komutu için zorunludur ve bu komut diske JSON/Markdown dosyaları yazar. Diğer komutlar `--out-dir` aldığında dosya yazmaz, yönlendirici hata mesajıyla (exit 0) sonlanır. |
+| D-049 | Markdown raporu JSON çıktısının doğrudan izdüşümüdür; Markdown raporuna, canonical JSON yapısında bulunmayan hiçbir ek veri (timestamp vb.) eklenemez, böylece içerik hash-identical determinizm korunur. |

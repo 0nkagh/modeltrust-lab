@@ -16,13 +16,13 @@ def test_help_flag():
     )
     assert result.returncode == 0
 
-def test_subcommand_not_implemented():
+def test_subcommand_usage_error():
     result = subprocess.run(
         [sys.executable, "-m", "modeltrust", "report", "--input", "x.csv"],
         capture_output=True, text=True
     )
-    assert result.returncode == 3
-    assert "not implemented" in result.stderr
+    assert result.returncode == 2
+    assert "Error: --out-dir is required" in result.stderr
 
 def test_unknown_command():
     result = subprocess.run(
