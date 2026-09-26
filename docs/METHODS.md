@@ -15,12 +15,12 @@ Aşağıdaki sızıntı türleri statik denetim (yalnızca CSV) aracılığıyla
 
 ## 2. İndeks Benzeri Kolon (Index-Like Column)
 - **Ne Ölçer:** Modelin öğrenebileceği bir sinyalden ziyade, her satır için neredeyse tekil (unique) olan bir kimlik (ID) veya indeks kolonu olup olmadığını.
-- **Nasıl Ölçer:** Kolondaki eşsiz eleman sayısının toplam satır sayısına oranını hesaplar.
-- **Eşik Gerekçesi:** Eşik 0.95 (D-030). %95'ten fazla tekil değer içeren kolonlar (string/kategorik/id formatlı nümerikler vb.) modelin ezber yapmasına (overfitting) sebep olacağı için şüpheli kabul edilir.
+- **Nasıl Ölçer:** Kolondaki eşsiz eleman sayısının toplam satır sayısına oranını hesaplar. Ayrıca kolonun kesinlikle tamsayı (integer) tipinde olması ve kesin artan (strictly monotonically increasing) olması şartı aranır.
+- **Eşik Gerekçesi:** Eşik 0.99. %99'dan fazla tekil değer içeren, tamsayı tipli ve monoton artan kolonlar modelin ezber yapmasına sebep olacağı için şüpheli kabul edilir (yanlış pozitifleri azaltmak için strict kurallar eklenmiştir).
 
 ## 3. Alt Küme (Subset) Satır Çakışması (Subset Row Overlap)
-- **Ne Ölçer:** Train, validation veya test gibi alt kümeler (subset) arasında birebir aynı satırların olup olmadığını. Sızıntıya işaret eder.
-- **Nasıl Ölçer:** Tüm kolonların (subset kolonu hariç) string temsillerinin birleşimi üzerinden SHA-256 parmak izi çıkarılır. Aynı parmak izinin birden fazla alt kümede yer alıp almadığı kontrol edilir.
+- **Ne Ölçer:** Train, validation veya test gibi alt kümeler (subset) arasında birebir aynı satırların olup olmadığını.
+- **Nasıl Ölçer:** Tüm kolonların (subset kolonu hariç) string temsillerinin birleşimi üzerinden SHA-256 parmak izi çıkarılır. Aynı parmak izinin birden fazla alt kümede yer alıp almadığı çiftler (pairs) halinde sayılır. Çıktıda her çift için overlap_count ve o çiftteki daha küçük kümenin boyutuna oranı (overlap_ratio_of_smaller) raporlanır.
 - **Eşik Gerekçesi:** 0; farklı alt kümelerde tam çakışan satır sayısı 0 olmalıdır. En az 1 çakışma raporlanır.
 
 ## 4. Alt Küme (Subset) Grup Çakışması (Subset Group Overlap)
