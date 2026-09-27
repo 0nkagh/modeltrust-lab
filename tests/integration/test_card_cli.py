@@ -229,3 +229,83 @@ def test_card_column_validation_positive(tmpdir):
     res = subprocess.run(cmd, capture_output=True, text=True)
     assert res.returncode == 0
     assert os.path.exists(os.path.join(str(tmpdir), "card.json"))
+
+
+def test_card_interval_coverage_fields_real(tmpdir):
+    out = os.path.join(str(tmpdir), "card_out")
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi",
+        "--nominal-coverage", "0.9",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+    cov_block = card["metrics"]["interval_coverage"]
+    assert cov_block is not None
+    assert cov_block["coverage_wilson_95"]["low"] is not None
+    assert cov_block["coverage_wilson_95"]["high"] is not None
+    assert cov_block["nominal_coverage"] == 0.9
+    assert cov_block["mean_interval_width"] is not None
+
+    rep_out = os.path.join(str(tmpdir), "rep_out")
+    rep_cmd = [
+        sys.executable, "-m", "modeltrust", "report",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi",
+        "--nominal-coverage", "0.9",
+        "--evaluate",
+        "--out-dir", rep_out
+    ]
+    res_rep = subprocess.run(rep_cmd, capture_output=True, text=True)
+    assert res_rep.returncode == 0
+    with open(os.path.join(rep_out, "report.json"), "r", encoding="utf-8") as f:
+        report = json.load(f)
+    rep_unc = report["evaluation"]["uncertainty"]
+    assert cov_block["coverage"] == rep_unc["coverage"]
+    assert cov_block["coverage_wilson_95"] == rep_unc["coverage_wilson_95"]
+    assert cov_block["nominal_coverage"] == rep_unc["nominal_coverage"]
+    assert cov_block["mean_interval_width"] == rep_unc["mean_interval_width"]
+
+
+def test_card_q8_evidence_real(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi",
+        "--nominal-coverage", "0.9",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+    q8 = next(q for q in card["questions"] if q["id"] == 8)
+    assert q8["status"] == "answered"
+    assert "0.000" not in q8["evidence"]
+    assert "0.862" in q8["evidence"]
+    assert "0.942" in q8["evidence"]
+    assert "nominal=0.9" in q8["evidence"]
+    assert "mean_width=3.290" in q8["evidence"]
+
+
+def test_card_interval_fields_missing_not_uydurma():
+    from modeltrust.card import build_card_json
+    prov = {
+        "evaluation": {
+            "uncertainty": {
+                "status": "performed",
+                "coverage": 0.91,
+                "nominal_coverage": 0.9,
+                "mean_interval_width": 3.29
+            }
+        }
+    }
+    card = build_card_json(prov, "cmd")
+    q8 = next(q for q in card["questions"] if q["id"] == 8)
+    assert q8["status"] == "not_assessable"
+    assert "incomplete" in q8["evidence"]

@@ -28,10 +28,12 @@ def test_card_full_equipment():
             "uncertainty": {
                 "status": "performed",
                 "coverage": 0.91,
-                "wilson_low": 0.86,
-                "wilson_high": 0.94,
-                "nominal": 0.9,
-                "mean_width": 3.2
+                "coverage_wilson_95": {
+                    "low": 0.86,
+                    "high": 0.94
+                },
+                "nominal_coverage": 0.9,
+                "mean_interval_width": 3.2
             }
         },
         "shift": {

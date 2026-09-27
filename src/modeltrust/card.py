@@ -91,14 +91,32 @@ def build_card_json(prov, reproduce_command):
         
     # Q8
     if ev:
-        unc_status = ev.get("uncertainty", {}).get("status", "not_assessable")
+        unc = ev.get("uncertainty")
+        unc_status = unc.get("status", "not_assessable") if isinstance(unc, dict) else "not_assessable"
         if unc_status == "performed":
-            u = ev.get("uncertainty", {})
-            cov = u.get("coverage", 0)
-            wl = u.get("wilson_low", 0)
-            wh = u.get("wilson_high", 0)
-            nom = u.get("nominal", 0)
-            questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "answered", "evidence": f"uncertainty.coverage={cov:.3f} (Wilson [{wl:.3f}, {wh:.3f}]), nominal={nom}"})
+            cov = unc.get("coverage")
+            wilson = unc.get("coverage_wilson_95") if isinstance(unc.get("coverage_wilson_95"), dict) else {}
+            wl = wilson.get("low")
+            wh = wilson.get("high")
+            nom = unc.get("nominal_coverage")
+            mw = unc.get("mean_interval_width")
+            
+            if any(x is None for x in [cov, wl, wh, mw]):
+                questions.append({
+                    "id": 8,
+                    "question": "Are uncertainty intervals calibrated?",
+                    "status": "not_assessable",
+                    "evidence": "uncertainty fields incomplete"
+                })
+                prov.setdefault("input", {}).setdefault("warnings", []).append("uncertainty fields incomplete")
+            else:
+                nom_str = str(nom) if nom is not None else "-"
+                questions.append({
+                    "id": 8,
+                    "question": "Are uncertainty intervals calibrated?",
+                    "status": "answered",
+                    "evidence": f"uncertainty.coverage={cov:.3f} (Wilson [{wl:.3f}, {wh:.3f}]), nominal={nom_str}, mean_width={mw:.3f}"
+                })
         else:
             questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "not_assessable", "evidence": "uncertainty not performed"})
     else:
@@ -311,7 +329,14 @@ def build_card_md(card):
         lines.append("### Interval coverage")
         lines.append("| Coverage | Wilson Low | Wilson High | Nominal | Mean Width |")
         lines.append("|---|---|---|---|---|")
-        lines.append(f"| {interval.get('coverage')} | {interval.get('wilson_low')} | {interval.get('wilson_high')} | {interval.get('nominal')} | {interval.get('mean_width')} |")
+        cov = interval.get("coverage")
+        wilson = interval.get("coverage_wilson_95") if isinstance(interval.get("coverage_wilson_95"), dict) else {}
+        wl = wilson.get("low")
+        wh = wilson.get("high")
+        nom = interval.get("nominal_coverage")
+        nom_val = nom if nom is not None else "-"
+        mw = interval.get("mean_interval_width")
+        lines.append(f"| {cov} | {wl} | {wh} | {nom_val} | {mw} |")
         lines.append("")
         
     lines.append("## 7. Thresholds")
