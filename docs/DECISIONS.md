@@ -47,12 +47,12 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 
 | # | Geçerli metin |
 |---|---|
-| D-017 | `provenance.py` T3'ten T2'ye taşındı: provenance, yüklenen girdi artefaktının özelliğidir; rapor entegrasyonu T6'da yapılır. |
-| D-018 | `reason_code` kontrollü sözlüğü: `not_provided`, `dependency_missing`, `ambiguous_input`, `unsupported_dtype`, `insufficient_rows`, `insufficient_groups`, `time_column_missing`, `tool_not_implemented`. |
-| D-019 | Girdi yolu rapora kullanıcının verdiği haliyle yazılır; mutlak yola genişletilmez. |
-| D-020 | CLI sözleşmesi: stdout **yalnızca** kanonik JSON içerir; tüm uyarılar stderr'e gider. |
-| D-021 | Satır sonu politikası: `.gitattributes` ile repo kanonik LF; `tests/fixtures/**` byte kararlılığı için korunur. |
-| D-022 | Commit yalnızca **tüm testler geçtikten sonra** atılır; bitmemiş iş commit edilmez. |
+| D-017 (errata) | `provenance.py` T3'ten T2'ye taşındı: provenance, yüklenen girdi artefaktının özelliğidir; rapor entegrasyonu T6'da yapılır. (errata — bkz. I-026) |
+| D-018 (errata) | `reason_code` kontrollü sözlüğü: `not_provided`, `dependency_missing`, `ambiguous_input`, `unsupported_dtype`, `insufficient_rows`, `insufficient_groups`, `time_column_missing`, `tool_not_implemented`. (errata — bkz. I-026) |
+| D-019 (errata) | Girdi yolu rapora kullanıcının verdiği haliyle yazılır; mutlak yola genişletilmez. (errata — bkz. I-026) |
+| D-020 (errata) | CLI sözleşmesi: stdout **yalnızca** kanonik JSON içerir; tüm uyarılar stderr'e gider. (errata — bkz. I-026) |
+| D-021 (errata) | Satır sonu politikası: `.gitattributes` ile repo kanonik LF; `tests/fixtures/**` byte kararlılığı için korunur. (errata — bkz. I-026) |
+| D-022 (errata) | Commit yalnızca **tüm testler geçtikten sonra** atılır; bitmemiş iş commit edilmez. (errata — bkz. I-026) |
 
 ### Errata & Sapmalar (T4-R2)
 * `run_leakage_audit` adı `build_leakage` olarak uygulandı.
@@ -103,3 +103,4 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-077 | Model card bir sertifika değildir; performans/uyumluluk iddiası içermez, yalnız teşhis özetidir. |
 | D-078 | Metrik tablosunda n_scored kapsamı dinamiktir: tüm satırlarda n_train=0 ise "n_scored (all rows provided)", aksi hâlde "n_scored (split)"; karışık kümede "n_scored (scope varies)" ve warnings notu. Card ve report aynı yardımcı fonksiyonu kullanır. |
 | D-079 | card komutu verilen kolon bayraklarının girdide bulunmasını zorunlu kılar; bulunmayan kolon için exit 2 ve "Error: --<bayrak> '<ad>' not found in input columns". Diğer alt komutların kolon doğrulanması biliçli olarak bu sürümün kapsamı dışındadır (T15 adayı). |
+| D-080 | Karar defteri append-only'dir: aynı numaranın birden fazla satırı bulunabilir (errata); errata satırları numarasında "(errata)" işareti taşır ve hiçbir satır silinmez. |
