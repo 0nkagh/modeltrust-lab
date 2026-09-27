@@ -66,3 +66,11 @@
 - Etki: Az satırlı dosyalarda monoton tamsayı değerler için teşhis değeri taşımayan yanlış pozitif leakage şüphesi (`fail`) üretildi.
 - Önlem: `MIN_ROWS_FOR_INDEX_CHECK = 10` eşiği eklendi; 10 satırdan az girdilerde denetim `status="not_assessable"`, `reason_code="insufficient_rows"` olarak işaretlendi (D-050).
 
+
+## INC-005: Object of type int64 is not JSON serializable
+* **Tarih:** 2026-09-27
+* **Hata:** \modeltrust evaluate\ çıktısı yazdırılırken numpy \int64\ tipleri \json.dumps\ tarafından reddedildi.
+* **Kök Neden:** Pandas indekslerinden ve numpy fonksiyonlarından dönen satır sayıları (örn. \len(train_idx)\) standart \int\ değil \
+p.int64\ tipliydi.
+* **Çözüm:** \valuate.py\ içindeki json sözlüğüne giren tüm \int64\ tipleri \int()\ sarmalayıcısı ile standart python integer'a dönüştürüldü.
+

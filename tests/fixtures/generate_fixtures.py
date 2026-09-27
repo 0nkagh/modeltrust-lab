@@ -63,10 +63,57 @@ def generate_split_time(path: Path):
     csv_str = df.to_csv(index=False, lineterminator='\n')
     path.write_bytes(csv_str.encode('utf-8'))
 
+def generate_eval_exact_linear(path: Path):
+    x = np.arange(1, 41, dtype=float)
+    y = 2 * x + 1
+    df = pd.DataFrame({'x': x, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_eval_preds(path: Path):
+    y = np.arange(1, 31, dtype=float)
+    pred = np.copy(y)
+    pred[20:] += 3.0
+    grp = ['G1'] * 10 + ['G2'] * 10 + ['G3'] * 10
+    df = pd.DataFrame({'y': y, 'pred': pred, 'grp': grp})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_eval_nan(path: Path):
+    x1 = np.arange(25, dtype=float)
+    x2 = np.arange(25, dtype=float)
+    y = np.arange(25, dtype=float)
+    
+    # x2'de 4 NaN
+    x2[2] = np.nan
+    x2[7] = np.nan
+    x2[12] = np.nan
+    x2[17] = np.nan
+    
+    # y'de 3 NaN
+    y[5] = np.nan
+    y[10] = np.nan
+    y[15] = np.nan
+    
+    df = pd.DataFrame({'x1': x1, 'x2': x2, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_eval_const_target(path: Path):
+    x = np.arange(25, dtype=float)
+    y = np.full(25, 5.0)
+    df = pd.DataFrame({'x': x, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
 if __name__ == "__main__":
     out_dir = Path(__file__).parent
     generate_leak_clean(out_dir / "leak_clean.csv")
     generate_leak_nearcopy(out_dir / "leak_nearcopy.csv")
     generate_split_groups(out_dir / "split_groups.csv")
     generate_split_time(out_dir / "split_time.csv")
+    generate_eval_exact_linear(out_dir / "eval_exact_linear.csv")
+    generate_eval_preds(out_dir / "eval_preds.csv")
+    generate_eval_nan(out_dir / "eval_nan.csv")
+    generate_eval_const_target(out_dir / "eval_const_target.csv")
     print("Fixtures generated.")

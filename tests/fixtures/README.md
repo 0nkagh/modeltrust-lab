@@ -24,3 +24,7 @@
 | split_groups.csv | Group split overlap | Random mode fails, group mode passes | .\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py |
 | split_time.csv | Temporal split group leakage | Time ranges ordered, group leak fails | .\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py |
 | split_dupes.csv | Random split row overlap | Duplicate rows cross split | Manually generated |
+| eval_exact_linear.csv | Evaluation baseline metrics | ols_baseline mae=0.0, rmse=0.0, r2=1.0 | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| eval_preds.csv | Supplied predictions calculation | MAE is exactly 1.0 | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| eval_nan.csv | NaN row dropping in evaluation | drops 4 in feature, 3 in target | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| eval_const_target.csv | Zero variance target handling | r2_status = not_assessable | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |

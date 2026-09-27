@@ -66,3 +66,18 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
 - **Markdown İzdüşümü:** JSON ile birlikte oluşturulan `report.md` dosyası, JSON çıktısının doğrudan izdüşümüdür. JSON yapısında bulunmayan hiçbir ek bilgi Markdown'a eklenmez.
 - **Determinizm:** Markdown raporundaki listeler ve tablolar deterministik bir sırada tutulur, ondalık sayılar formatlanarak verilir ve `not_assessable` olan kontroller atlanmaz, özel bir bölümde (`What could NOT be assessed`) raporlanır.
 - **Yorumlama Dili:** Rapor, modelin güvende olduğuna veya sızıntı olmadığına dair kesin sonuç cümleleri ("leakage-proof", "safe", "fully reliable" vb.) içermez. Sadece teşhis göstergesi olduğunu belirten uyarılar içerir.
+
+## 8. Evaluation (Değerlendirme)
+- **Modeller (Baseline):**
+  - **mean_baseline:** Eğitim kümesindeki hedef değişkenin (target) aritmetik ortalamasını tüm test örnekleri için tahmin olarak döndürür.
+  - **ols_baseline:** Tüm sayısal özellikler üzerinden (sabit terim eklenerek) Sıradan En Küçük Kareler (Ordinary Least Squares - OLS) ile çoklu doğrusal regresyon uygular.
+  - **supplied_predictions:** Kullanıcı dışarıdan hazır bir tahmin kolonu (`--pred-col`) sağlarsa model eğitimi atlanır ve bu kolon test/değerlendirme için doğrudan kullanılır.
+- **Metrikler ve Yöntemler:**
+  - **MAE (Mean Absolute Error):** Hataların mutlak değerlerinin ortalaması. `mean(|y - y_pred|)`
+  - **RMSE (Root Mean Square Error):** Hataların karelerinin ortalamasının karekökü. `sqrt(mean((y - y_pred)^2))`
+  - **R² (R-squared):** Modelin açıkladığı varyans oranı. `1 - (SS_res / SS_tot)` formülü ile hesaplanır. SS_tot sıfır ise `not_assessable` durumu döner ve `zero_variance_target` uyarısı verilir.
+- **Eksik Veri (NaN) Davranışı:**
+  - Hedef değişkende veya sağlanan tahminde (`supplied_predictions` kullanılıyorsa) NaN olan test satırları skorlamaya (n_scored) dahil edilmez.
+  - OLS eğitimi sırasında, hedefte veya herhangi bir özelliğinde (feature) NaN olan satırlar eğitim kümesinden düşülür.
+- **Cross-Validation (CV):** K-katlı çapraz doğrulama (CV) modülleri (random, group, temporal) desteklenir. Modüle özgü bölme mantıkları (örneğin grup bütünlüğünü bozmayan greedy group allocation) uygulanır. Eğer test kümesindeki veri çok küçükse (`CV_MIN_FOLD_SIZE < 3`) kat değerlendirilmez (`not_assessable`).
+- **Grup Hatası (Group Error):** Grup modunda (`--split-mode group`), test kümesinde yer alan her bir grup için test hataları (n, MAE, RMSE, mean residual) bağımsız hesaplanarak listelenir. MAE değerine göre gruplar sıralanır ve en kötü performans gösteren gruplar (`TOP_WORST_GROUPS = 3`) belirlenir. Yeterli örneğe sahip olmayan (`n < 5`) gruplar bu sıralamanın dışında bırakılır.

@@ -75,3 +75,15 @@ modeltrust report --input data.csv --target-col y --group-col grp --out-dir ./re
 # Produces: ./reports/report.json and ./reports/report.md
 ```
 *Note: This tool produces diagnostic indicators. It is not a certificate.*
+
+### `evaluate`
+Evaluates models against simple baselines (mean, ols) and computes test metrics (MAE, RMSE, R²). Also supports CV and group-level error analysis.
+```bash
+modeltrust evaluate --input data.csv --target-col y --pred-col my_preds --split-mode random --cv random --folds 5
+# Or to evaluate baselines:
+modeltrust evaluate --input data.csv --target-col y --model both
+```
+- `--model`: `mean`, `ols`, `both` (default). If `--pred-col` is given, the supplied predictions are evaluated.
+- `--split-mode`: `random` (default), `group`, `temporal`. Determines single holdout test allocation.
+- `--cv`: `none` (default), `random`, `group`, `temporal`. Performs cross-validation.
+- `--folds`: number of folds for CV (default 5).

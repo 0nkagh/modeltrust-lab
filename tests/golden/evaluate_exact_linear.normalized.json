@@ -1,0 +1,220 @@
+{
+  "column_spec": {
+    "group": null,
+    "prediction": null,
+    "subset": null,
+    "target": "y",
+    "time": null
+  },
+  "evaluation": {
+    "checks": [
+      {
+        "detail": "",
+        "evidence": {},
+        "name": "metrics_computed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {},
+        "name": "target_type_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {},
+        "name": "r2_target_variance_defined",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {},
+        "name": "cv_folds_size_sane",
+        "reason_code": "not_provided",
+        "result": "fail",
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "coverage_ratio": 0.0
+        },
+        "name": "group_error_coverage",
+        "reason_code": "not_provided",
+        "result": "fail",
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": {},
+        "name": "supplied_predictions_present",
+        "reason_code": "not_provided",
+        "result": "fail",
+        "status": "not_assessable"
+      }
+    ],
+    "cv": {
+      "aggregate": {},
+      "folds": [],
+      "folds_requested": 5,
+      "reason_code": "not_provided",
+      "scheme": "none",
+      "status": "not_assessable"
+    },
+    "evaluation_schema_version": 1,
+    "group_errors": {
+      "coverage_ratio": 0.0,
+      "groups": [],
+      "model": null,
+      "reason_code": "not_provided",
+      "status": "not_assessable",
+      "worst_by_mae": []
+    },
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "models": [
+      {
+        "dropped_rows": 0,
+        "mae": 24.21875,
+        "n_scored": 8,
+        "n_test": 8,
+        "n_train": 32,
+        "name": "mean_baseline",
+        "r2": -0.000534,
+        "r2_status": "performed",
+        "reason_code": null,
+        "rmse": 27.058097,
+        "status": "performed"
+      },
+      {
+        "dropped_rows": 0,
+        "mae": 0.0,
+        "n_scored": 8,
+        "n_test": 8,
+        "n_train": 32,
+        "name": "ols_baseline",
+        "r2": 1.0,
+        "r2_status": "performed",
+        "reason_code": null,
+        "rmse": 0.0,
+        "status": "performed"
+      }
+    ],
+    "target": "y",
+    "thresholds": {
+      "CV_MIN_FOLD_SIZE": 3,
+      "MIN_GROUP_ROWS_FOR_ERROR": 5,
+      "MIN_ROWS_FOR_METRICS": 10,
+      "TOP_WORST_GROUPS": 3
+    },
+    "warnings": [
+      "cv_not_requested"
+    ]
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "x",
+      "y"
+    ],
+    "columns_sha256": "9ab9de25768ac172235e119b76362ecddad33878fe9a7792cdddbe47236f9a87",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 2,
+    "nrows_read": 40,
+    "nrows_total": 40,
+    "path": "tests/fixtures/eval_exact_linear.csv",
+    "sha256": "eb52ab68d4a19dea0fb132f1d5f354ce51ed4e1bfad2aa95c1aa9c5bd68c62ac",
+    "size_bytes": 391,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided",
+      "time_not_provided"
+    ]
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 3,
+      "performed": 5,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}
