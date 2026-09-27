@@ -2,6 +2,35 @@ import os
 import json
 from modeltrust.report import scored_scope_label
 
+
+def get_card_thresholds() -> dict:
+    thresholds = {}
+    try:
+        from modeltrust.audit.leakage import MIN_ROWS_FOR_COPY_CHECK
+        thresholds["MIN_ROWS_FOR_COPY_CHECK"] = MIN_ROWS_FOR_COPY_CHECK
+    except ImportError:
+        pass
+
+    try:
+        from modeltrust.audit.shift import OOD_MAHALANOBIS_RATIO_MIN
+        thresholds["OOD_MAHALANOBIS_RATIO_MIN"] = OOD_MAHALANOBIS_RATIO_MIN
+    except ImportError:
+        pass
+
+    try:
+        from modeltrust.evaluate import COVERAGE_GAP_TOL
+        thresholds["COVERAGE_GAP_TOL"] = COVERAGE_GAP_TOL
+    except ImportError:
+        pass
+
+    try:
+        from modeltrust.evaluate import MIN_ROWS_FOR_METRICS
+        thresholds["MIN_ROWS_FOR_METRICS"] = MIN_ROWS_FOR_METRICS
+    except ImportError:
+        pass
+    return thresholds
+
+
 def build_card_json(prov, reproduce_command):
     questions = []
     
@@ -201,30 +230,7 @@ def build_card_json(prov, reproduce_command):
     }
     
     # Collect thresholds
-    thresholds = {}
-    try:
-        from modeltrust.audit.leakage import MIN_ROWS_FOR_COPY_CHECK
-        thresholds["MIN_ROWS_FOR_COPY_CHECK"] = MIN_ROWS_FOR_COPY_CHECK
-    except ImportError:
-        pass
-    
-    try:
-        from modeltrust.audit.shift import OOD_MAHALANOBIS_RATIO_MIN
-        thresholds["OOD_MAHALANOBIS_RATIO_MIN"] = OOD_MAHALANOBIS_RATIO_MIN
-    except ImportError:
-        pass
-        
-    try:
-        from modeltrust.evaluate import COVERAGE_GAP_TOL
-        thresholds["COVERAGE_GAP_TOL"] = COVERAGE_GAP_TOL
-    except ImportError:
-        pass
-
-    try:
-        from modeltrust.evaluate import MIN_ROWS_FOR_METRICS
-        thresholds["MIN_ROWS_FOR_METRICS"] = MIN_ROWS_FOR_METRICS
-    except ImportError:
-        pass
+    thresholds = get_card_thresholds()
         
     env = prov.get("environment", {})
     env_clean = {k: v for k, v in env.items() if k in ["python", "pandas", "numpy", "platform"]}

@@ -10,6 +10,7 @@ Exit code convention:
 """
 
 import argparse
+import os
 import sys
 import json
 import traceback
@@ -89,6 +90,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     card_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     card_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
     card_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+    card_parser.add_argument("--manifest", action="store_true", help="Generate reproducibility manifest (manifest.json)")
 
     # Profile command
     profile_parser = subparsers.add_parser("profile")
@@ -360,7 +362,25 @@ def main(argv: Optional[list[str]] = None) -> int:
                 import shlex
                 reproduce_command = "python -m modeltrust " + " ".join(shlex.quote(a) for a in actual_argv[1:])
                 json_p, md_p = write_card(prov, args.out_dir, reproduce_command)
-                print(f"wrote {json_p} and {md_p}", file=sys.stderr)
+                if getattr(args, "manifest", False):
+                    import hashlib
+                    from modeltrust.manifest import build_manifest, write_manifest
+
+                    with open(json_p, "rb") as f:
+                        card_json_sha = hashlib.sha256(f.read()).hexdigest()
+                    with open(md_p, "rb") as f:
+                        card_md_sha = hashlib.sha256(f.read()).hexdigest()
+
+                    outputs_sha = {
+                        "card_json_sha256": card_json_sha,
+                        "card_md_sha256": card_md_sha,
+                    }
+                    manifest_data = build_manifest(prov, reproduce_command, args.input, outputs_sha)
+                    manifest_p = os.path.join(args.out_dir, "manifest.json")
+                    write_manifest(manifest_p, manifest_data)
+                    print(f"wrote {json_p}, {md_p} and {manifest_p}", file=sys.stderr)
+                else:
+                    print(f"wrote {json_p} and {md_p}", file=sys.stderr)
                 return 0
             
             # print json

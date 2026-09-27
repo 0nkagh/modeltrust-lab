@@ -222,3 +222,31 @@ Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dina
 | Karmaşık küme (hem 0 hem >0) | `n_scored (scope varies)` + warnings notu |
 
 `n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde.
+
+## 12. Reproducibility Manifest
+
+`--manifest` bayrağı verildiğinde `card` komutu, kart çıktılarıyla birlikte reproducibility manifest dosyası (`manifest.json`) üretir (`manifest_schema_version = 1`).
+
+### 12.1 Manifest Alanları
+- **`manifest_schema_version`:** Şema sürümü (tamsayı, 1).
+- **`tool`:** Aracın adı (`name`) ve sürümü (`version`).
+- **`command`:** Kartın §9 Reproduce bölümünde listelenen yeniden üretme CLI komutu (tek kaynaktan).
+- **`input`:** Kullanıcının verdiği girdi dosya yolu (`path`), girdi dosyasının SHA-256 bayt özeti (`sha256`), toplam satır sayısı (`rows`) ve kolon sayısı (`columns`).
+- **`environment`:** Çalışma ortamı bilgileri (`python` sürümü, `pandas` sürümü, `numpy` sürümü, `platform`).
+- **`seed`:** Rastgele sayı üretici tohumu (`seed`).
+- **`git`:** Yerel git bilgileri (`commit`: 40-karakter hex commit hash'i, `dirty`: çalışma ağacında commit edilmemiş değişiklik olup olmadığı boolean değeri).
+- **`config`:** Kullanılan eşik değerleri (`thresholds`).
+- **`outputs`:** Üretilen kart dosyalarının SHA-256 bayt özetleri (`card_json_sha256`, `card_md_sha256`).
+- **`warnings`:** Uyarı listesi.
+
+### 12.2 Determinizm ve Zaman Damgası Kuralı
+- Manifest hiçbir koşulda tarih veya saat damgası (timestamp) içermez.
+- Aynı girdi, seed ve ortamda ardışık çalıştırmalarda üretilen `manifest.json` bayt bayt özdeştir (hash-identical determinism).
+
+### 12.3 Git Erişilemezse Davranış
+- Git yüklü olmadığında, `.git` dizini bulunmadığında veya `git` komutları başarısız olduğunda çalıştırma kesintiye uğramaz.
+- `git` alanı şu şekilde doldurulur: `{"commit": null, "dirty": null, "reason_code": "not_available"}`.
+
+### 12.4 Kapsam Dışı Maddeler
+- `manifest.json` yalnız `modeltrust card` komutu kapsamındadır; `report`, `evaluate` ve `shift` komutları için manifest üretimi kapsam dışıdır.
+- Dizin taraması, çoklu fixture toplu hash'i ve kriptografik imzalama bu sürümün kapsamı dışındadır.

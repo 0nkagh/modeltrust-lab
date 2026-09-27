@@ -127,4 +127,22 @@ Generates a diagnostic summary card (JSON and Markdown) containing data provenan
 ```bash
 modeltrust card --input data.csv --target-col y --out-dir ./card_reports
 ```
+- `--manifest`: Generates a `manifest.json` reproducibility manifest in the output directory.
+
+Example `manifest.json`:
+```json
+{
+  "manifest_schema_version": 1,
+  "tool": {"name": "modeltrust", "version": "0.1.0"},
+  "command": "python -m modeltrust card --input data.csv --target-col y --manifest --out-dir ./card_reports",
+  "input": {"path": "data.csv", "sha256": "...", "rows": 200, "columns": 3},
+  "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.2.6", "platform": "win32"},
+  "seed": 42,
+  "git": {"commit": "...", "dirty": false},
+  "config": {"thresholds": {"MIN_ROWS_FOR_COPY_CHECK": 5}},
+  "outputs": {"card_json_sha256": "...", "card_md_sha256": "..."},
+  "warnings": []
+}
+```
+
 *Note: The card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.*

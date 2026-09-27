@@ -1,0 +1,26 @@
+{
+  "config": {
+    "thresholds": {
+      "COVERAGE_GAP_TOL": 0.05,
+      "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "OOD_MAHALANOBIS_RATIO_MIN": 2.0
+    }
+  },
+  "input": {
+    "columns": 3,
+    "path": "tests/fixtures/intervals_calibrated.csv",
+    "rows": 200,
+    "sha256": "c61eac4bed2c9240add09ccc0223faa7458011faa7c9929fc354e44b24feb4b5"
+  },
+  "manifest_schema_version": 1,
+  "outputs": {
+    "card_json_sha256": "<STRIPPED>",
+    "card_md_sha256": "<STRIPPED>"
+  },
+  "seed": 42,
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  },
+  "warnings": []
+}
