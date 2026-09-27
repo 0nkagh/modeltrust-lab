@@ -1,0 +1,226 @@
+{
+  "column_spec": {
+    "group": null,
+    "prediction": null,
+    "subset": null,
+    "target": "y",
+    "time": "ts"
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "ts",
+      "x",
+      "y"
+    ],
+    "columns_sha256": "84caa74063f336dcecf70f499d05e5aab6f3c7c5e78aeefcb08e48e8f9cb33fb",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 60,
+    "nrows_total": 60,
+    "path": "tests/fixtures/shift_drift.csv",
+    "sha256": "3661a8aa09f3663b390fbb4db63bf151a5b2a354665de687fb3006846038f314",
+    "size_bytes": 2336,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided"
+    ]
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 1,
+      "performed": 7,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "shift": {
+    "checks": [
+      {
+        "detail": "Split generated using temporal mode",
+        "name": "shift.split_available",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Sufficient rows for shift analysis (train=48, test=12)",
+        "name": "shift.row_count",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: 0.416667 max outside ratio (heuristic threshold 0.10)",
+        "name": "ood.feature_range",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: Mahalanobis distance ratio=3.280376 (heuristic threshold 2.00)",
+        "name": "ood.mahalanobis",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: max KS stat=0.875000 across features (heuristic threshold 0.25)",
+        "name": "drift.feature_ks",
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: target KS stat=0.000000 (heuristic threshold 0.25)",
+        "name": "drift.target_ks",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "drift": {
+      "feature_ks": {
+        "features": [
+          {
+            "column": "x",
+            "ks_stat": 0.875,
+            "n_test": 12,
+            "n_train": 48
+          }
+        ],
+        "max_ks_stat": 0.875,
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      },
+      "target_ks": {
+        "ks_stat": 0.0,
+        "n_test": 12,
+        "n_train": 48,
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    },
+    "interpretation": "Diagnostic indicators only. Heuristic thresholds; no significance testing is performed. A flagged pattern may be legitimate.",
+    "ood": {
+      "feature_range": {
+        "features": [
+          {
+            "column": "x",
+            "n_outside": 5,
+            "outside_ratio": 0.416667,
+            "train_max": 2.141648,
+            "train_min": -1.951035
+          }
+        ],
+        "max_feature_outside_ratio": 0.416667,
+        "reason_code": null,
+        "result": "fail",
+        "row_outside_ratio": 0.416667,
+        "status": "performed"
+      },
+      "mahalanobis": {
+        "median_test": 2.330202,
+        "median_train": 0.710346,
+        "n_features": 1,
+        "p95_test": 4.00922,
+        "p95_train": 1.665019,
+        "ratio": 3.280376,
+        "reason_code": null,
+        "result": "fail",
+        "status": "performed"
+      }
+    },
+    "shift_schema_version": 1,
+    "split": {
+      "mode": "temporal",
+      "n_test": 12,
+      "n_train": 48
+    },
+    "thresholds": {
+      "DRIFT_KS_STAT_MIN": 0.25,
+      "OOD_FEATURE_OUTSIDE_RATIO_MIN": 0.1,
+      "OOD_MAHALANOBIS_RATIO_MIN": 2.0,
+      "SHIFT_MIN_ROWS": 20
+    },
+    "warnings": [
+      "ood_rows_present",
+      "drift_detected"
+    ]
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}

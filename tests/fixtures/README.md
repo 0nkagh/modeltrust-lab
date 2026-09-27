@@ -32,4 +32,7 @@
 | leak_minmax_full.csv | Full dataset minmax scaling check | preprocess.global_minmax_signature fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | leak_det_feature.csv | Near deterministic feature correlation | preprocess.feature_target_near_deterministic fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | leak_name_hints.csv | Suspicious feature naming hints | preprocess.suspicious_feature_name warning | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| shift_ood.csv | OOD feature range detection | x_out outside_ratio=1.0, ood.feature_range fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| shift_drift.csv | Distribution shift detection via KS | x feature KS >= 0.5, drift.feature_ks fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| shift_clean.csv | No shift / clean baseline | all shift checks pass | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 

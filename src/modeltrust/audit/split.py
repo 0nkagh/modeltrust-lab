@@ -1,8 +1,63 @@
 import hashlib
 import numpy as np
 import pandas as pd
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from modeltrust.schema import ColumnSpec
+
+def compute_split_indices(
+    df: pd.DataFrame,
+    spec: ColumnSpec,
+    mode: str,
+    test_size: float = 0.2,
+    seed: int = 42
+) -> Tuple[List[int], List[int]]:
+    """Compute (train_idx, test_idx) integer row positions for random, group, or temporal split."""
+    n = len(df)
+    n_test = int(round(test_size * n))
+    n_test = max(1, min(n - 1, n_test)) if n > 1 else 0
+
+    if mode == "random":
+        rng = np.random.default_rng(seed)
+        perm = rng.permutation(n).tolist()
+        test_idx = sorted(perm[:n_test])
+        train_idx = sorted(perm[n_test:])
+        return train_idx, test_idx
+
+    elif mode == "group":
+        if spec.group is None or spec.group not in df.columns:
+            raise ValueError(f"Group column '{spec.group}' is required for group split")
+        vc = df[spec.group].astype(str).value_counts().reset_index()
+        vc.columns = ["grp", "count"]
+        vc = vc.sort_values(by=["count", "grp"], ascending=[False, True])
+        if len(vc) < 2:
+            raise ValueError("At least 2 groups are required for group split")
+        test_grp = []
+        test_count = 0
+        for _, row in vc.iterrows():
+            g = row["grp"]
+            c = row["count"]
+            if test_count < n_test:
+                test_grp.append(g)
+                test_count += c
+        group_series = df[spec.group].astype(str)
+        is_test = group_series.isin(test_grp)
+        train_idx = np.where(~is_test)[0].tolist()
+        test_idx = np.where(is_test)[0].tolist()
+        return train_idx, test_idx
+
+    elif mode == "temporal":
+        if spec.time is None or spec.time not in df.columns:
+            raise ValueError(f"Time column '{spec.time}' is required for temporal split")
+        df_time = pd.to_datetime(df[spec.time], errors="coerce")
+        sort_df = pd.DataFrame({"time": df_time, "orig_idx": np.arange(n)})
+        sort_df = sort_df.sort_values(by=["time", "orig_idx"])
+        n_train_actual = n - n_test
+        train_idx = sort_df.iloc[:n_train_actual]["orig_idx"].tolist()
+        test_idx = sort_df.iloc[n_train_actual:]["orig_idx"].tolist()
+        return train_idx, test_idx
+
+    else:
+        raise ValueError(f"Unknown split mode: '{mode}'. Expected 'random', 'group', or 'temporal'.")
 
 def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size: float = 0.2, seed: int = 42) -> Dict[str, Any]:
     n = len(df)
@@ -83,10 +138,7 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
 
     # RANDOM
     if mode in ["all", "random"]:
-        rng = np.random.default_rng(seed)
-        perm = rng.permutation(n).tolist()
-        test_idx = sorted(perm[:n_test])
-        train_idx = sorted(perm[n_test:])
+        train_idx, test_idx = compute_split_indices(df, spec, mode="random", test_size=test_size, seed=seed)
         
         g_ov = _eval_group_overlap(train_idx, test_idx)
         r_ov = _eval_row_overlap(train_idx, test_idx)
@@ -140,6 +192,8 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
                     "target_summary": None
                 }
             else:
+                train_idx, test_idx = compute_split_indices(df, spec, mode="group", test_size=test_size, seed=seed)
+                group_series = df[spec.group].astype(str)
                 test_grp = []
                 test_count = 0
                 for _, row in vc.iterrows():
@@ -148,13 +202,6 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
                     if test_count < n_test:
                         test_grp.append(g)
                         test_count += c
-                        
-                # Use absolute integer indices to match perm indexing style
-                # Avoid dataframe indices
-                group_series = df[spec.group].astype(str)
-                is_test = group_series.isin(test_grp)
-                train_idx = np.where(~is_test)[0].tolist()
-                test_idx = np.where(is_test)[0].tolist()
                 
                 g_ov = _eval_group_overlap(train_idx, test_idx)
                 r_ov = _eval_row_overlap(train_idx, test_idx)
@@ -199,15 +246,9 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
                 "target_summary": None
             }
         else:
+            train_idx, test_idx = compute_split_indices(df, spec, mode="temporal", test_size=test_size, seed=seed)
             df_time = pd.to_datetime(df[spec.time], errors="coerce")
-            
-            # create sort keys, sort by time and original index
-            sort_df = pd.DataFrame({"time": df_time, "orig_idx": np.arange(n)})
-            sort_df = sort_df.sort_values(by=["time", "orig_idx"])
-            
             n_train_actual = n - n_test
-            train_idx = sort_df.iloc[:n_train_actual]["orig_idx"].tolist()
-            test_idx = sort_df.iloc[n_train_actual:]["orig_idx"].tolist()
             
             # evaluate boundary ties
             boundary_ties = 0

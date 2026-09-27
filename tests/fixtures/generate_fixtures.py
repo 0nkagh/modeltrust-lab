@@ -148,6 +148,39 @@ def generate_leak_name_hints(path: Path):
     csv_str = df.to_csv(index=False, lineterminator='\n')
     path.write_bytes(csv_str.encode('utf-8'))
 
+def generate_shift_ood(path: Path):
+    ts = np.arange(1, 51)
+    x_in = np.zeros(50)
+    x_in[:40] = np.linspace(0.0, 1.0, 40)
+    x_in[40:] = np.linspace(0.2, 0.8, 10)
+    x_out = np.zeros(50)
+    x_out[:40] = np.linspace(0.1, 0.9, 40)
+    x_out[40:] = np.linspace(5.1, 5.9, 10)
+    y = 1.5 * x_in + 2.0
+    df = pd.DataFrame({'ts': ts, 'x_in': x_in, 'x_out': x_out, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_shift_drift(path: Path):
+    rng = np.random.default_rng(42)
+    ts = np.arange(1, 61)
+    x = np.concatenate([rng.normal(0.0, 1.0, size=48), rng.normal(2.0, 1.0, size=12)])
+    base_y = np.linspace(10.0, 30.0, 12)
+    y = np.concatenate([base_y, base_y, base_y, base_y, base_y])
+    df = pd.DataFrame({'ts': ts, 'x': x, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_shift_clean(path: Path):
+    ts = np.arange(1, 61)
+    base_x = np.linspace(-2.0, 2.0, 12)
+    x = np.concatenate([base_x, base_x, base_x, base_x, base_x])
+    base_y = np.linspace(10.0, 30.0, 12)
+    y = np.concatenate([base_y, base_y, base_y, base_y, base_y])
+    df = pd.DataFrame({'ts': ts, 'x': x, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
 if __name__ == "__main__":
     out_dir = Path(__file__).parent
     generate_leak_clean(out_dir / "leak_clean.csv")
@@ -162,5 +195,9 @@ if __name__ == "__main__":
     generate_leak_minmax_full(out_dir / "leak_minmax_full.csv")
     generate_leak_det_feature(out_dir / "leak_det_feature.csv")
     generate_leak_name_hints(out_dir / "leak_name_hints.csv")
+    generate_shift_ood(out_dir / "shift_ood.csv")
+    generate_shift_drift(out_dir / "shift_drift.csv")
+    generate_shift_clean(out_dir / "shift_clean.csv")
     print("Fixtures generated.")
+
 

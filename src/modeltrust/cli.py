@@ -96,6 +96,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     eval_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
     eval_parser.add_argument("--folds", type=int, default=5)
 
+    # Shift command
+    shift_parser = subparsers.add_parser("shift")
+    _add_common_args(shift_parser)
+    shift_parser.add_argument("--split-mode", choices=["random", "group", "temporal"], default="random")
+    shift_parser.add_argument("--test-size", type=float, default=0.2)
+
     args = parser.parse_args(argv)
     
     actual_argv = argv if argv is not None else sys.argv
@@ -109,7 +115,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("not implemented yet (planned: PHASE 2 / T4+)", file=sys.stderr)
         return 3
 
-    if args.command in ["inspect", "profile", "leakage", "split", "evaluate"]:
+    if args.command in ["inspect", "profile", "leakage", "split", "evaluate", "shift"]:
         if args.out_dir:
             print('use "modeltrust report --out-dir" to write report files', file=sys.stderr)
             return 0
@@ -165,7 +171,18 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("Error: --cv temporal requires --time-col", file=sys.stderr)
             return 4
 
-    if args.command in ["inspect", "profile", "leakage", "split", "report", "evaluate"]:
+    if args.command == "shift":
+        if not args.target_col:
+            print("Error: --target-col is required for shift command", file=sys.stderr)
+            return 2
+        if args.split_mode == "group" and not args.group_col:
+            print("Error: --split-mode group requires --group-col", file=sys.stderr)
+            return 4
+        if args.split_mode == "temporal" and not args.time_col:
+            print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
+            return 4
+
+    if args.command in ["inspect", "profile", "leakage", "split", "report", "evaluate", "shift"]:
         if args.command == "split" or args.command == "report":
             if args.mode in ["group", "temporal"]:
                 if args.mode == "group" and not args.group_col:
@@ -232,6 +249,16 @@ def main(argv: Optional[list[str]] = None) -> int:
                     folds=args.folds, 
                     seed=args.seed
                 )
+
+            if args.command == "shift":
+                from modeltrust.audit.shift import build_shift
+                prov["shift"] = build_shift(
+                    loaded.frame,
+                    spec,
+                    split_mode=args.split_mode,
+                    test_size=args.test_size,
+                    seed=args.seed
+                )
                 
             if prov["schema"]["summary"]["fail"] > 0:
                 for check in prov["schema"]["checks"]:
@@ -257,6 +284,17 @@ def main(argv: Optional[list[str]] = None) -> int:
                     "evaluation": prov["evaluation"]
                 }
                 print(json.dumps(eval_prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
+            elif args.command == "shift":
+                shift_prov = {
+                    "tool": prov["tool"],
+                    "run_metadata": prov["run_metadata"],
+                    "environment": prov["environment"],
+                    "input": prov["input"],
+                    "column_spec": prov["column_spec"],
+                    "schema": prov["schema"],
+                    "shift": prov["shift"]
+                }
+                print(json.dumps(shift_prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
             else:
                 print(json.dumps(prov, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False))
             

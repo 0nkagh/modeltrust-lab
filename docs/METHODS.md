@@ -115,3 +115,31 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
 ### 8.y Neyi ölçmez
 Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, kalibrasyon ve belirsizlik kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.
 
+## 9. Dağılım Kayması ve OOD (Gösterge)
+
+ModelTrust Lab `shift` modülü (`src/modeltrust/audit/shift.py`), eğitim ve test bölmeleri arasındaki veri dağılımı farklılıklarını ve alan dışı (Out-of-Distribution - OOD) örnekleri istatistiksel ve geometrik göstergelerle teşhis eder:
+
+- **Kontroller:**
+  - **`ood.feature_range`:** Sayısal özelliklerin eğitim kümesindeki asgari ve azami (`[train_min, train_max]`) değer sınırlarını hesaplar. Test kümesinde bu sınırların dışına çıkan değerlerin oranını (`outside_ratio`) ve en az bir özelliği sınır dışına çıkan test satırlarının oranını (`row_outside_ratio`) ölçer. `max_feature_outside_ratio >= OOD_FEATURE_OUTSIDE_RATIO_MIN (0.10)` ise başarısız (`fail`) sayılır.
+  - **`ood.mahalanobis`:** Eğitim kümesi üzerinden ortalama vektör $\mu$ ve kovaryans matrisi $\Sigma$ (`ddof=1`, tekil matrisler için Moore-Penrose sözde tersi $\Sigma^+$) hesaplar. Test ve eğitim satırlarının Mahalanobis mesafesi $d(x) = \sqrt{(x-\mu)^T \Sigma^+ (x-\mu)}$ medyan oranını (`ratio = median_test / median_train`) belirler. `ratio >= OOD_MAHALANOBIS_RATIO_MIN (2.0)` ise başarısız (`fail`) sayılır.
+  - **`drift.feature_ks`:** Train ve test kümesi sayısal özellikleri arasındaki iki örneklemli Kolmogorov-Smirnov ($D$) istatistiğini $D = \max |F_{\text{train}}(x) - F_{\text{test}}(x)|$ formülüyle hesaplar. En yüksek özellik KS değeri `max_ks_stat >= DRIFT_KS_STAT_MIN (0.25)` ise başarısız (`fail`) sayılır.
+  - **`drift.target_ks`:** Train ve test kümesi hedef değişkenleri arasındaki Kolmogorov-Smirnov ($D$) istatistiğini hesaplar. `ks_stat >= DRIFT_KS_STAT_MIN (0.25)` ise başarısız (`fail`) sayılır.
+- **Sabit Kolon Politikası:** Eğitim kümesinde varyansı sıfır (`std == 0`) olan sabit kolonlar shift analizinden hariç tutulur ve `constant_features_excluded` uyarısıyla listelenir.
+- **Zaman Kolonu Koşulu:** Drift kontrolleri (`drift.feature_ks`, `drift.target_ks`) zaman serisi ekseninde anlamlı olduğundan, `--time-col` verilmediğinde drift kontrolleri `not_assessable` (`not_provided`) olarak işaretlenir; OOD kontrolleri ise random veya group bölmelerinde de çalıştırılabilir.
+
+### 9.x Eşikler
+| Sabit Adı | Değer | Açıklama |
+| --- | --- | --- |
+| `SHIFT_MIN_ROWS` | 20 | Shift analizi için eğitim kümesinde gereken asgari satır sayısı |
+| `CV_MIN_FOLD_SIZE` | 3 | Shift analizi için test kümesinde gereken asgari satır sayısı |
+| `OOD_FEATURE_OUTSIDE_RATIO_MIN` | 0.10 | Bir özelliğin OOD aralık aşımı fail eşiği |
+| `OOD_MAHALANOBIS_RATIO_MIN` | 2.0 | Mahalanobis medyan mesafe oranı fail eşiği |
+| `DRIFT_KS_STAT_MIN` | 0.25 | Kolmogorov-Smirnov kayma istatistiği fail eşiği |
+
+### 9.y Neyi Ölçmez (Dürüstlük ve Sınırlar)
+- **p-değeri ve İstatistiksel Anlamlılık Yoktur:** Modül parametrik testler veya p-değeri hesaplamaz (scipy bağımlılığı yoktur). Raporlanan değerler kesin hipotez testi sonuçları değil, ampirik mesafelerdir.
+- **Heuristik Eşikler:** Belirlenen eşikler (0.10, 2.0, 0.25) kural tabanlı tanı göstergeleridir ("diagnostic indicators"); mutlak bir kabul/ret sınırını temsil etmez.
+- **Nedensellik ve Başarısızlık Garantisi Yoktur:** OOD veya kayma bayrağının verilmesi bir verinin meşru bir rejim değişiminden kaynaklanabileceğini dışlamaz; aynı şekilde bir bayrağın bulunmaması dağılım kaymasının kesinlikle olmadığı anlamına gelmez ("Absence of a flag does not establish absence of shift").
+- **Model Çökme İddiası Yoktur:** Alan dışı örnek bulunması veya KS istatistiğinin yüksek olması, kullanıcının modelinin bu örnekler üzerinde kesinlikle hatalı tahmin üreteceğini garanti etmez.
+
+

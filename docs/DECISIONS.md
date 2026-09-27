@@ -82,5 +82,9 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-058 | eval_preds.csv şartnameye sabitlendi: 3 grup × 10 satır, ilk 20 satır pred=y, son 10 satır pred=y+3 (MAE=1.0, RMSE=√3). |
 | D-059 | evaluation bloğu şeması T7-B3 sözleşmesiyle tam uyumludur: models[].{mae,rmse,r2,n_scored}, group_errors.{groups[],worst_by_mae,coverage_ratio,model}, cv.folds[].{n_groups_train,n_groups_test}; coverage_ratio = n_rows_evaluated / n_rows_scored olarak tanımlanır. |
 | D-060 | report --evaluate opsiyoneldir (varsayılan kapalı); açıldığında evaluation bloğu JSON'a ve md'ye eklenir, davranış evaluate komutuyla birebir aynıdır. |
+| D-061 | Yeni modül: audit/shift.py (OOD + drift). Yeni reason_code: degenerate_covariance. |
+| D-062 | OOD/drift eşikleri heuristiktir; p-değeri hesaplanmaz (scipy yok). Bulgular "diagnostic indicator" dilinde raporlanır. |
+| D-063 | split.py indeks üretimi compute_split_indices yardımcısına çıkarıldı; build_split çıktı sözleşmesi ve golden'lar değişmedi. |
+
 
 
