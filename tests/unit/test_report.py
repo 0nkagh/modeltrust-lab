@@ -53,6 +53,9 @@ def test_report_no_forbidden_language():
             assert w not in md_lower, f"Forbidden word '{w}' found in report"
             
         assert "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage." in md
+        
+        assert "## 5. Flagged patterns" in md
+        assert "No flagged patterns in the tested checks." in md
 
 def test_report_out_dir_required():
     res = run_cli(["report", "--input", "tests/fixtures/simple_ok.csv"])
@@ -80,3 +83,4 @@ def test_report_section_2_summary_table_includes_profile():
             
         assert "| Module | Performed | Not Assessable | Skipped | Fail |" in md
         assert "| profile |" in md
+        assert "* Checks marked as `not_assessable` are skipped when prerequisite conditions" in md

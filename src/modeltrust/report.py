@@ -32,6 +32,7 @@ def build_report_md(prov: dict) -> str:
             
             if c.get("result") == "fail": fail += 1
         md.append(f"| {mod} | {perf} | {not_assess} | {skip} | {fail} |")
+    md.append("\n* Checks marked as `not_assessable` are skipped when prerequisite conditions (e.g., target column variance, temporal column presence) are not met.")
         
     # 3. What could NOT be assessed
     md.append("\n## 3. What could NOT be assessed")
@@ -63,17 +64,22 @@ def build_report_md(prov: dict) -> str:
         non_finite += (c.get("non_finite_count") or 0)
     md.append(f"- Non-finite values (numeric): {non_finite}")
 
-    # 5. Leakage suspicions
-    md.append("\n## 5. Leakage suspicions")
-    leak_fails = []
-    if prov.get("leakage"):
-        for c in prov["leakage"].get("checks", []):
-            if c.get("result") == "fail":
-                leak_fails.append(f"- **{c['name']}**: {c.get('detail', '')}")
-    if leak_fails:
-        md.extend(leak_fails)
+    # 5. Flagged patterns
+    md.append("\n## 5. Flagged patterns")
+    flagged = []
+    for mod in ["leakage", "split"]:
+        if prov.get(mod):
+            for c in prov[mod].get("checks", []):
+                if c.get("result") == "fail":
+                    flagged.append((mod, c["name"], c.get("detail", "")))
+    
+    if flagged:
+        md.append("| Module | Check | Details |")
+        md.append("|---|---|---|")
+        for mod, check, detail in flagged:
+            md.append(f"| {mod} | {check} | {detail} |")
     else:
-        md.append("- No leakage suspicions flagged.")
+        md.append("- No flagged patterns in the tested checks.")
     md.append("\n> Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.")
 
     # 6. Split comparison
@@ -81,25 +87,32 @@ def build_report_md(prov: dict) -> str:
     if prov.get("split") and prov["split"].get("comparison"):
         md.append("| Mode | n_train | n_test | group_overlap | row_overlap | time_overlap | abs_std_mean_diff |")
         md.append("|---|---|---|---|---|---|---|")
+        modes_dict = prov["split"].get("modes", {})
         for comp in prov["split"]["comparison"]:
             mode = comp.get("mode")
-            n_tr = comp.get("n_train")
-            n_te = comp.get("n_test")
-            g_ov = comp.get("group_overlap_count")
-            r_ov = comp.get("row_overlap_count")
-            t_ov = comp.get("time_ranges_overlap")
-            a_diff = comp.get("abs_std_mean_diff")
+            status = modes_dict.get(mode, {}).get("status", "performed")
             
-            row = [
-                str(mode),
-                str(n_tr) if n_tr is not None else "N/A",
-                str(n_te) if n_te is not None else "N/A",
-                str(g_ov) if g_ov is not None else "N/A",
-                str(r_ov) if r_ov is not None else "N/A",
-                str(t_ov) if t_ov is not None else "N/A",
-                f"{a_diff:.6f}" if isinstance(a_diff, (int, float)) else "N/A"
-            ]
+            if status != "performed":
+                row = [str(mode), "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"]
+            else:
+                n_tr = comp.get("n_train")
+                n_te = comp.get("n_test")
+                g_ov = comp.get("group_overlap_count")
+                r_ov = comp.get("row_overlap_count")
+                t_ov = comp.get("time_ranges_overlap")
+                a_diff = comp.get("abs_std_mean_diff")
+                
+                row = [
+                    str(mode),
+                    str(n_tr) if n_tr is not None else "N/A",
+                    str(n_te) if n_te is not None else "N/A",
+                    str(g_ov) if g_ov is not None else "N/A",
+                    str(r_ov) if r_ov is not None else "N/A",
+                    str(t_ov) if t_ov is not None else "N/A",
+                    f"{a_diff:.6f}" if isinstance(a_diff, (int, float)) else "N/A"
+                ]
             md.append("| " + " | ".join(row) + " |")
+        md.append("\n* Modes marked as N/A were not assessable (e.g., temporal split on a dataset without a time column).")
     else:
         md.append("Split comparison not requested or not available.")
 
