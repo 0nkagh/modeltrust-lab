@@ -7,25 +7,22 @@ def test_card_full_equipment():
         "tool": {"name": "modeltrust", "version": "0.1.0"},
         "environment": {"python": "3.11", "pandas": "2.0", "numpy": "1.24", "platform": "Windows"},
         "run_metadata": {"seed": 42},
-        "profile": {"status": "performed", "duplicate_rows": 0},
+        "profile": {"duplicate_rows": {"exact_duplicate_count": 0}},
         "leakage": {
-            "status": "performed",
-            "checks": {
-                "target_copy_exact": {"result": "pass"},
-                "target_copy_near": {"result": "pass"},
-                "preprocess.fit_scope": {"result": "not_assessable", "reason_code": "requires_pipeline_code"}
-            }
-        },
-        "split": {
-            "status": "performed",
-            "modes": [
-                {"mode": "random", "result": "performed"},
-                {"mode": "group", "result": "performed"},
-                {"mode": "temporal", "result": "not_assessable", "reason_code": "time_column_missing"}
+            "checks": [
+                {"name": "target_copy_exact", "result": "pass"},
+                {"name": "target_copy_near", "result": "pass"},
+                {"name": "preprocess.fit_scope", "result": "not_assessable", "reason_code": "requires_pipeline_code"}
             ]
         },
+        "split": {
+            "modes": {
+                "random": {"status": "performed"},
+                "group": {"status": "performed"},
+                "temporal": {"status": "not_assessable", "reason_code": "time_column_missing"}
+            }
+        },
         "evaluation": {
-            "status": "performed",
             "group_errors": {"status": "performed"},
             "models": [{"name": "ols", "mae": 1.0}],
             "uncertainty": {
@@ -38,7 +35,6 @@ def test_card_full_equipment():
             }
         },
         "shift": {
-            "status": "performed",
             "drift": {"feature_ks": {"status": "performed"}},
             "ood": {"feature_range": {"status": "performed"}}
         }
@@ -57,7 +53,7 @@ def test_card_full_equipment():
 
 def test_card_profile_only():
     prov = {
-        "profile": {"status": "performed", "duplicate_rows": 5}
+        "profile": {"duplicate_rows": {"exact_duplicate_count": 5}}
     }
     card = build_card_json(prov, "cmd")
     q_dict = {q["id"]: q for q in card["questions"]}
@@ -70,19 +66,18 @@ def test_card_profile_only():
 def test_card_q4_rule():
     prov = {
         "split": {
-            "status": "performed",
-            "modes": [
-                {"mode": "random", "result": "performed"},
-                {"mode": "group", "result": "not_assessable"},
-                {"mode": "temporal", "result": "not_assessable"}
-            ]
+            "modes": {
+                "random": {"status": "performed"},
+                "group": {"status": "not_assessable"},
+                "temporal": {"status": "not_assessable"}
+            }
         }
     }
     card = build_card_json(prov, "cmd")
     q_dict = {q["id"]: q for q in card["questions"]}
     assert q_dict[4]["status"] == "partial"
     
-    prov["split"]["modes"][1]["result"] = "performed"
+    prov["split"]["modes"]["group"]["status"] = "performed"
     card = build_card_json(prov, "cmd")
     q_dict = {q["id"]: q for q in card["questions"]}
     assert q_dict[4]["status"] == "answered"
@@ -120,7 +115,7 @@ def test_thresholds():
     assert len(t) > 0
 
 def test_determinism():
-    prov = {"profile": {"status": "performed", "duplicate_rows": 1}}
+    prov = {"profile": {"duplicate_rows": {"exact_duplicate_count": 1}}}
     card1 = build_card_json(prov, "cmd")
     card2 = build_card_json(prov, "cmd")
     assert json.dumps(card1, sort_keys=True) == json.dumps(card2, sort_keys=True)
@@ -128,10 +123,9 @@ def test_determinism():
 def test_not_assessable_logic():
     prov = {
         "leakage": {
-            "status": "performed",
-            "checks": {
-                "c1": {"result": "not_assessable", "reason_code": "r1"}
-            }
+            "checks": [
+                {"name": "c1", "result": "not_assessable", "reason_code": "r1"}
+            ]
         }
     }
     card = build_card_json(prov, "cmd")
@@ -144,7 +138,6 @@ def test_not_assessable_logic():
 def test_interval_coverage_null():
     prov = {
         "evaluation": {
-            "status": "performed",
             "uncertainty": {"status": "skipped"}
         }
     }

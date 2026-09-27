@@ -1,5 +1,27 @@
 {
-  "checks_summary": [],
+  "checks_summary": [
+    {
+      "fail": 0,
+      "module": "leakage",
+      "not_assessable": 4,
+      "performed": 8,
+      "total": 12
+    },
+    {
+      "fail": 0,
+      "module": "split",
+      "not_assessable": 1,
+      "performed": 2,
+      "total": 3
+    },
+    {
+      "fail": 0,
+      "module": "shift",
+      "not_assessable": 2,
+      "performed": 2,
+      "total": 4
+    }
+  ],
   "input": {
     "bom_stripped": false,
     "columns": [
@@ -53,37 +75,73 @@
     ],
     "worst_groups_by_mae": null
   },
-  "not_assessable": [],
+  "not_assessable": [
+    {
+      "check": "subset_row_overlap",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "subset_group_overlap",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "subset_time_ranges",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "preprocess.fit_scope",
+      "module": "leakage",
+      "reason_code": "requires_pipeline_code"
+    },
+    {
+      "check": "modes.temporal",
+      "module": "split",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "drift.feature_ks",
+      "module": "shift",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "drift.target_ks",
+      "module": "shift",
+      "reason_code": "not_provided"
+    }
+  ],
   "questions": [
     {
-      "evidence": "profile not performed",
+      "evidence": "profile: duplicate_rows=0, missing cells reported",
       "id": 1,
       "question": "Missing or duplicate records?",
-      "status": "not_assessable"
+      "status": "answered"
     },
     {
-      "evidence": "leakage not performed",
+      "evidence": "leakage.target_copy_exact=pass, target_copy_near=pass",
       "id": 2,
       "question": "Target leakage suspicion?",
-      "status": "not_assessable"
+      "status": "answered"
     },
     {
-      "evidence": "split.modes.random not performed",
+      "evidence": "split.modes.random=performed",
       "id": 3,
       "question": "Train/test or group leakage?",
-      "status": "not_assessable"
+      "status": "answered"
     },
     {
-      "evidence": "not enough split modes for comparison",
+      "evidence": "multiple split modes performed (2)",
       "id": 4,
       "question": "Split strategy difference?",
-      "status": "partial"
+      "status": "answered"
     },
     {
-      "evidence": "evaluation not performed",
+      "evidence": "evaluation.group_errors performed",
       "id": 5,
       "question": "Which groups have higher error?",
-      "status": "not_assessable"
+      "status": "answered"
     },
     {
       "evidence": "shift.drift.feature_ks not performed",

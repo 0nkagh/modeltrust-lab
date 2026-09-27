@@ -4,19 +4,30 @@ import json
 def build_card_json(prov, reproduce_command):
     questions = []
     
+    # Helper to check if a module ran
+    def _ran(mod):
+        return bool(prov.get(mod))
+        
+    def _chk_res(mod, check_name):
+        checks = prov.get(mod, {}).get("checks", [])
+        for c in checks:
+            if c.get("name") == check_name:
+                return c.get("result", "not_assessable")
+        return "not_assessable"
+
     # Q1
-    p = prov.get("profile", {})
-    if p and p.get("status") == "performed":
-        dupes = p.get("duplicate_rows", 0)
+    p = prov.get("profile")
+    if p:
+        dupes = p.get("duplicate_rows", {}).get("exact_duplicate_count", 0) if isinstance(p.get("duplicate_rows"), dict) else p.get("duplicate_rows", 0)
         questions.append({"id": 1, "question": "Missing or duplicate records?", "status": "answered", "evidence": f"profile: duplicate_rows={dupes}, missing cells reported"})
     else:
         questions.append({"id": 1, "question": "Missing or duplicate records?", "status": "not_assessable", "evidence": "profile not performed"})
         
     # Q2
-    lk = prov.get("leakage", {})
-    if lk and lk.get("status") == "performed":
-        exact = lk.get("checks", {}).get("target_copy_exact", {}).get("result", "not_assessable")
-        near = lk.get("checks", {}).get("target_copy_near", {}).get("result", "not_assessable")
+    lk = prov.get("leakage")
+    if lk:
+        exact = _chk_res("leakage", "target_copy_exact")
+        near = _chk_res("leakage", "target_copy_near")
         if exact != "not_assessable" or near != "not_assessable":
             questions.append({"id": 2, "question": "Target leakage suspicion?", "status": "answered", "evidence": f"leakage.target_copy_exact={exact}, target_copy_near={near}"})
         else:
@@ -25,34 +36,34 @@ def build_card_json(prov, reproduce_command):
         questions.append({"id": 2, "question": "Target leakage suspicion?", "status": "not_assessable", "evidence": "leakage not performed"})
         
     # Q3
-    sp = prov.get("split", {}) or {}
-    rand_status = "not_assessable"
-    if sp and sp.get("status") == "performed":
-        for m in sp.get("modes", []):
-            if m.get("mode") == "random":
-                rand_status = m.get("result", "performed")
-                break
-    if rand_status != "not_assessable":
-        questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "answered", "evidence": f"split.modes.random={rand_status}"})
+    sp = prov.get("split")
+    if sp:
+        rand_status = sp.get("modes", {}).get("random", {}).get("status", "not_assessable")
+        if rand_status != "not_assessable":
+            questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "answered", "evidence": f"split.modes.random={rand_status}"})
+        else:
+            questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split.modes.random not performed"})
     else:
-        questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split.modes.random not performed"})
+        questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split not performed"})
         
     # Q4
-    modes_performed = 0
-    if sp and sp.get("status") == "performed":
-        for m in sp.get("modes", []):
-            if m.get("mode") in ["random", "group", "temporal"] and m.get("result", "not_assessable") != "not_assessable":
-                modes_performed += 1
-    if modes_performed >= 2:
-        questions.append({"id": 4, "question": "Split strategy difference?", "status": "answered", "evidence": f"multiple split modes performed ({modes_performed})"})
+    if sp:
+        modes_perf = 0
+        for m, md in sp.get("modes", {}).items():
+            if md.get("status") != "not_assessable":
+                modes_perf += 1
+        if modes_perf >= 2:
+            questions.append({"id": 4, "question": "Split strategy difference?", "status": "answered", "evidence": f"multiple split modes performed ({modes_perf})"})
+        else:
+            questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "not enough split modes for comparison"})
     else:
-        questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "not enough split modes for comparison"})
+        questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "split not performed"})
         
     # Q5
-    ev = prov.get("evaluation", {})
-    if ev and ev.get("status") == "performed":
-        ge = ev.get("group_errors", {})
-        if ge and ge.get("status") == "performed":
+    ev = prov.get("evaluation")
+    if ev:
+        ge_status = ev.get("group_errors", {}).get("status", "not_assessable")
+        if ge_status == "performed":
             questions.append({"id": 5, "question": "Which groups have higher error?", "status": "answered", "evidence": "evaluation.group_errors performed"})
         else:
             questions.append({"id": 5, "question": "Which groups have higher error?", "status": "not_assessable", "evidence": "group_errors not performed"})
@@ -60,30 +71,37 @@ def build_card_json(prov, reproduce_command):
         questions.append({"id": 5, "question": "Which groups have higher error?", "status": "not_assessable", "evidence": "evaluation not performed"})
         
     # Q6 & Q7
-    sh = prov.get("shift", {})
-    drift_status = sh.get("drift", {}).get("feature_ks", {}).get("status", "not_assessable") if sh else "not_assessable"
-    if drift_status == "performed":
-        questions.append({"id": 6, "question": "Distribution drift?", "status": "answered", "evidence": "shift.drift.feature_ks performed"})
+    sh = prov.get("shift")
+    if sh:
+        drift_status = sh.get("drift", {}).get("feature_ks", {}).get("status", "not_assessable")
+        if drift_status == "performed":
+            questions.append({"id": 6, "question": "Distribution drift?", "status": "answered", "evidence": "shift.drift.feature_ks performed"})
+        else:
+            questions.append({"id": 6, "question": "Distribution drift?", "status": "not_assessable", "evidence": "shift.drift.feature_ks not performed"})
+            
+        ood_status = sh.get("ood", {}).get("feature_range", {}).get("status", "not_assessable")
+        if ood_status == "performed":
+            questions.append({"id": 7, "question": "Out-of-distribution (OOD) data?", "status": "answered", "evidence": "shift.ood.feature_range performed"})
+        else:
+            questions.append({"id": 7, "question": "Out-of-distribution (OOD) data?", "status": "not_assessable", "evidence": "shift.ood.feature_range not performed"})
     else:
-        questions.append({"id": 6, "question": "Distribution drift?", "status": "not_assessable", "evidence": "shift.drift.feature_ks not performed"})
-        
-    ood_status = sh.get("ood", {}).get("feature_range", {}).get("status", "not_assessable") if sh else "not_assessable"
-    if ood_status == "performed":
-        questions.append({"id": 7, "question": "Out-of-distribution (OOD) data?", "status": "answered", "evidence": "shift.ood.feature_range performed"})
-    else:
-        questions.append({"id": 7, "question": "Out-of-distribution (OOD) data?", "status": "not_assessable", "evidence": "shift.ood.feature_range not performed"})
+        questions.append({"id": 6, "question": "Distribution drift?", "status": "not_assessable", "evidence": "shift not performed"})
+        questions.append({"id": 7, "question": "Out-of-distribution (OOD) data?", "status": "not_assessable", "evidence": "shift not performed"})
         
     # Q8
-    unc_status = ev.get("uncertainty", {}).get("status", "not_assessable") if ev else "not_assessable"
-    if unc_status == "performed":
-        u = ev.get("uncertainty", {})
-        cov = u.get("coverage", 0)
-        wl = u.get("wilson_low", 0)
-        wh = u.get("wilson_high", 0)
-        nom = u.get("nominal", 0)
-        questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "answered", "evidence": f"uncertainty.coverage={cov:.3f} (Wilson [{wl:.3f}, {wh:.3f}]), nominal={nom}"})
+    if ev:
+        unc_status = ev.get("uncertainty", {}).get("status", "not_assessable")
+        if unc_status == "performed":
+            u = ev.get("uncertainty", {})
+            cov = u.get("coverage", 0)
+            wl = u.get("wilson_low", 0)
+            wh = u.get("wilson_high", 0)
+            nom = u.get("nominal", 0)
+            questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "answered", "evidence": f"uncertainty.coverage={cov:.3f} (Wilson [{wl:.3f}, {wh:.3f}]), nominal={nom}"})
+        else:
+            questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "not_assessable", "evidence": "uncertainty not performed"})
     else:
-        questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "not_assessable", "evidence": "uncertainty not performed"})
+        questions.append({"id": 8, "question": "Are uncertainty intervals calibrated?", "status": "not_assessable", "evidence": "evaluation not performed"})
         
     # Q9
     questions.append({"id": 9, "question": "Which checks could not be performed?", "status": "answered", "evidence": "see not_assessable"})
@@ -95,35 +113,44 @@ def build_card_json(prov, reproduce_command):
     not_assessable = []
     
     # Collect not_assessable from leakage, split, evaluation, shift
-    if lk and lk.get("status") == "performed":
+    if lk:
         total = 0; performed = 0; fail = 0; na = 0
-        for chk, d in lk.get("checks", {}).items():
+        for c in lk.get("checks", []):
             total += 1
-            if d.get("result") == "not_assessable":
+            if c.get("status") == "not_assessable":
                 na += 1
-                not_assessable.append({"module": "leakage", "check": chk, "reason_code": d.get("reason_code", "unknown")})
-            elif d.get("result") == "fail":
+                not_assessable.append({"module": "leakage", "check": c.get("name"), "reason_code": c.get("reason_code", "unknown")})
+            elif c.get("status") == "performed":
+                performed += 1
+                if c.get("result") == "fail":
+                    fail += 1
+            elif c.get("result") == "not_assessable":
+                na += 1
+                not_assessable.append({"module": "leakage", "check": c.get("name"), "reason_code": c.get("reason_code", "unknown")})
+            elif c.get("result") == "fail":
                 fail += 1
                 performed += 1
             else:
                 performed += 1
-        checks_summary.append({"module": "leakage", "total": total, "performed": performed, "fail": fail, "not_assessable": na})
+        if total > 0:
+            checks_summary.append({"module": "leakage", "total": total, "performed": performed, "fail": fail, "not_assessable": na})
         
-    if sp and sp.get("status") == "performed":
+    if sp:
         total = 0; performed = 0; fail = 0; na = 0
-        for m in sp.get("modes", []):
+        for m, md in sp.get("modes", {}).items():
             total += 1
-            if m.get("result") == "not_assessable":
+            if md.get("status") == "not_assessable":
                 na += 1
-                not_assessable.append({"module": "split", "check": f"modes.{m.get('mode')}", "reason_code": m.get("reason_code", "unknown")})
-            elif m.get("result") == "fail":
+                not_assessable.append({"module": "split", "check": f"modes.{m}", "reason_code": md.get("reason_code", "unknown")})
+            elif md.get("status") == "fail":
                 fail += 1
                 performed += 1
             else:
                 performed += 1
-        checks_summary.append({"module": "split", "total": total, "performed": performed, "fail": fail, "not_assessable": na})
+        if total > 0:
+            checks_summary.append({"module": "split", "total": total, "performed": performed, "fail": fail, "not_assessable": na})
         
-    if sh and sh.get("status") == "performed":
+    if sh:
         total = 0; performed = 0; fail = 0; na = 0
         for cat in ["drift", "ood"]:
             if cat in sh:

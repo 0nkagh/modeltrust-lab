@@ -114,3 +114,56 @@ def test_card_full_golden(tmpdir):
         golden = json.load(f)
         
     assert card == golden
+
+def test_card_real_cli_questions_answered(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/eval_preds.csv",
+        "--target-col", "y", "--pred-col", "pred", "--group-col", "grp",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+    q_dict = {q["id"]: q for q in card["questions"]}
+    assert q_dict[1]["status"] == "answered"
+    assert q_dict[2]["status"] == "answered"
+    assert q_dict[3]["status"] == "answered"
+    assert q_dict[5]["status"] == "answered"
+    assert q_dict[9]["status"] == "answered"
+    assert q_dict[10]["status"] == "partial"
+
+def test_card_real_cli_minimal(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/simple_ok.csv",
+        "--target-col", "y",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+    q_dict = {q["id"]: q for q in card["questions"]}
+    assert q_dict[1]["status"] == "answered"
+    # Depending on row counts Q2 and Q3 may be not_assessable.
+    assert q_dict[10]["status"] == "partial"
+
+def test_card_real_cli_uncertainty_wired(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+    q_dict = {q["id"]: q for q in card["questions"]}
+    assert q_dict[8]["status"] == "answered"
+    assert card["metrics"].get("interval_coverage") is not None
