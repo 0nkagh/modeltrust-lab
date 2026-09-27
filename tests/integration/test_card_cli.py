@@ -167,3 +167,65 @@ def test_card_real_cli_uncertainty_wired(tmpdir):
     q_dict = {q["id"]: q for q in card["questions"]}
     assert q_dict[8]["status"] == "answered"
     assert card["metrics"].get("interval_coverage") is not None
+
+
+# --- Column existence validation tests (PHASE 4 / T14-R4 / D-079) ---
+
+def test_card_column_validation_group_col_missing(tmpdir):
+    """--group-col referencing a non-existent column -> exit 2 with clear message."""
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y",
+        "--group-col", "grp",
+        "--lower-col", "lo", "--upper-col", "hi",
+        "--out-dir", str(tmpdir),
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 2
+    assert "Error: --group-col 'grp' not found in input columns" in res.stderr
+
+
+def test_card_column_validation_lower_col_missing(tmpdir):
+    """--lower-col referencing a non-existent column -> exit 2 with clear message."""
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/simple_ok.csv",
+        "--target-col", "y",
+        "--lower-col", "no_such_col",
+        "--upper-col", "no_such_col2",
+        "--out-dir", str(tmpdir),
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 2
+    assert "--lower-col" in res.stderr
+    assert "not found in input columns" in res.stderr
+
+
+def test_card_column_validation_pred_col_missing(tmpdir):
+    """--pred-col referencing a non-existent column -> exit 2 with clear message."""
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y",
+        "--pred-col", "no_pred",
+        "--out-dir", str(tmpdir),
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 2
+    assert "Error: --pred-col 'no_pred' not found in input columns" in res.stderr
+
+
+def test_card_column_validation_positive(tmpdir):
+    """All provided columns exist -> exit 0."""
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y",
+        "--lower-col", "lo",
+        "--upper-col", "hi",
+        "--out-dir", str(tmpdir),
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    assert os.path.exists(os.path.join(str(tmpdir), "card.json"))

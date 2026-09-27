@@ -273,7 +273,28 @@ def main(argv: Optional[list[str]] = None) -> int:
                 time=args.time_col,
                 subset=args.subset_col
             )
-            
+
+            # Column existence validation — card command only
+            # (Other sub-commands are out of scope for this release; see D-079.)
+            if args.command == "card":
+                _input_cols = set(loaded.frame.columns)
+                _col_flag_map = [
+                    ("--target-col",  getattr(args, "target_col",  None)),
+                    ("--pred-col",    getattr(args, "pred_col",    None)),
+                    ("--group-col",   getattr(args, "group_col",   None)),
+                    ("--time-col",    getattr(args, "time_col",    None)),
+                    ("--subset-col",  getattr(args, "subset_col",  None)),
+                    ("--lower-col",   getattr(args, "lower_col",   None)),
+                    ("--upper-col",   getattr(args, "upper_col",   None)),
+                ]
+                for _flag, _col in _col_flag_map:
+                    if _col and _col not in _input_cols:
+                        print(
+                            f"Error: {_flag} '{_col}' not found in input columns",
+                            file=sys.stderr,
+                        )
+                        return 2
+
             prov = build_provenance(loaded, spec, seed=args.seed, path_as_given=args.input)
             
             if args.run_timestamp:
