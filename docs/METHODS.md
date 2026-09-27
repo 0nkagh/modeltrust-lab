@@ -202,3 +202,18 @@ Kart, değerlendirme durumunu belirlemek için aşağıdaki katı kuralları (de
 
 ### 11.3 Neyi İddia Etmez (Sınırlar)
 Model card bir **sertifika değildir**. Herhangi bir modelin "production-ready" olduğunu, "compliant" (mevzuata uygun) olduğunu veya performans/güvenilirlik garantisi taşıdığını iddia etmez. Yalnızca belirtilen veri kümesi ve çalıştırılan argümanlarla üretilen bir teşhis (diagnostic) özetidir.
+
+### 11.4 `n_scored` Kapsamı — Supplied Predictions Modu
+
+`--pred-col` verildiğinde CLI, tahminlerin kullanıcı tarafından dışarıda hesaplanmış olduğunu varsayar. Bu modda:
+
+- **Split uygulanmaz.** Tüm sağlanan satırlar (NaN olmayan) metriğe dahil edilir.
+- Metrik tablosundaki `n_scored (all rows provided)` kolonu bu gerçeği yansıtır: değer, sağlanan veri setindeki NaN-olmayan satır sayısıdır; bir test split'inin büyüklüğü değildir.
+- `--split-mode` ve `--test-size` argümanları bu modda train/test split metrikleri üretmez; split modülü bağımsız olarak ayrı leakage denetimleri için çalışır.
+
+### 11.5 `n_scored` Kapsamı — Model Eğitim Modu
+
+`--pred-col` verilmediğinde CLI dahili OLS ve mean baseline modellerini eğitir. Bu modda `n_scored`, split sonucundaki **test setinin** satır sayısını (NaN olmayan) gösterir.
+
+- `n_scored` değerinin tutarlılığı, baseline ve OLS modellerinin aynı test setini kullandığını doğrular.
+- İki çıktı arasındaki `n_scored` karşılaştırması: `--pred-col` modunda tüm veri seti (örn. 30), eğitim modunda yalnızca test split'i (örn. 6, `--test-size 0.2` ile) sayılır.
