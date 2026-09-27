@@ -52,6 +52,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--split-mode", choices=["random", "group", "temporal"], default="random")
     report_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
     report_parser.add_argument("--folds", type=int, default=5)
+    report_parser.add_argument("--shift", action="store_true", help="Include distribution shift and OOD checks in report")
 
     def _add_common_args(p):
         p.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -125,13 +126,24 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("Error: --out-dir is required for report command", file=sys.stderr)
             return 2
 
-        eval_only_flags = ["--pred-col", "--model", "--split-mode", "--test-size", "--cv", "--folds"]
+        # Flags exclusive to --evaluate
+        evaluate_only_flags = ["--pred-col", "--model", "--cv", "--folds"]
+        # Flags valid with --evaluate OR --shift
+        evaluate_or_shift_flags = ["--split-mode", "--test-size"]
+
         if not args.evaluate:
-            for flag in eval_only_flags:
+            for flag in evaluate_only_flags:
                 if any(a == flag or a.startswith(f"{flag}=") for a in actual_argv):
                     print(f"Error: {flag} requires --evaluate", file=sys.stderr)
                     return 2
-        else:
+
+        if not args.evaluate and not args.shift:
+            for flag in evaluate_or_shift_flags:
+                if any(a == flag or a.startswith(f"{flag}=") for a in actual_argv):
+                    print(f"Error: {flag} requires --evaluate or --shift", file=sys.stderr)
+                    return 2
+
+        if args.evaluate:
             if not args.target_col:
                 print("Error: --target-col is required when --evaluate is enabled", file=sys.stderr)
                 return 2
@@ -149,6 +161,17 @@ def main(argv: Optional[list[str]] = None) -> int:
                 return 4
             if args.cv == "temporal" and not args.time_col:
                 print("Error: --cv temporal requires --time-col", file=sys.stderr)
+                return 4
+
+        if args.shift:
+            if not args.target_col:
+                print("Error: --target-col is required when --shift is enabled", file=sys.stderr)
+                return 2
+            if args.split_mode == "group" and not args.group_col:
+                print("Error: --split-mode group requires --group-col", file=sys.stderr)
+                return 4
+            if args.split_mode == "temporal" and not args.time_col:
+                print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
                 return 4
 
     if args.command == "evaluate":
@@ -250,7 +273,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     seed=args.seed
                 )
 
-            if args.command == "shift":
+            if args.command == "shift" or (args.command == "report" and args.shift):
                 from modeltrust.audit.shift import build_shift
                 prov["shift"] = build_shift(
                     loaded.frame,

@@ -1,0 +1,738 @@
+{
+  "column_spec": {
+    "group": null,
+    "prediction": null,
+    "subset": null,
+    "target": "y",
+    "time": "ts"
+  },
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "ts",
+      "x",
+      "y"
+    ],
+    "columns_sha256": "84caa74063f336dcecf70f499d05e5aab6f3c7c5e78aeefcb08e48e8f9cb33fb",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 60,
+    "nrows_total": 60,
+    "path": "tests/fixtures/shift_drift.csv",
+    "sha256": "3661a8aa09f3663b390fbb4db63bf151a5b2a354665de687fb3006846038f314",
+    "size_bytes": 2336,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided"
+    ]
+  },
+  "leakage": {
+    "checks": [
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "target_copy_exact",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "target_copy_near",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "index_like_feature",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_row_overlap",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_group_overlap",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "subset_time_ranges",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "Whether transformers, imputers or encoders were fit on training data only cannot be determined from a CSV. Pipeline code is out of scope for v1.",
+        "evidence": null,
+        "name": "preprocess.fit_scope",
+        "reason_code": "requires_pipeline_code",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.global_standardization_signature",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.global_minmax_signature",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.feature_target_near_deterministic",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.redundant_feature_pair",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.suspicious_feature_name",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "leakage_schema_version": 1,
+    "summary": {
+      "fail": 0,
+      "not_assessable": 4,
+      "performed": 8,
+      "skipped": 0,
+      "suspicion_count": 0,
+      "total": 12
+    },
+    "thresholds": {
+      "ATOL_NUMERIC_EQUALITY": 1e-12,
+      "EXACT_COPY_EQUALITY_RATIO": 1.0,
+      "EXAMPLE_LIMIT": 5,
+      "FEATURE_TARGET_DET_MIN": 0.999,
+      "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
+      "MIN_PAIRS_FOR_CORRELATION": 20,
+      "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "MIN_ROWS_FOR_INDEX_CHECK": 10,
+      "NEAR_COPY_CORR_ABS_MIN": 0.999,
+      "PREPROCESS_MIN_ROWS": 10,
+      "PREPROCESS_NUMERIC_TOL": 1e-09,
+      "REDUNDANT_PAIR_MIN": 0.999
+    },
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided"
+    ]
+  },
+  "profile": {
+    "all_missing_columns": [],
+    "checks": [
+      {
+        "detail": "",
+        "name": "rows_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "missing_values_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "duplicate_rows_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "constant_columns_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "all_missing_columns_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "high_cardinality_columns_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "non_finite_values_observed",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_available_for_summary",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "column_count": 3,
+    "columns": [
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": true,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 60,
+        "name": "ts",
+        "non_finite_count": 0,
+        "observed_dtype": "int64",
+        "role": "time",
+        "stats": {
+          "max": 60.0,
+          "mean": 30.5,
+          "min": 1.0,
+          "q05": 3.95,
+          "q25": 15.75,
+          "q50": 30.5,
+          "q75": 45.25,
+          "q95": 57.05,
+          "std": 17.464249
+        },
+        "top_values": [],
+        "unique_ratio": 1.0
+      },
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": true,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 60,
+        "name": "x",
+        "non_finite_count": 0,
+        "observed_dtype": "float64",
+        "role": "feature",
+        "stats": {
+          "max": 3.494941,
+          "mean": 0.465285,
+          "min": -1.951035,
+          "q05": -0.962938,
+          "q25": -0.325215,
+          "q50": 0.390742,
+          "q75": 0.987234,
+          "q95": 2.633669,
+          "std": 1.105425
+        },
+        "top_values": [],
+        "unique_ratio": 1.0
+      },
+      {
+        "is_all_missing": false,
+        "is_constant": false,
+        "is_numeric": true,
+        "missing_count": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 12,
+        "name": "y",
+        "non_finite_count": 0,
+        "observed_dtype": "float64",
+        "role": "target",
+        "stats": {
+          "max": 30.0,
+          "mean": 20.0,
+          "min": 10.0,
+          "q05": 10.0,
+          "q25": 15.0,
+          "q50": 20.0,
+          "q75": 25.0,
+          "q95": 30.0,
+          "std": 6.329426
+        },
+        "top_values": [],
+        "unique_ratio": 0.2
+      }
+    ],
+    "constant_columns": [],
+    "duplicate_rows": {
+      "duplicate_row_ratio": 0.0,
+      "exact_duplicate_count": 0,
+      "example_row_indices": [],
+      "null_equals_null": true
+    },
+    "high_cardinality_columns": [],
+    "profile_schema_version": 1,
+    "row_count": 60,
+    "target_summary": {
+      "count": 60,
+      "max": 30.0,
+      "mean": 20.0,
+      "min": 10.0,
+      "missing_count": 0,
+      "non_finite_count": 0,
+      "q05": 10.0,
+      "q25": 15.0,
+      "q50": 20.0,
+      "q75": 25.0,
+      "q95": 30.0,
+      "std": 6.329426
+    },
+    "warnings": []
+  },
+  "run_metadata": {
+    "generated_at": null,
+    "seed": 42
+  },
+  "schema": {
+    "checks": [
+      {
+        "detail": "",
+        "name": "frame_not_empty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "columns_unique",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "column_names_nonempty",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "target_numeric",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "optional_columns_present",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "time_column_parseable",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "name": "group_column_cardinality",
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
+      }
+    ],
+    "summary": {
+      "fail": 0,
+      "not_assessable": 1,
+      "performed": 7,
+      "skipped": 0,
+      "total": 8
+    }
+  },
+  "shift": {
+    "checks": [
+      {
+        "detail": "Split generated using random mode",
+        "name": "shift.split_available",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Sufficient rows for shift analysis (train=48, test=12)",
+        "name": "shift.row_count",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: 0.000000 max outside ratio (heuristic threshold 0.10)",
+        "name": "ood.feature_range",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: Mahalanobis distance ratio=1.262286 (heuristic threshold 2.00)",
+        "name": "ood.mahalanobis",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: max KS stat=0.125000 across features (heuristic threshold 0.25)",
+        "name": "drift.feature_ks",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "Diagnostic indicator: target KS stat=0.208333 (heuristic threshold 0.25)",
+        "name": "drift.target_ks",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "drift": {
+      "feature_ks": {
+        "features": [
+          {
+            "column": "x",
+            "ks_stat": 0.125,
+            "n_test": 12,
+            "n_train": 48
+          }
+        ],
+        "max_ks_stat": 0.125,
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      "target_ks": {
+        "ks_stat": 0.208333,
+        "n_test": 12,
+        "n_train": 48,
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    },
+    "interpretation": "Diagnostic indicators only. Heuristic thresholds; no significance testing is performed. A flagged pattern may be legitimate.",
+    "ood": {
+      "feature_range": {
+        "features": [
+          {
+            "column": "x",
+            "n_outside": 0,
+            "outside_ratio": 0.0,
+            "train_max": 3.494941,
+            "train_min": -1.951035
+          }
+        ],
+        "max_feature_outside_ratio": 0.0,
+        "reason_code": null,
+        "result": "pass",
+        "row_outside_ratio": 0.0,
+        "status": "performed"
+      },
+      "mahalanobis": {
+        "median_test": 0.76695,
+        "median_train": 0.607588,
+        "n_features": 1,
+        "p95_test": 1.980895,
+        "p95_train": 2.043413,
+        "ratio": 1.262286,
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    },
+    "shift_schema_version": 1,
+    "split": {
+      "mode": "random",
+      "n_test": 12,
+      "n_train": 48
+    },
+    "thresholds": {
+      "DRIFT_KS_STAT_MIN": 0.25,
+      "OOD_FEATURE_OUTSIDE_RATIO_MIN": 0.1,
+      "OOD_MAHALANOBIS_RATIO_MIN": 2.0,
+      "SHIFT_MIN_ROWS": 20
+    },
+    "warnings": []
+  },
+  "split": {
+    "checks": [
+      {
+        "detail": "",
+        "evidence": {
+          "n_test": 12,
+          "n_train": 48
+        },
+        "name": "split_sizes_sane",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "count": 0
+        },
+        "name": "random_split_row_overlap",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "n_test": 12,
+          "n_train": 48
+        },
+        "name": "split_sizes_sane",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      },
+      {
+        "detail": "",
+        "evidence": {
+          "boundary_ties": 0,
+          "test_min": "1970-01-01 00:00:00.000000049",
+          "train_max": "1970-01-01 00:00:00.000000048"
+        },
+        "name": "temporal_split_ordering",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
+      }
+    ],
+    "comparison": [
+      {
+        "abs_std_mean_diff": 0.157374,
+        "group_overlap_count": null,
+        "mode": "random",
+        "n_test": 12,
+        "n_train": 48,
+        "row_overlap_count": 0,
+        "test_fraction": 0.2,
+        "time_ranges_overlap": null,
+        "train_row_indices_sha256": "f5f1a2e5a7ff82bd9ee01fc5a6657121f2c661d34158399372f49cb8fa3be567"
+      },
+      {
+        "abs_std_mean_diff": null,
+        "group_overlap_count": null,
+        "mode": "group",
+        "n_test": 0,
+        "n_train": 0,
+        "row_overlap_count": 0,
+        "test_fraction": 0.0,
+        "time_ranges_overlap": null,
+        "train_row_indices_sha256": ""
+      },
+      {
+        "abs_std_mean_diff": 0.0,
+        "group_overlap_count": null,
+        "mode": "temporal",
+        "n_test": 12,
+        "n_train": 48,
+        "row_overlap_count": 0,
+        "test_fraction": 0.2,
+        "time_ranges_overlap": false,
+        "train_row_indices_sha256": "315e8ec92e8160417b335cafd0d075b7bd1af8e94c41e3341dafba123003ff5b"
+      }
+    ],
+    "config": {
+      "fingerprint_excludes": [],
+      "mode": "all",
+      "random_method": "numpy.random.default_rng(seed).permutation",
+      "seed": 42,
+      "test_size": 0.2
+    },
+    "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
+    "modes": {
+      "group": {
+        "group_assignments": [],
+        "group_overlap": {
+          "count": 0,
+          "groups": [],
+          "ratio_of_smaller": 0.0,
+          "reason_code": "not_provided",
+          "status": "not_assessable"
+        },
+        "n_test": 0,
+        "n_train": 0,
+        "reason_code": "not_provided",
+        "row_overlap_count": 0,
+        "status": "not_assessable",
+        "target_summary": null,
+        "test_fraction": 0.0,
+        "test_row_indices_sha256": "",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": null,
+          "reason_code": "not_provided",
+          "status": "not_assessable",
+          "test_max": null,
+          "test_min": null,
+          "train_max": null,
+          "train_min": null
+        },
+        "train_row_indices_sha256": ""
+      },
+      "random": {
+        "group_assignments": [],
+        "group_overlap": {
+          "count": 0,
+          "groups": [],
+          "ratio_of_smaller": 0.0,
+          "reason_code": "not_provided",
+          "status": "not_assessable"
+        },
+        "n_test": 12,
+        "n_train": 48,
+        "reason_code": null,
+        "row_overlap_count": 0,
+        "status": "performed",
+        "target_summary": {
+          "abs_std_mean_diff": 0.157374,
+          "test": {
+            "mean": 19.242424,
+            "q25": 15.454545,
+            "q50": 19.090909,
+            "q75": 22.727273,
+            "std": 5.396848
+          },
+          "train": {
+            "mean": 20.189394,
+            "q25": 13.636364,
+            "q50": 20.909091,
+            "q75": 26.363636,
+            "std": 6.579533
+          }
+        },
+        "test_fraction": 0.2,
+        "test_row_indices_sha256": "dec4a0bcc9a2355fad5fb82d7c317082845b967a84d1cad286801440b0767576",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": null,
+          "reason_code": "not_provided",
+          "status": "not_assessable",
+          "test_max": null,
+          "test_min": null,
+          "train_max": null,
+          "train_min": null
+        },
+        "train_row_indices_sha256": "f5f1a2e5a7ff82bd9ee01fc5a6657121f2c661d34158399372f49cb8fa3be567"
+      },
+      "temporal": {
+        "group_assignments": [],
+        "group_overlap": {
+          "count": 0,
+          "groups": [],
+          "ratio_of_smaller": 0.0,
+          "reason_code": "not_provided",
+          "status": "not_assessable"
+        },
+        "n_test": 12,
+        "n_train": 48,
+        "reason_code": null,
+        "row_overlap_count": 0,
+        "status": "performed",
+        "target_summary": {
+          "abs_std_mean_diff": 0.0,
+          "test": {
+            "mean": 20.0,
+            "q25": 15.0,
+            "q50": 20.0,
+            "q75": 25.0,
+            "std": 6.555548
+          },
+          "train": {
+            "mean": 20.0,
+            "q25": 15.0,
+            "q50": 20.0,
+            "q75": 25.0,
+            "std": 6.342879
+          }
+        },
+        "test_fraction": 0.2,
+        "test_row_indices_sha256": "7efddc571547e839ab3ad8d9433ae88358a3ce6ad62afdbca11cdadd42596725",
+        "time_ranges": {
+          "boundary_ties": 0,
+          "overlaps": false,
+          "reason_code": null,
+          "status": "performed",
+          "test_max": "1970-01-01 00:00:00.000000060",
+          "test_min": "1970-01-01 00:00:00.000000049",
+          "train_max": "1970-01-01 00:00:00.000000048",
+          "train_min": "1970-01-01 00:00:00.000000001"
+        },
+        "train_row_indices_sha256": "315e8ec92e8160417b335cafd0d075b7bd1af8e94c41e3341dafba123003ff5b"
+      }
+    },
+    "split_schema_version": 1,
+    "warnings": [
+      "group_not_provided"
+    ]
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}

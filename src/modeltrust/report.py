@@ -21,7 +21,7 @@ def build_report_md(prov: dict) -> str:
     md.append("\n## 2. Check summary")
     md.append("| Module | Performed | Not Assessable | Skipped | Fail |")
     md.append("|---|---|---|---|---|")
-    modules = ["schema", "profile", "leakage", "split", "evaluation"]
+    modules = ["schema", "profile", "leakage", "split", "evaluation", "shift"]
     for mod in modules:
         if not prov.get(mod): continue
         perf = not_assess = skip = fail = 0
@@ -68,7 +68,7 @@ def build_report_md(prov: dict) -> str:
     # 5. Flagged patterns
     md.append("\n## 5. Flagged patterns")
     flagged = []
-    for mod in ["leakage", "split", "evaluation"]:
+    for mod in ["leakage", "split", "evaluation", "shift"]:
         if prov.get(mod):
             for c in prov[mod].get("checks", []):
                 if c.get("status") == "performed" and c.get("result") == "fail":
@@ -83,8 +83,13 @@ def build_report_md(prov: dict) -> str:
         md.append("- No flagged patterns in the tested checks.")
     md.append("\n> Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.")
 
-    # 6. Split comparison
-    md.append("\n## 6. Split comparison")
+    # 6. Split comparison (and distribution shift if present)
+    has_shift = prov.get("shift") is not None
+    if has_shift:
+        md.append("\n## 6. Split comparison and distribution shift")
+    else:
+        md.append("\n## 6. Split comparison")
+
     if prov.get("split") and prov["split"].get("comparison"):
         md.append("| Mode | n_train | n_test | group_overlap | row_overlap | time_overlap | abs_std_mean_diff |")
         md.append("|---|---|---|---|---|---|---|")
@@ -117,6 +122,29 @@ def build_report_md(prov: dict) -> str:
     else:
         md.append("Split comparison not requested or not available.")
 
+    # Distribution shift & OOD table (only when --shift enabled)
+    if has_shift:
+        sh = prov["shift"]
+        md.append("\n### Distribution shift & OOD")
+        md.append("| Check | Result | Detail |")
+        md.append("|---|---|---|")
+        for c in sh.get("checks", []):
+            check_name = c["name"]
+            result = c.get("result", "N/A")
+            status = c.get("status", "performed")
+            detail = c.get("detail", "")
+            if status != "performed":
+                result_str = f"not_assessable ({c.get('reason_code', '')})"
+            else:
+                result_str = result
+            md.append(f"| {check_name} | {result_str} | {detail} |")
+
+        # Shift warnings
+        warns = sh.get("warnings", [])
+        if warns:
+            md.append(f"\n> Shift warnings: {', '.join(warns)}")
+        md.append(f"\n> {sh.get('interpretation', 'Diagnostic indicators only.')}")
+
     # 7. Limitations & scope
     md.append("\n## 7. Limitations & scope")
     md.append("- Scope: Tabular regression only.")
@@ -136,6 +164,8 @@ def build_report_md(prov: dict) -> str:
     cmd_args.extend(["--seed", str(prov["run_metadata"]["seed"])])
     if prov.get("evaluation"):
         cmd_args.append("--evaluate")
+    if has_shift:
+        cmd_args.append("--shift")
     cmd_str = " ".join(cmd_args)
     md.append(f"`python -m modeltrust report --input \"{prov['input']['path']}\" --out-dir <DIR> {cmd_str}`")
     

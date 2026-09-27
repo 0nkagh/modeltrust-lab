@@ -137,3 +137,48 @@ def test_report_scope_wording_and_metric_headers():
     assert "- Out of scope: pipeline-code level preprocessing leakage (fit scope cannot be inspected from a file), feature engineering transformations, sampling bias, label noise, database join leakage, temporal causality violations." in md
 
 
+
+def test_report_shift_markdown_structure():
+    """build_report_md with shift data renders section 6 with distribution shift and OOD table."""
+    fake_prov = {
+        "input": {"path": "test.csv", "sha256": "abc", "nrows_total": 50, "ncols": 3, "columns_sha256": "def"},
+        "run_metadata": {"seed": 42},
+        "environment": {"python": "3.12", "pandas": "3.0"},
+        "column_spec": {"target": "y", "prediction": None, "group": None, "time": "ts", "subset": None},
+        "shift": {
+            "warnings": [],
+            "interpretation": "Diagnostic indicator: review flagged checks manually.",
+            "checks": [
+                {
+                    "name": "shift.split_available",
+                    "status": "performed",
+                    "reason_code": None,
+                    "result": "pass",
+                    "detail": "Split generated using temporal mode"
+                },
+                {
+                    "name": "ood.feature_range",
+                    "status": "performed",
+                    "reason_code": None,
+                    "result": "fail",
+                    "detail": "Diagnostic indicator: 3 test rows outside training range in x"
+                },
+                {
+                    "name": "drift.feature_ks",
+                    "status": "not_assessable",
+                    "reason_code": "not_provided",
+                    "result": "pass",
+                    "detail": "Diagnostic indicator: Feature KS drift not assessable (not_provided)"
+                },
+            ]
+        }
+    }
+    md = build_report_md(fake_prov)
+    assert "## 6. Split comparison and distribution shift" in md
+    assert "### Distribution shift & OOD" in md
+    assert "| Check | Result | Detail |" in md
+    assert "| ood.feature_range | fail | Diagnostic indicator: 3 test rows outside training range in x |" in md
+    assert "not_assessable (not_provided)" in md
+    assert "| shift | ood.feature_range |" in md
+    assert "| shift |" in md
+    assert "--shift" in md

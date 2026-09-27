@@ -90,3 +90,24 @@ modeltrust evaluate --input data.csv --target-col y --model both
 - `--split-mode`: `random` (default), `group`, `temporal`. Determines single holdout test allocation.
 - `--cv`: `none` (default), `random`, `group`, `temporal`. Performs cross-validation.
 - `--folds`: number of folds for CV (default 5).
+
+### `shift`
+Runs OOD and distribution shift diagnostics by splitting data and comparing train vs test distributions.
+```bash
+modeltrust shift --input data.csv --target-col y --time-col ts --split-mode temporal
+# Or with random split:
+modeltrust shift --input data.csv --target-col y
+```
+- `--split-mode`: `random` (default), `group`, `temporal`. Determines train/test split for OOD and drift checks.
+- `--test-size`: fraction of data for test set (default 0.2).
+*Note: Heuristic thresholds; no significance testing. Diagnostic indicators only.*
+
+### `report --shift`
+Add `--shift` to include OOD and distribution shift diagnostics in the report. Section 6 expands to two tables (split comparison + distribution shift & OOD):
+```bash
+modeltrust report --input data.csv --target-col y --time-col ts --shift --out-dir ./reports
+
+# Combined with evaluation:
+modeltrust report --input data.csv --target-col y --time-col ts --shift --evaluate --out-dir ./reports
+```
+*Note: `--split-mode` and `--test-size` are valid with either `--evaluate` or `--shift`.*
