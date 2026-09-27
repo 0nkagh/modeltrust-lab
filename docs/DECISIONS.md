@@ -86,6 +86,8 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-062 | OOD/drift eşikleri heuristiktir; p-değeri hesaplanmaz (scipy yok). Bulgular "diagnostic indicator" dilinde raporlanır. |
 | D-063 | split.py indeks üretimi compute_split_indices yardımcısına çıkarıldı; build_split çıktı sözleşmesi ve golden'lar değişmedi. |
 | D-064 | report --shift opsiyoneldir; açıldığında §6 iki tabloya genişler (split karşılaştırma + distribution shift & OOD) ve JSON'a shift bloğu eklenir; diğer golden'lar değişmez. --split-mode ve --test-size artık --evaluate veya --shift varlığını gerektirir. |
+| D-065 | `shift` ve `report --shift` için --target-col zorunludur (target_ks drift kontrolü hedef gerektirir); eksikse exit 2. |
+| D-066 | report --shift verilmeden --split-mode/--test-size kullanılamaz (exit 2); --shift ile birlikte kullanılabilir. |
 
 
 

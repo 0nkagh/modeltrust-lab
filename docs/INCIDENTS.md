@@ -114,3 +114,9 @@
 - Önlem: Kanıt tazeliği kuralı getirildi: Bir turda raporlanan her çıktı, mutlaka o oturumda çalıştırılan komutun ham çıktısından doğrudan kopyalanacak, geçmiş raporlardan asla veri taşınmayacaktır.
 > Bu dosyada gösterilen diff'ler yalnız bu oturumda çalıştırılan git komutunun çıktısı olabilir.
 
+
+## I-021 — T12 sırasında çıplak `python` ile komut çalıştırıldı (PHASE 4 / T12).
+- Tarih: 2026-09-27
+- Ne oldu: T12 ZZZ mutation doğrulama adımında, `.\.venv\Scripts\python.exe` yerine çıplak `python -c` komutu kullanılarak mutation uygulandı. Bu, `.venv` dışı yorumlayıcı çağrısıdır.
+- Etki: Ortam tutarsızlığı riski; ancak bu oturumda çıktı aynı kaldı ve herhangi bir hata üretmedi. Yüklü paketler aynı ortama ait olmadığı için sonuç farklı çıkabilirdi.
+- Önlem: Tüm Python komutları `.\.venv\Scripts\python.exe -m ...` ile çalıştırılacak; çıplak `python` veya `python -c` kullanımı yasaktır; mutation scriptleri dahil tüm betikler `.\.venv\Scripts\python.exe -c` ile çağrılacak.

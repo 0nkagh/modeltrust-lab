@@ -142,4 +142,11 @@ ModelTrust Lab `shift` modülü (`src/modeltrust/audit/shift.py`), eğitim ve te
 - **Nedensellik ve Başarısızlık Garantisi Yoktur:** OOD veya kayma bayrağının verilmesi bir verinin meşru bir rejim değişiminden kaynaklanabileceğini dışlamaz; aynı şekilde bir bayrağın bulunmaması dağılım kaymasının kesinlikle olmadığı anlamına gelmez ("Absence of a flag does not establish absence of shift").
 - **Model Çökme İddiası Yoktur:** Alan dışı örnek bulunması veya KS istatistiğinin yüksek olması, kullanıcının modelinin bu örnekler üzerinde kesinlikle hatalı tahmin üreteceğini garanti etmez.
 
+### 9.z `shift` Komutu Sözleşmesi (CLI Kuralları)
+- **`--target-col` zorunludur** (`shift` komutu ve `report --shift` için). Eksikse `exit 2` döner (`Error: --target-col is required`). Gerekçe: `drift.target_ks` kontrolü hedef kolon üzerinden hesaplanır; kolon yoksa kontrol anlamsızlaşır.
+- **`--split-mode group`** için **`--group-col` zorunludur**; eksikse `exit 4` döner (`Error: --split-mode group requires --group-col`).
+- **`--split-mode temporal`** için **`--time-col` zorunludur**; eksikse `exit 4` döner (`Error: --split-mode temporal requires --time-col`).
+- **`--time-col` yoksa** drift kontrolleri (`drift.feature_ks`, `drift.target_ks`) `not_assessable (not_provided)` olarak işaretlenir; OOD kontrolleri (`ood.feature_range`, `ood.mahalanobis`) çalışmaya devam eder.
+- **`report --shift` ile `--split-mode`/`--test-size`** birlikte kullanılabilir; bu bayraklar artık yalnız `--evaluate` değil, `--evaluate` veya `--shift` varlığını gerektirir. İkisi de yoksa `exit 2` döner (`Error: {flag} requires --evaluate or --shift`).
+
 
