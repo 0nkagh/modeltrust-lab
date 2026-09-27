@@ -77,6 +77,21 @@ def main(argv: Optional[list[str]] = None) -> int:
     inspect_parser = subparsers.add_parser("inspect")
     _add_common_args(inspect_parser)
 
+    # New command: card
+    card_parser = subparsers.add_parser("card")
+    _add_common_args(card_parser)
+    card_parser.add_argument("--mode", choices=["random", "group", "temporal", "all"], default="all")
+    card_parser.add_argument("--test-size", type=float, default=0.2)
+    card_parser.add_argument("--evaluate", action="store_true", help="Include model evaluation in card")
+    card_parser.add_argument("--model", choices=["mean", "ols", "both"], default="both")
+    card_parser.add_argument("--split-mode", choices=["random", "group", "temporal"], default="random")
+    card_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
+    card_parser.add_argument("--folds", type=int, default=5)
+    card_parser.add_argument("--shift", action="store_true", help="Include distribution shift and OOD checks in card")
+    card_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
+    card_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
+    card_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+
     # Profile command
     profile_parser = subparsers.add_parser("profile")
     _add_common_args(profile_parser)
@@ -127,9 +142,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             print('use "modeltrust report --out-dir" to write report files', file=sys.stderr)
             return 0
 
-    if args.command == "report":
+    if args.command in ["report", "card"]:
         if not args.out_dir:
-            print("Error: --out-dir is required for report command", file=sys.stderr)
+            print(f"Error: --out-dir is required for {args.command} command", file=sys.stderr)
             return 2
 
         # Flags exclusive to --evaluate
@@ -223,8 +238,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
             return 4
 
-    if args.command in ["inspect", "profile", "leakage", "split", "report", "evaluate", "shift"]:
-        if args.command == "split" or args.command == "report":
+    if args.command in ["inspect", "profile", "leakage", "split", "report", "card", "evaluate", "shift"]:
+        if args.command in ["split", "report", "card"]:
             if args.mode in ["group", "temporal"]:
                 if args.mode == "group" and not args.group_col:
                     print("Error: --mode group requires --group-col", file=sys.stderr)
@@ -262,23 +277,23 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.run_timestamp:
                 prov["run_metadata"]["generated_at"] = datetime.now(timezone.utc).isoformat()
                 
-            if args.command in ["profile", "report"]:
+            if args.command in ["profile", "report", "card"]:
                 from modeltrust.profile import build_profile
                 prov["profile"] = build_profile(loaded.frame, loaded.meta, spec)
                 
-            if args.command in ["leakage", "report"]:
+            if args.command in ["leakage", "report", "card"]:
                 from modeltrust.audit.leakage import build_leakage
                 prov["leakage"] = build_leakage(loaded.frame, spec)
                 
-            if args.command in ["split", "report"]:
-                if args.command == "report" and not args.group_col and not args.time_col:
+            if args.command in ["split", "report", "card"]:
+                if args.command in ["report", "card"] and not args.group_col and not args.time_col:
                     prov["split"] = None
                     prov["input"]["warnings"].append("split_not_requested")
                 else:
                     from modeltrust.audit.split import build_split
                     prov["split"] = build_split(loaded.frame, spec, args.mode, args.test_size, args.seed)
 
-            if args.command == "evaluate" or (args.command == "report" and args.evaluate):
+            if args.command == "evaluate" or (args.command in ["report", "card"] and args.evaluate):
                 from modeltrust.evaluate import build_evaluation
                 prov["evaluation"] = build_evaluation(
                     loaded.frame, 
@@ -294,7 +309,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     nominal_coverage=getattr(args, "nominal_coverage", None)
                 )
 
-            if args.command == "shift" or (args.command == "report" and args.shift):
+            if args.command == "shift" or (args.command in ["report", "card"] and args.shift):
                 from modeltrust.audit.shift import build_shift
                 prov["shift"] = build_shift(
                     loaded.frame,
@@ -313,6 +328,15 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.command == "report":
                 from modeltrust.report import write_reports
                 json_p, md_p = write_reports(prov, args.out_dir)
+                print(f"wrote {json_p} and {md_p}", file=sys.stderr)
+                return 0
+                
+            if args.command == "card":
+                from modeltrust.card import write_card
+                # Reconstruct reproduce_command
+                import shlex
+                reproduce_command = "python -m modeltrust " + " ".join(shlex.quote(a) for a in actual_argv[1:])
+                json_p, md_p = write_card(prov, args.out_dir, reproduce_command)
                 print(f"wrote {json_p} and {md_p}", file=sys.stderr)
                 return 0
             

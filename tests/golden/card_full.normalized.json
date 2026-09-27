@@ -1,0 +1,140 @@
+{
+  "checks_summary": [],
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "y",
+      "pred",
+      "grp"
+    ],
+    "columns_sha256": "ed5bca5c479141bf87992c21287689581ed29fe15e71aa785a0e6a42de001ecf",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 30,
+    "nrows_total": 30,
+    "path": "tests/fixtures/eval_preds.csv",
+    "sha256": "ddb4fbf5cd4ae4fc92a77a3d224bdbbc852613d96f5feec329961ce6677947cf",
+    "size_bytes": 383,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "time_not_provided"
+    ]
+  },
+  "interpretation": "This card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.",
+  "limitations": [
+    "Scope: tabular regression only.",
+    "Diagnostic indicators only. Absence of a flag does not establish absence of leakage.",
+    "Heuristic thresholds; no significance testing is performed.",
+    "Single split; finite sample; no distribution-free guarantee."
+  ],
+  "metrics": {
+    "cv_aggregate": null,
+    "interval_coverage": null,
+    "models": [
+      {
+        "dropped_rows": 0,
+        "mae": 1.0,
+        "n_scored": 30,
+        "n_test": 30,
+        "n_train": 0,
+        "name": "supplied_predictions",
+        "r2": 0.959956,
+        "r2_status": "performed",
+        "reason_code": null,
+        "rmse": 1.732051,
+        "status": "performed"
+      }
+    ],
+    "worst_groups_by_mae": null
+  },
+  "not_assessable": [],
+  "questions": [
+    {
+      "evidence": "profile not performed",
+      "id": 1,
+      "question": "Missing or duplicate records?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "leakage not performed",
+      "id": 2,
+      "question": "Target leakage suspicion?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "split.modes.random not performed",
+      "id": 3,
+      "question": "Train/test or group leakage?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "not enough split modes for comparison",
+      "id": 4,
+      "question": "Split strategy difference?",
+      "status": "partial"
+    },
+    {
+      "evidence": "evaluation not performed",
+      "id": 5,
+      "question": "Which groups have higher error?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "shift.drift.feature_ks not performed",
+      "id": 6,
+      "question": "Distribution drift?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "shift.ood.feature_range performed",
+      "id": 7,
+      "question": "Out-of-distribution (OOD) data?",
+      "status": "answered"
+    },
+    {
+      "evidence": "uncertainty not performed",
+      "id": 8,
+      "question": "Are uncertainty intervals calibrated?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "see not_assessable",
+      "id": 9,
+      "question": "Which checks could not be performed?",
+      "status": "answered"
+    },
+    {
+      "evidence": "see limitations and not_assessable",
+      "id": 10,
+      "question": "How much can this report be trusted?",
+      "status": "partial"
+    }
+  ],
+  "reproduce_command": "python -m modeltrust card -i tests/fixtures/eval_preds.csv --target-col y --pred-col pred --group-col grp --evaluate --shift --split-mode group --test-size 0.2 --out-dir 'C:\\Users\\agah\\AppData\\Local\\Temp\\modeltrust-pytest\\test_card_full_golden0'",
+  "run": {
+    "command": "python -m modeltrust card -i tests/fixtures/eval_preds.csv --target-col y --pred-col pred --group-col grp --evaluate --shift --split-mode group --test-size 0.2 --out-dir 'C:\\Users\\agah\\AppData\\Local\\Temp\\modeltrust-pytest\\test_card_full_golden0'",
+    "generated_at": null,
+    "seed": 42
+  },
+  "scope": {
+    "external_data_downloaded": false,
+    "model_loaded": false,
+    "task": "tabular_regression",
+    "user_code_executed": false
+  },
+  "thresholds": {
+    "COVERAGE_GAP_TOL": 0.05,
+    "MIN_ROWS_FOR_COPY_CHECK": 5,
+    "OOD_MAHALANOBIS_RATIO_MIN": 2.0
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}
