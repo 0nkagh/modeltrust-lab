@@ -85,3 +85,41 @@ def test_report_section_2_summary_table_includes_profile():
         assert "| profile |" in md
         assert "* Checks marked as `not_assessable` are skipped when prerequisite conditions" in md
         assert "* Profile fail findings indicate data quality issues, not model leakage or split errors." in md
+
+def test_report_evaluate_markdown_structure():
+    fake_prov = {
+        "input": {"path": "test.csv", "sha256": "abc", "nrows_total": 10, "ncols": 2, "columns_sha256": "def"},
+        "run_metadata": {"seed": 42},
+        "environment": {"python": "3.11", "pandas": "2.0"},
+        "column_spec": {"target": "y", "prediction": "pred", "group": "grp", "time": None, "subset": None},
+        "evaluation": {
+            "models": [
+                {"name": "supplied_predictions", "status": "performed", "mae": 1.0, "rmse": 1.732051, "r2": 0.5, "n_scored": 10}
+            ],
+            "cv": {
+                "status": "not_assessable",
+                "reason_code": "not_provided",
+                "folds": [],
+                "aggregate": {}
+            },
+            "group_errors": {
+                "status": "performed",
+                "worst_by_mae": ["G1"],
+                "groups": [{"group": "G1", "n": 10, "mae": 1.0, "rmse": 1.0, "mean_residual": 0.0}],
+                "coverage_ratio": 1.0
+            },
+            "thresholds": {"MIN_ROWS_FOR_METRICS": 10, "TOP_WORST_GROUPS": 3},
+            "checks": [
+                {"name": "cv_folds_size_sane", "status": "not_assessable", "reason_code": "not_provided", "result": "fail"}
+            ]
+        }
+    }
+    md = build_report_md(fake_prov)
+    assert "## 9. Model evaluation" in md
+    assert "| supplied_predictions | 1.000000 | 1.732051 | 0.500000 | 10 |" in md
+    assert "Cross-validation not assessable: N/A (not_provided)" in md
+    assert "| G1 | 10 | 1.000000 | 1.000000 |" in md
+    assert "- Coverage ratio: 1.000000" in md
+    assert "- Thresholds: MIN_ROWS_FOR_METRICS=10, TOP_WORST_GROUPS=3" in md
+    assert "- Not assessable: cv_folds_size_sane (not_provided)" in md
+

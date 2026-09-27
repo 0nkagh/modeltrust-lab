@@ -69,9 +69,12 @@ modeltrust split --input data.csv --target-col y --group-col grp --time-col ts
 ```
 
 ### `report`
-Generates full JSON and Markdown diagnostic reports, writing them to a directory.
+Generates full JSON and Markdown diagnostic reports, writing them to a directory. Tek komutta profil + leakage + split + model hatası denetimi gerçekleştirilebilir.
 ```bash
 modeltrust report --input data.csv --target-col y --group-col grp --out-dir ./reports
+
+# With evaluation enabled (single command profile + leakage + split + model error evaluation):
+modeltrust report --input data.csv --target-col y --group-col grp --pred-col my_preds --evaluate --out-dir ./reports
 # Produces: ./reports/report.json and ./reports/report.md
 ```
 *Note: This tool produces diagnostic indicators. It is not a certificate.*

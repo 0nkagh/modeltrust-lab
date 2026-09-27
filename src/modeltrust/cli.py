@@ -47,6 +47,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--out-dir", help="Output directory for reports")
     report_parser.add_argument("--mode", choices=["random", "group", "temporal", "all"], default="all")
     report_parser.add_argument("--test-size", type=float, default=0.2)
+    report_parser.add_argument("--evaluate", action="store_true", help="Include model evaluation in report")
+    report_parser.add_argument("--model", choices=["mean", "ols", "both"], default="both")
+    report_parser.add_argument("--split-mode", choices=["random", "group", "temporal"], default="random")
+    report_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
+    report_parser.add_argument("--folds", type=int, default=5)
 
     def _add_common_args(p):
         p.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -114,11 +119,37 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("Error: --out-dir is required for report command", file=sys.stderr)
             return 2
 
+        eval_only_flags = ["--pred-col", "--model", "--split-mode", "--test-size", "--cv", "--folds"]
+        if not args.evaluate:
+            for flag in eval_only_flags:
+                if any(a == flag or a.startswith(f"{flag}=") for a in actual_argv):
+                    print(f"Error: {flag} requires --evaluate", file=sys.stderr)
+                    return 2
+        else:
+            if not args.target_col:
+                print("Error: --target-col is required when --evaluate is enabled", file=sys.stderr)
+                return 2
+            if args.pred_col and any(a == "--model" or a.startswith("--model=") for a in actual_argv):
+                print("Error: --pred-col and --model cannot be used together", file=sys.stderr)
+                return 2
+            if args.split_mode == "group" and not args.group_col:
+                print("Error: --split-mode group requires --group-col", file=sys.stderr)
+                return 4
+            if args.split_mode == "temporal" and not args.time_col:
+                print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
+                return 4
+            if args.cv == "group" and not args.group_col:
+                print("Error: --cv group requires --group-col", file=sys.stderr)
+                return 4
+            if args.cv == "temporal" and not args.time_col:
+                print("Error: --cv temporal requires --time-col", file=sys.stderr)
+                return 4
+
     if args.command == "evaluate":
         if not args.target_col:
             print("Error: --target-col is required for evaluate command", file=sys.stderr)
             return 2
-        if args.pred_col and "--model" in actual_argv:
+        if args.pred_col and any(a == "--model" or a.startswith("--model=") for a in actual_argv):
             print("Error: --pred-col and --model cannot be used together", file=sys.stderr)
             return 2
         if args.split_mode == "group" and not args.group_col:
@@ -189,7 +220,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     from modeltrust.audit.split import build_split
                     prov["split"] = build_split(loaded.frame, spec, args.mode, args.test_size, args.seed)
 
-            if args.command == "evaluate":
+            if args.command == "evaluate" or (args.command == "report" and args.evaluate):
                 from modeltrust.evaluate import build_evaluation
                 prov["evaluation"] = build_evaluation(
                     loaded.frame, 

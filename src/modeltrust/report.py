@@ -21,16 +21,16 @@ def build_report_md(prov: dict) -> str:
     md.append("\n## 2. Check summary")
     md.append("| Module | Performed | Not Assessable | Skipped | Fail |")
     md.append("|---|---|---|---|---|")
-    modules = ["schema", "profile", "leakage", "split"]
+    modules = ["schema", "profile", "leakage", "split", "evaluation"]
     for mod in modules:
         if not prov.get(mod): continue
         perf = not_assess = skip = fail = 0
         for c in prov[mod].get("checks", []):
-            if c["status"] == "performed": perf += 1
+            if c["status"] == "performed":
+                perf += 1
+                if c.get("result") == "fail": fail += 1
             elif c["status"] == "not_assessable": not_assess += 1
             elif c["status"] == "skipped": skip += 1
-            
-            if c.get("result") == "fail": fail += 1
         md.append(f"| {mod} | {perf} | {not_assess} | {skip} | {fail} |")
     md.append("\n* Checks marked as `not_assessable` are skipped when prerequisite conditions (e.g., target column variance, temporal column presence) are not met.")
     md.append("* Profile fail findings indicate data quality issues, not model leakage or split errors.")
@@ -68,10 +68,10 @@ def build_report_md(prov: dict) -> str:
     # 5. Flagged patterns
     md.append("\n## 5. Flagged patterns")
     flagged = []
-    for mod in ["leakage", "split"]:
+    for mod in ["leakage", "split", "evaluation"]:
         if prov.get(mod):
             for c in prov[mod].get("checks", []):
-                if c.get("result") == "fail":
+                if c.get("status") == "performed" and c.get("result") == "fail":
                     flagged.append((mod, c["name"], c.get("detail", "")))
     
     if flagged:
@@ -134,8 +134,93 @@ def build_report_md(prov: dict) -> str:
     if prov["column_spec"].get("time"): cmd_args.extend(["--time-col", prov["column_spec"]["time"]])
     if prov["column_spec"].get("subset"): cmd_args.extend(["--subset-col", prov["column_spec"]["subset"]])
     cmd_args.extend(["--seed", str(prov["run_metadata"]["seed"])])
+    if prov.get("evaluation"):
+        cmd_args.append("--evaluate")
     cmd_str = " ".join(cmd_args)
     md.append(f"`python -m modeltrust report --input \"{prov['input']['path']}\" --out-dir <DIR> {cmd_str}`")
+    
+    # 9. Model evaluation
+    if prov.get("evaluation"):
+        ev = prov["evaluation"]
+        md.append("\n## 9. Model evaluation")
+        
+        # Models table
+        md.append("### Models")
+        md.append("| Model | MAE | RMSE | R² | n_scored |")
+        md.append("|---|---|---|---|---|")
+        for m in ev.get("models", []):
+            m_name = m.get("name", "unknown")
+            if m.get("status") == "performed":
+                mae_str = f"{m['mae']:.6f}" if m.get("mae") is not None else "N/A"
+                rmse_str = f"{m['rmse']:.6f}" if m.get("rmse") is not None else "N/A"
+                r2_str = f"{m['r2']:.6f}" if m.get("r2") is not None else "N/A"
+                n_scored = str(m.get("n_scored", "N/A"))
+            else:
+                mae_str = "N/A"
+                rmse_str = "N/A"
+                r2_str = "N/A"
+                n_scored = f"N/A ({m.get('reason_code') or 'not_performed'})"
+            md.append(f"| {m_name} | {mae_str} | {rmse_str} | {r2_str} | {n_scored} |")
+            
+        # CV table
+        md.append("\n### Cross-validation")
+        cv = ev.get("cv", {})
+        md.append("| Fold | MAE | RMSE | R² |")
+        md.append("|---|---|---|---|")
+        if cv.get("status") == "performed":
+            for f_info in cv.get("folds", []):
+                f_num = f_info.get("fold", "N/A")
+                f_mae = f"{f_info['mae']:.6f}" if f_info.get("mae") is not None else "N/A"
+                f_rmse = f"{f_info['rmse']:.6f}" if f_info.get("rmse") is not None else "N/A"
+                f_r2 = f"{f_info['r2']:.6f}" if f_info.get("r2") is not None else "N/A"
+                md.append(f"| {f_num} | {f_mae} | {f_rmse} | {f_r2} |")
+            agg = cv.get("aggregate", {})
+            agg_mae = f"{agg['mae_mean']:.6f}" if agg.get("mae_mean") is not None else "N/A"
+            agg_rmse = f"{agg['rmse_mean']:.6f}" if agg.get("rmse_mean") is not None else "N/A"
+            agg_r2 = f"{agg['r2_mean']:.6f}" if agg.get("r2_mean") is not None else "N/A"
+            md.append(f"| Aggregate | {agg_mae} | {agg_rmse} | {agg_r2} |")
+        else:
+            reason = cv.get("reason_code") or "not_provided"
+            md.append(f"| N/A | N/A | N/A | N/A |")
+            md.append(f"| Aggregate | N/A ({reason}) | N/A | N/A |")
+            md.append(f"\n* Cross-validation not assessable: N/A ({reason}).")
+
+        # Group errors table
+        md.append("\n### Group errors")
+        ge = ev.get("group_errors", {})
+        md.append("| Group | n | MAE | RMSE |")
+        md.append("|---|---|---|---|")
+        if ge.get("status") == "performed":
+            worst_names = set(ge.get("worst_by_mae", []))
+            worst_groups = [g for g in ge.get("groups", []) if g.get("group") in worst_names]
+            worst_groups.sort(key=lambda x: (-x.get("mae", 0.0), x.get("group", "")))
+            if worst_groups:
+                for wg in worst_groups:
+                    md.append(f"| {wg['group']} | {wg['n']} | {wg['mae']:.6f} | {wg['rmse']:.6f} |")
+            else:
+                md.append("| None | 0 | N/A | N/A |")
+            cov_ratio = ge.get("coverage_ratio", 0.0)
+            md.append(f"\n- Coverage ratio: {cov_ratio:.6f}")
+        else:
+            reason = ge.get("reason_code") or "not_provided"
+            md.append(f"| N/A | N/A | N/A | N/A |")
+            md.append(f"\n* Group errors not assessable: N/A ({reason}).")
+            cov_ratio = ge.get("coverage_ratio", 0.0)
+            md.append(f"- Coverage ratio: {cov_ratio:.6f}")
+
+        # Thresholds and Not assessable lines
+        thresh = ev.get("thresholds", {})
+        thresh_parts = [f"{k}={v}" for k, v in sorted(thresh.items())]
+        md.append(f"\n- Thresholds: {', '.join(thresh_parts)}")
+        
+        not_assess = []
+        for mod in ["leakage", "split", "evaluation"]:
+            if prov.get(mod):
+                for c in prov[mod].get("checks", []):
+                    if c.get("status") == "not_assessable":
+                        not_assess.append(f"{c['name']} ({c.get('reason_code') or 'unknown'})")
+        not_assess_str = ", ".join(not_assess) if not_assess else "None"
+        md.append(f"- Not assessable: {not_assess_str}")
     
     return "\n".join(md) + "\n"
 

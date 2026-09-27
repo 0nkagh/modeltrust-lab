@@ -54,3 +54,116 @@ def test_report_input_not_found():
     assert res.returncode == 4
     assert "file not found" in res.stderr
     assert not res.stdout.strip()
+
+def test_report_evaluate_present():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(["report", "--input", "tests/fixtures/simple_ok.csv", "--target-col", "y", "--evaluate", "--out-dir", tmpdir])
+        assert res.returncode == 0
+        
+        with open(os.path.join(tmpdir, "report.json"), "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+        assert "evaluation" in data
+        assert isinstance(data["evaluation"], dict)
+        assert "models" in data["evaluation"]
+        
+        with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
+            md = f.read()
+            
+        assert "## 9. Model evaluation" in md
+        assert "### Models" in md
+        assert "| Model | MAE | RMSE | R² | n_scored |" in md
+        assert "mean_baseline" in md
+        assert "ols_baseline" in md
+        assert "| evaluation |" in md
+
+def test_report_evaluate_absent_negative_control():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(["report", "--input", "tests/fixtures/simple_ok.csv", "--target-col", "y", "--out-dir", tmpdir])
+        assert res.returncode == 0
+        
+        with open(os.path.join(tmpdir, "report.json"), "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+        assert "evaluation" not in data
+        
+        with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
+            md = f.read()
+            
+        assert "## 9. Model evaluation" not in md
+        assert "| evaluation |" not in md
+
+def test_report_eval_args_without_evaluate_fails():
+    res = run_cli(["report", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--out-dir", "out"])
+    assert res.returncode == 2
+    assert "Error: --pred-col requires --evaluate" in res.stderr
+    assert not res.stdout.strip()
+
+    for flag in ["--model", "--split-mode", "--cv", "--folds", "--test-size"]:
+        val = "ols" if flag == "--model" else ("random" if "mode" in flag or "cv" in flag else "3")
+        res2 = run_cli(["report", "--input", "tests/fixtures/simple_ok.csv", "--target-col", "y", flag, val, "--out-dir", "out"])
+        assert res2.returncode == 2
+        assert f"Error: {flag} requires --evaluate" in res2.stderr
+        assert not res2.stdout.strip()
+
+def test_report_flagged_patterns_evaluation_fail():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(["report", "--input", "tests/fixtures/eval_const_target.csv", "--target-col", "y", "--evaluate", "--out-dir", tmpdir])
+        assert res.returncode == 0
+        with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
+            md = f.read()
+        assert "## 5. Flagged patterns" in md
+        assert "| evaluation | r2_target_variance_defined | Target variance is zero |" in md
+
+def test_report_flagged_patterns_no_flags():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(["report", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--group-col", "grp", "--mode", "group", "--split-mode", "group", "--evaluate", "--out-dir", tmpdir])
+        assert res.returncode == 0
+        with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
+            md = f.read()
+        assert "## 5. Flagged patterns" in md
+        assert "- No flagged patterns in the tested checks." in md
+
+def test_report_evaluate_byte_identical_runs():
+    with tempfile.TemporaryDirectory() as tmpdir1, tempfile.TemporaryDirectory() as tmpdir2:
+        cmd = ["report", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--group-col", "grp", "--evaluate", "--out-dir"]
+        res1 = run_cli(cmd + [tmpdir1])
+        res2 = run_cli(cmd + [tmpdir2])
+        
+        assert res1.returncode == 0
+        assert res2.returncode == 0
+        
+        with open(os.path.join(tmpdir1, "report.json"), "rb") as f:
+            j1 = f.read()
+        with open(os.path.join(tmpdir2, "report.json"), "rb") as f:
+            j2 = f.read()
+            
+        with open(os.path.join(tmpdir1, "report.md"), "rb") as f:
+            m1 = f.read()
+        with open(os.path.join(tmpdir2, "report.md"), "rb") as f:
+            m2 = f.read()
+            
+        assert j1 == j2
+        assert m1 == m2
+
+def test_report_evaluate_golden():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        cmd = ["report", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--group-col", "grp", "--evaluate", "--out-dir", tmpdir]
+        res = run_cli(cmd)
+        assert res.returncode == 0
+        
+        with open(os.path.join(tmpdir, "report.json"), "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+            
+        if "environment" in data:
+            del data["environment"]
+            
+        normalized = json.dumps(data, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+        golden_path = "tests/golden/report_evaluate.normalized.json"
+        
+        if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
+            with open(golden_path, "w", encoding="utf-8") as f:
+                f.write(normalized)
+                
+        with open(golden_path, "r", encoding="utf-8") as f:
+            golden = f.read()
+            
+        assert normalized == golden
