@@ -176,7 +176,7 @@ def build_report_md(prov: dict) -> str:
         
         # Models table
         md.append("### Models")
-        md.append("| Model | MAE | RMSE | R² | n_scored |")
+        md.append("| Model | MAE | RMSE | R² | n_scored (split) |")
         md.append("|---|---|---|---|---|")
         for m in ev.get("models", []):
             m_name = m.get("name", "unknown")
@@ -191,6 +191,7 @@ def build_report_md(prov: dict) -> str:
                 r2_str = "N/A"
                 n_scored = f"N/A ({m.get('reason_code') or 'not_performed'})"
             md.append(f"| {m_name} | {mae_str} | {rmse_str} | {r2_str} | {n_scored} |")
+        md.append("\nModel metrics are computed on the evaluation split; interval coverage is computed on all scored rows (the two n_scored values need not match).")
             
         # CV table
         md.append("\n### Cross-validation")
@@ -242,8 +243,8 @@ def build_report_md(prov: dict) -> str:
         md.append("\n### Uncertainty intervals")
         unc = ev.get("uncertainty", {})
         if unc.get("status") == "performed":
-            md.append("| Coverage | Wilson 95% | Mean width | Median width | Nominal | Gap | Dropped |")
-            md.append("|---|---|---|---|---|---|---|")
+            md.append("| Coverage | Wilson 95% | Mean width | Median width | Nominal | Gap | Dropped | scored rows |")
+            md.append("|---|---|---|---|---|---|---|---|")
             cov = f"{unc['coverage']:.6f}"
             wil = unc['coverage_wilson_95']
             wil_str = f"[{wil['low']:.6f}, {wil['high']:.6f}]" if wil else "N/A"
@@ -252,7 +253,8 @@ def build_report_md(prov: dict) -> str:
             nom = f"{unc['nominal_coverage']:.6f}" if unc.get("nominal_coverage") is not None else "N/A"
             gap = f"{unc['coverage_gap']:.6f}" if unc.get("coverage_gap") is not None else "N/A"
             drop = str(unc.get("dropped_rows", 0))
-            md.append(f"| {cov} | {wil_str} | {m_wid} | {med_wid} | {nom} | {gap} | {drop} |")
+            scored = str(unc.get("n_scored", "N/A"))
+            md.append(f"| {cov} | {wil_str} | {m_wid} | {med_wid} | {nom} | {gap} | {drop} | {scored} |")
             
             # Width bins
             bins = unc.get("coverage_by_width_bin")

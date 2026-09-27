@@ -116,7 +116,7 @@ def test_report_evaluate_markdown_structure():
     }
     md = build_report_md(fake_prov)
     assert "## 9. Model evaluation" in md
-    assert "| Model | MAE | RMSE | R² | n_scored |" in md
+    assert "| Model | MAE | RMSE | R² | n_scored (split) |" in md
     assert "| Fold | MAE | RMSE | R² |" in md
     assert "| supplied_predictions | 1.000000 | 1.732051 | 0.500000 | 10 |" in md
     assert "Cross-validation not assessable: N/A (not_provided)" in md

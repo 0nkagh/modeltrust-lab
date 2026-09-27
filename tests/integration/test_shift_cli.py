@@ -38,7 +38,7 @@ def test_shift_cli_golden():
 
     if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
         golden_path.parent.mkdir(exist_ok=True, parents=True)
-        golden_path.write_text(json.dumps(actual_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        golden_path.write_text(json.dumps(actual_data, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
 
     with open(golden_path, "r", encoding="utf-8") as f:
         golden_norm = json.load(f)

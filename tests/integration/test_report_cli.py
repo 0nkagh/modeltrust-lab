@@ -41,7 +41,7 @@ def test_report_golden():
         golden_path = "tests/golden/report_simple_ok.normalized.json"
         
         if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
-            with open(golden_path, "w", encoding="utf-8") as f:
+            with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(normalized)
                 
         with open(golden_path, "r", encoding="utf-8") as f:
@@ -71,7 +71,7 @@ def test_report_evaluate_present():
             
         assert "## 9. Model evaluation" in md
         assert "### Models" in md
-        assert "| Model | MAE | RMSE | R² | n_scored |" in md
+        assert "| Model | MAE | RMSE | R² | n_scored (split) |" in md
         assert "mean_baseline" in md
         assert "ols_baseline" in md
         assert "| evaluation |" in md
@@ -167,7 +167,7 @@ def test_report_evaluate_golden():
         golden_path = "tests/golden/report_evaluate.normalized.json"
         
         if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
-            with open(golden_path, "w", encoding="utf-8") as f:
+            with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(normalized)
                 
         with open(golden_path, "r", encoding="utf-8") as f:
@@ -177,7 +177,7 @@ def test_report_evaluate_golden():
         
         with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
             md_text = f.read()
-        assert "| Model | MAE | RMSE | R² | n_scored |" in md_text
+        assert "| Model | MAE | RMSE | R² | n_scored (split) |" in md_text
         assert "pipeline-code level" in md_text
 
 def test_report_shift_present():
@@ -292,7 +292,7 @@ def test_report_shift_golden():
         golden_path = "tests/golden/report_shift.normalized.json"
 
         if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
-            with open(golden_path, "w", encoding="utf-8") as f:
+            with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(normalized)
 
         with open(golden_path, "r", encoding="utf-8") as f:
@@ -348,7 +348,7 @@ def test_report_uncertainty_golden():
         golden_path = "tests/golden/report_uncertainty.normalized.json"
 
         if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
-            with open(golden_path, "w", encoding="utf-8") as f:
+            with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(normalized)
 
         with open(golden_path, "r", encoding="utf-8") as f:

@@ -1,6 +1,7 @@
 # Mimari Kararlar
 
 Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir karar satırı eklenir; mevcut satır silinmez (append-only).
+> Karar numaraları tekrar kullanılmaz; mükerrer satır tespit edilirse ikinci kopya silinir ve içeriği gerekiyorsa yeni numarayla eklenir.
 
 | # | Karar |
 |---|---|
@@ -20,12 +21,6 @@ Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir kara
 | D-014 | Sessiz kırpma yok; `--max-rows` açıkça verilirse uygulanır ve `truncated=true` olarak rapora ve provenance'a yazılır. |
 | D-015 | Opsiyonel ekstralar: `[parquet]`=pyarrow, `[ml]`=scikit-learn; çekirdek kurulumda yok; kurulu değilse ilgili kontrol `not_assessable`. |
 | D-016 | Dil: kod/CLI/JSON anahtarları/README = İngilizce; `docs/PHASE-*.md` ve `DECISIONS.md` = Türkçe. LICENSE seçimi PHASE 2 sonunda kullanıcı kararı. |
-| D-017 | Veri okuma: CSV varsayılan olarak utf-8-sig ile okunur ve BOM varsa temizlenir. Parquet opsiyonel ekstra gerektirir. |
-| D-018 | Ayırıcı ve ondalık tespiti: Deterministik sniff (ilk 50 satır/64KB) yapılır. Ambiguous durumlarda sessiz fallback yapılmaz. |
-| D-019 | Path raporlama: Kullanıcının verdiği dosya yolu olduğu gibi provenance'a yazılır (mutlak yola genişletilmez). |
-| D-020 | Max rows: Açıkça verilirse uygulanır, sessiz kırpma yasaktır. Truncation durumu rapora yazılır. |
-| D-021 | Hata yönetimi: Şema kontrolleri fail üretirse araç Exit Code 4 ile sonlanır. "not_assessable" uyarı mahiyetindedir. |
-| D-022 | CLI: `inspect` alt komutu kanonik JSON basar. `--out-dir` bu aşamada reserve edilmiştir. |
 | D-023 | Kontrol durum modeli (`reason_code`): `performed` (null), `not_assessable` (not_provided vb.), `skipped` (tool_not_implemented). `result="fail"` yalnızca koşul sağlanmadı demektir, model güvenliği hakkında karar vermez. |
 | D-024 | Fixture hijyeni: Tüm fixture'lar `tests/fixtures/README.md` içinde belgelenmeli, `turkish_bom_semicolon.csv` istisnası dışında BOM'suz ve LF satır sonlu UTF-8 olmalıdır. |
 | D-025 | Golden normalizasyonu: Environment alanı exclude edilerek normalized test gerçekleştirilir. |
@@ -91,15 +86,9 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-067 | Belirsizlik (Uncertainty) değerlendirmesi evaluation bloğunun bir parçasıdır; `--lower-col` ve `--upper-col` (ve opsiyonel `--nominal-coverage`) verildiğinde aktifleşir. |
 | D-068 | Belirsizlik aralıklarının kapsamı "single split, no distribution-free guarantee" varsayımıyla çalışır ve kalibrasyon güvencesi ("aralıklar kalibre olduğu kanıtlandı") vermez; sadece ampirik "observed coverage" hesaplanır. Küçük örneklem aralığı için Wilson Score Interval kullanılır. |
 
-
-
-| D-069 | Test fixture'larındaki belirsizlik değerleri testlerdeki teorik/ideal oranlar yerine ampirik ölçümlere (tolerans payıyla birlikte) bağlanır.
-
-| D-070 | Belirsizlik aralık genişlikleri değerlendirilirken 
-umpy.inf değerleri dışlanmaz; metriklerde aralıkların doğası gereği hesaba katılır, ancak bucket hesaplamalarında veya test verilerinde sonsuz değer beklenmediği için standart yaklaşımlar kullanılır.
-
-| D-071 | Kapsama metriklerinde hata toleransı  .05 (%5) olarak sabitlenmiştir.
-
-| D-072 | Belirsizlik fixture'ları hata σ'sına göre ölçeklenmiş yarıçaplarla üretilir (σ=1; R=1.645 kalibre, R=0.4 aşırı güvenli); testler ölçülen kapsamaya şartname bandıyla bağlanır.
-
-| D-073 | Golden dosyaları depoda LF satır sonuyla saklanır; Windows çalışma kopyasındaki CRLF git normalizasyonuyla commit edilir.
+| D-069 | Test fixture'larındaki belirsizlik değerleri testlerdeki teorik/ideal oranlar yerine ampirik ölçümlere (tolerans payıyla birlikte) bağlanır. |
+| D-070 | Belirsizlik aralık genişlikleri değerlendirilirken numpy.inf değerleri dışlanmaz; metriklerde aralıkların doğası gereği hesaba katılır, ancak bucket hesaplamalarında veya test verilerinde sonsuz değer beklenmediği için standart yaklaşımlar kullanılır. |
+| D-071 | Kapsama metriklerinde hata toleransı  .05 (%5) olarak sabitlenmiştir. |
+| D-072 | Belirsizlik fixture'ları hata σ'sına göre ölçeklenmiş yarıçaplarla üretilir (σ=1; R=1.645 kalibre, R=0.4 aşırı güvenli); testler ölçülen kapsamaya şartname bandıyla bağlanır. |
+| D-073 | Golden dosyaları depoda LF satır sonuyla saklanır; Windows çalışma kopyasındaki CRLF git normalizasyonuyla commit edilir. |
+| D-074 | Model card bir sertifika değildir; yalnız bu veri kümesi ve bu ayarlarla üretilmiş teşhis özetini taşır ve performans garantisi içermez. |

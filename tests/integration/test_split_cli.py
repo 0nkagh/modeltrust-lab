@@ -65,7 +65,7 @@ def test_golden_split_time_all():
     golden_path = "tests/golden/split_time_all_modes.normalized.json"
     
     if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
-        with open(golden_path, "w", encoding="utf-8") as f:
+        with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(normalized)
             
     with open(golden_path, "r", encoding="utf-8") as f:
