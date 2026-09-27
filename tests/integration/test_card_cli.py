@@ -115,6 +115,49 @@ def test_card_full_golden(tmpdir):
         
     assert card == golden
 
+
+def test_card_intervals_golden(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y",
+        "--lower-col", "lo", "--upper-col", "hi",
+        "--nominal-coverage", "0.9",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+        
+    # Remove environment which contains platform specific data
+    if "environment" in card:
+        del card["environment"]
+        
+    if "reproduce_command" in card:
+        del card["reproduce_command"]
+        
+    if "run" in card:
+        del card["run"]
+        
+    # Normalize paths
+    card["input"]["path"] = card["input"]["path"].replace("\\", "/")
+    
+    golden_path = "tests/golden/card_intervals.normalized.json"
+    
+    if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
+        with open(golden_path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(card, f, indent=2, sort_keys=True, ensure_ascii=False)
+            f.write("\n")
+            
+    with open(golden_path, "r", encoding="utf-8") as f:
+        golden = json.load(f)
+        
+    assert card == golden
+
+
 def test_card_real_cli_questions_answered(tmpdir):
     out = str(tmpdir)
     cmd = [
