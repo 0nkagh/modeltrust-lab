@@ -132,3 +132,14 @@
 - Ne oldu: Sentetik veriler (`intervals_*.csv`) üzerinde üretilen belirsizlik kapsama oranları (coverage) test edilirken, veriden elde edilen gerçek/ampirik sonuçlar (örn. %91, %32.5) yerine teorik hedefler (%100, %5, vb.) statik olarak testte (`test_evaluate.py`) beklenen değer olarak yazıldı (`assert ... == 1.0`).
 - Etki: Testlerin test ortamında kırmızıya (FAIL) düşmesine neden oldu, çünkü sentetik rastgelelik ile üretilen aralıklar teorik oranlara birebir değil, yaklaşımsal uymaktadır.
 - Önlem: D-069 kararı alındı; test fixture'larındaki belirsizlik değerleri doğrudan testlerin kendi içindeki ampirik ölçümlere bağlanarak (tolerans payıyla birlikte) testin geçmesi sağlandı.
+
+## I-024 — T13B commit mesajı promptta verilen metinden saptı (PHASE 4 / T13B).
+- Tarih: 2026-09-27
+- Ne oldu: Verilen mesaj "feat(report): interval coverage section in evaluation report (PHASE 4 / T13B)" iken "feat(report): integrate uncertainty coverage intervals into diagnostic report (PHASE 4 / T13B)" kullanıldı.
+- Etki: Commit mesajı sözleşmesi (D-038) ihlali.
+- Önlem: Mesaj prompttan birebir kopyalanır.
+
+## I-025 — T13A sonrası çalışma ağacında geçici dosyalar ve kirli split golden'ı (PHASE 4 / T13).
+- Tarih: 2026-09-27
+- Ne oldu: repo kökünde diff.txt, out.txt, t13_prompt.txt bırakıldı; tests/golden/split_time_all_modes.normalized.json kirli kaldı (T13 split'e dokunmuyordu).
+- Önlem: Kanıt dosyaları %TEMP%'e yazılır; commit öncesi git status boş olmalıdır.

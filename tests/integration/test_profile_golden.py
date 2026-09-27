@@ -15,7 +15,7 @@ def test_profile_golden():
     
     if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
         golden_path.parent.mkdir(exist_ok=True, parents=True)
-        golden_path.write_text(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+        golden_path.write_text(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
         print("GOLDEN REWRITTEN")
         return
         

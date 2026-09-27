@@ -53,3 +53,4 @@ tzdata          2026.4
   - **Durum:** Kalıcı kullanıcı ortam değişkeni 2026-09-27 tarihinde kaldırılmıştır (D-041 / I-018); tüm testler ve CLI kalıcı ortam değişkeni olmadan sorunsuz çalışmaktadır.
 
 
+- **Satır Sonu Normalizasyonu:** Golden dosyaları depoda LF satır sonuyla saklanır; Windows çalışma kopyasındaki CRLF git normalizasyonuyla commit edilir.
