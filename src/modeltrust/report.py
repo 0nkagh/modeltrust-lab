@@ -33,6 +33,7 @@ def build_report_md(prov: dict) -> str:
             if c.get("result") == "fail": fail += 1
         md.append(f"| {mod} | {perf} | {not_assess} | {skip} | {fail} |")
     md.append("\n* Checks marked as `not_assessable` are skipped when prerequisite conditions (e.g., target column variance, temporal column presence) are not met.")
+    md.append("* Profile fail findings indicate data quality issues, not model leakage or split errors.")
         
     # 3. What could NOT be assessed
     md.append("\n## 3. What could NOT be assessed")

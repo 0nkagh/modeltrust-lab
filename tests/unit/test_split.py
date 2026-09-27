@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import pandas as pd
 from modeltrust.audit.split import build_split
 from modeltrust.schema import ColumnSpec
 from modeltrust.dataio import read_table
@@ -152,5 +153,31 @@ def test_split_target_summary_known_diff():
     assert abs(ts["test"]["mean"] - 13.0) < 1e-9
     assert abs(ts["test"]["std"] - 2.0) < 1e-9
     assert abs(ts["abs_std_mean_diff"] - 1.5) < 1e-9
+
+def test_split_target_summary_unequal_sizes_formula():
+    train_vals = [-1.0, -np.sqrt(0.5), np.sqrt(0.5), 1.0] # n=4, mean 0.0, var 1.0
+    test_vals = [3.0 - np.sqrt(4.5), 3.0 + np.sqrt(4.5)] # n=2, mean 3.0, var 9.0
+    n = 6
+    y = np.zeros(n)
+    
+    rng = np.random.default_rng(42)
+    perm = rng.permutation(n).tolist()
+    test_idx = sorted(perm[:2])
+    train_idx = sorted(perm[2:])
+    for i, idx in enumerate(train_idx):
+        y[idx] = train_vals[i]
+    for i, idx in enumerate(test_idx):
+        y[idx] = test_vals[i]
+        
+    df = pd.DataFrame({"y": y})
+    spec = ColumnSpec(target="y")
+    res = build_split(df, spec, mode="random", test_size=0.333333, seed=42)
+    ts = res["modes"]["random"]["target_summary"]
+    assert ts is not None
+    assert abs(ts["train"]["mean"] - 0.0) < 1e-5
+    assert abs(ts["train"]["std"] - 1.0) < 1e-5
+    assert abs(ts["test"]["mean"] - 3.0) < 1e-5
+    assert abs(ts["test"]["std"] - 3.0) < 1e-5
+    assert abs(ts["abs_std_mean_diff"] - 1.341641) < 1e-5
 
 

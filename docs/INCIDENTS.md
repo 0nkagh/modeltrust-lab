@@ -94,3 +94,11 @@
 - Ne oldu: Windows 11 ortamında çoklu alt süreç (subprocess) testleri sırasında ortaya çıkan `OpenBLAS error: Memory allocation still failed after 10 retries, giving up` hatasını aşmak için `OPENBLAS_NUM_THREADS=1` ortam değişkeni kullanıcı (User) seviyesinde kalıcı olarak yazıldı ve bu durum kullanıcıya bildirilmedi.
 - Önlem: Kullanıcı düzeyindeki kalıcı değişken kaldırıldı; gereklilik gerekçesi ve hata logu `docs/ENVIRONMENT.md` içine belgelendi; ortam değişikliklerinin sessizce yapılmaması kuralı pekiştirildi.
 
+## I-019 — T7-R raporundaki kod alıntısı ve metrik değerleri kanıtla uyuşmadı (PHASE 3 / T7-R).
+- Tarih: 2026-09-27
+- Ne oldu:
+  1. `split.py` için T7-R raporunda alıntılanan formül ile T8'de bahsi geçen havuzlanmış varyans formülü arasında uyuşmazlık şüphesi incelendi; kod tabanında tek bir hesap yeri olduğu (`_target_summary`) ve ağırlıksız ortalama varyans formülünün uygulandığı teyit edildi (D-057).
+  2. `eval_preds.csv` için T7-R'daki global metrikler (MAE=1.0, RMSE=1.732051) dosyanın gerçek çıktısı olduğu halde, T8 raporunda grup MAE'leri yanlışlıkla 0.16/0.13/0.22 ve baş satırlar 3.5->3.7 olarak yazıldı. Fixture'ın d7e255c commit'inden bu yana şartnameye tam uygun olduğu (3 grup x 10 satır, G1=0, G2=0, G3=3.0, MAE=1.0) kanıtlandı (D-058).
+- Etki: T8 raporundaki grup metrikleri ile dosyanın gerçek değerleri arasında tutarsızlık görüntüsü oluştu; kod ve fixture'da ise bir bozulma olmadığı kanıtlandı.
+- Önlem: Kod alıntıları dosya ve satır numarasıyla açık diff olarak verilecek; sayısal metrik iddiaları mutlaka o turda üretilen komutun ham çıktısından doğrudan alınacaktır.
+

@@ -112,3 +112,22 @@ def test_evaluate_group_errors_supplied_full_coverage():
     assert g_map["G3"]["n"] == 10
     assert abs(g_map["G3"]["mae"] - 3.0) < 1e-9
 
+def test_evaluate_mae_rmse_group_invariance():
+    import numpy as np
+    res = run_cli(["evaluate", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--group-col", "grp"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    
+    model = next(m for m in data["evaluation"]["models"] if m["name"] == "supplied_predictions")
+    global_mae = model["mae"]
+    global_rmse = model["rmse"]
+    
+    ge = data["evaluation"]["group_errors"]
+    total_n = sum(g["n"] for g in ge["groups"])
+    weighted_mae = sum(g["n"] * g["mae"] for g in ge["groups"]) / total_n
+    weighted_mse = sum(g["n"] * (g["rmse"] ** 2) for g in ge["groups"]) / total_n
+    weighted_rmse = np.sqrt(weighted_mse)
+    
+    assert abs(global_mae - weighted_mae) <= 1e-9
+    assert abs(global_rmse - weighted_rmse) <= 1e-6
+

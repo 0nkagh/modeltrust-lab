@@ -84,3 +84,4 @@ def test_report_section_2_summary_table_includes_profile():
         assert "| Module | Performed | Not Assessable | Skipped | Fail |" in md
         assert "| profile |" in md
         assert "* Checks marked as `not_assessable` are skipped when prerequisite conditions" in md
+        assert "* Profile fail findings indicate data quality issues, not model leakage or split errors." in md
