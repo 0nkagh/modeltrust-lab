@@ -82,12 +82,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     _add_common_args(card_parser)
     card_parser.add_argument("--mode", choices=["random", "group", "temporal", "all"], default="all")
     card_parser.add_argument("--test-size", type=float, default=0.2)
-    card_parser.add_argument("--evaluate", action="store_true", help="Include model evaluation in card")
     card_parser.add_argument("--model", choices=["mean", "ols", "both"], default="both")
     card_parser.add_argument("--split-mode", choices=["random", "group", "temporal"], default="random")
     card_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
     card_parser.add_argument("--folds", type=int, default=5)
-    card_parser.add_argument("--shift", action="store_true", help="Include distribution shift and OOD checks in card")
     card_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     card_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
     card_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
@@ -152,52 +150,56 @@ def main(argv: Optional[list[str]] = None) -> int:
         # Flags valid with --evaluate OR --shift
         evaluate_or_shift_flags = ["--split-mode", "--test-size"]
 
-        if not args.evaluate:
+        cmd = getattr(args, "command", "")
+        run_eval = getattr(args, "evaluate", False) or (cmd == "card" and getattr(args, "target_col", None))
+        run_shift = getattr(args, "shift", False) or (cmd == "card" and getattr(args, "target_col", None))
+
+        if cmd != "card" and not run_eval:
             for flag in evaluate_only_flags:
                 if any(a == flag or a.startswith(f"{flag}=") for a in actual_argv):
                     print(f"Error: {flag} requires --evaluate", file=sys.stderr)
                     return 2
 
-        if not args.evaluate and not args.shift:
+        if not run_eval and not run_shift:
             for flag in evaluate_or_shift_flags:
                 if any(a == flag or a.startswith(f"{flag}=") for a in actual_argv):
                     print(f"Error: {flag} requires --evaluate or --shift", file=sys.stderr)
                     return 2
 
-        if args.evaluate:
+        if run_eval:
             if not args.target_col:
                 print("Error: --target-col is required when --evaluate is enabled", file=sys.stderr)
                 return 2
-            if args.pred_col and any(a == "--model" or a.startswith("--model=") for a in actual_argv):
+            if getattr(args, "pred_col", None) and any(a == "--model" or a.startswith("--model=") for a in actual_argv):
                 print("Error: --pred-col and --model cannot be used together", file=sys.stderr)
                 return 2
-            if args.split_mode == "group" and not args.group_col:
+            if getattr(args, "split_mode", None) == "group" and not args.group_col:
                 print("Error: --split-mode group requires --group-col", file=sys.stderr)
                 return 4
-            if args.split_mode == "temporal" and not args.time_col:
+            if getattr(args, "split_mode", None) == "temporal" and not getattr(args, "time_col", None):
                 print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
                 return 4
-            if args.cv == "group" and not args.group_col:
+            if getattr(args, "cv", None) == "group" and not args.group_col:
                 print("Error: --cv group requires --group-col", file=sys.stderr)
                 return 4
-            if args.cv == "temporal" and not args.time_col:
+            if getattr(args, "cv", None) == "temporal" and not getattr(args, "time_col", None):
                 print("Error: --cv temporal requires --time-col", file=sys.stderr)
                 return 4
-            if bool(args.lower_col) != bool(args.upper_col):
+            if bool(getattr(args, "lower_col", None)) != bool(getattr(args, "upper_col", None)):
                 print("Error: --lower-col and --upper-col must be provided together", file=sys.stderr)
                 return 2
-            if args.nominal_coverage is not None and not (0.0 < args.nominal_coverage < 1.0):
+            if getattr(args, "nominal_coverage", None) is not None and not (0.0 < args.nominal_coverage < 1.0):
                 print("Error: --nominal-coverage must be between 0.0 and 1.0 exclusive", file=sys.stderr)
                 return 2
 
-        if args.shift:
+        if run_shift:
             if not args.target_col:
                 print("Error: --target-col is required when --shift is enabled", file=sys.stderr)
                 return 2
-            if args.split_mode == "group" and not args.group_col:
+            if getattr(args, "split_mode", None) == "group" and not args.group_col:
                 print("Error: --split-mode group requires --group-col", file=sys.stderr)
                 return 4
-            if args.split_mode == "temporal" and not args.time_col:
+            if getattr(args, "split_mode", None) == "temporal" and not getattr(args, "time_col", None):
                 print("Error: --split-mode temporal requires --time-col", file=sys.stderr)
                 return 4
 
@@ -293,7 +295,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     from modeltrust.audit.split import build_split
                     prov["split"] = build_split(loaded.frame, spec, args.mode, args.test_size, args.seed)
 
-            if args.command == "evaluate" or (args.command in ["report", "card"] and args.evaluate):
+            if args.command == "evaluate" or getattr(args, "evaluate", False) or (args.command == "card" and args.target_col):
                 from modeltrust.evaluate import build_evaluation
                 prov["evaluation"] = build_evaluation(
                     loaded.frame, 
@@ -309,7 +311,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     nominal_coverage=getattr(args, "nominal_coverage", None)
                 )
 
-            if args.command == "shift" or (args.command in ["report", "card"] and args.shift):
+            if args.command == "shift" or getattr(args, "shift", False) or (args.command == "card" and args.target_col):
                 from modeltrust.audit.shift import build_shift
                 prov["shift"] = build_shift(
                     loaded.frame,
@@ -382,3 +384,5 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+

@@ -168,3 +168,37 @@ ModelTrust Lab `shift` modülü (`src/modeltrust/audit/shift.py`), eğitim ve te
 - **`report --shift` ile `--split-mode`/`--test-size`** birlikte kullanılabilir; bu bayraklar artık yalnız `--evaluate` değil, `--evaluate` veya `--shift` varlığını gerektirir. İkisi de yoksa `exit 2` döner (`Error: {flag} requires --evaluate or --shift`).
 
 
+
+## 11. Model Card (Özet Rapor)
+
+`modeltrust card` komutu, veri kaynağı, test edilen senaryolar, ölçülen metrikler ve gerçekleştirilemeyen denetimlerin teşhis özetini içeren bir kart üretir. 
+
+### 11.1 Kart Bölümleri
+1. **Scope & disclaimer:** Kartın bir sertifika olmadığı, performans garantisi sunmadığı belirtilir.
+2. **Data provenance:** Girdi veri yolunu, satır/kolon sayısını, veri hash'ini, kullanılan sürüm ve seed bilgilerini içerir.
+3. **Questions answered:** Modüllerin çalışabilirlik durumuna göre 10 kritik soruya verilen yanıtlar (durum ve kanıt) tablosu.
+4. **Checks summary:** Modül bazında (örn. `leakage`) gerçekleştirilen, başarısız olan ve yapılamayan denetimlerin sayımı.
+5. **Not assessable:** Gerçekleştirilemeyen denetimlerin listesi ve nedenleri (reason_code).
+6. **Metrics:** Modelin ölçülen hata metrikleri, çapraz doğrulama (CV) sonuçları ve varsa belirsizlik aralığı (uncertainty interval) kapsamı.
+7. **Thresholds:** Kullanılan konfigürasyon ve eşik değerleri (örn. `OOD_MAHALANOBIS_RATIO_MIN`).
+8. **Limitations:** Aracın kısıtlamaları (sadece tabular regression, p-değeri yok, vb.) ve uyarılar.
+9. **Reproduce:** Raporu birebir aynı seed ve ayarlarla tekrar üretmek için gereken CLI komutu.
+
+### 11.2 "Questions Answered" Durum Kuralları
+Kart, değerlendirme durumunu belirlemek için aşağıdaki katı kuralları (deterministik) kullanır:
+
+| # | Soru | `answered` koşulu | Aksi hâlde |
+|---|---|---|---|
+| 1 | Eksik/duplicate kayıt? | profile çalıştı | — |
+| 2 | Target leakage şüphesi? | `leakage.target_copy_exact` **veya** `target_copy_near` performed | `not_assessable` |
+| 3 | Train/test veya grup sızıntısı? | `split.modes.random` performed | `not_assessable` |
+| 4 | Split stratejisi farkı? | random/group/temporal'dan ≥2 performed | `partial` |
+| 5 | Hangi gruplarda hata? | `evaluation.group_errors.status == "performed"` | `not_assessable` |
+| 6 | Drift? | `shift.drift.feature_ks.status == "performed"` | `not_assessable` |
+| 7 | OOD? | `shift.ood.feature_range.status == "performed"` | `not_assessable` |
+| 8 | Belirsizlik kalibre mi? | `uncertainty.status == "performed"` | `not_assessable` |
+| 9 | Hangi kontroller yapılamadı? | her zaman `answered` | — |
+| 10 | Rapora ne kadar güvenilebilir? | her zaman `partial` | — |
+
+### 11.3 Neyi İddia Etmez (Sınırlar)
+Model card bir **sertifika değildir**. Herhangi bir modelin "production-ready" olduğunu, "compliant" (mevzuata uygun) olduğunu veya performans/güvenilirlik garantisi taşıdığını iddia etmez. Yalnızca belirtilen veri kümesi ve çalıştırılan argümanlarla üretilen bir teşhis (diagnostic) özetidir.

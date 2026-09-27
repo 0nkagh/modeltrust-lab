@@ -121,3 +121,10 @@ modeltrust report --input data.csv --target-col y --time-col ts --shift --out-di
 modeltrust report --input data.csv --target-col y --time-col ts --shift --evaluate --out-dir ./reports
 ```
 *Note: `--split-mode` and `--test-size` are valid with either `--evaluate` or `--shift`.*
+
+### `card`
+Generates a diagnostic summary card (JSON and Markdown) containing data provenance, test coverage, and evaluated metrics. This command automatically executes schema validation, dataset profiling, leakage detection, and splitting checks.
+```bash
+modeltrust card --input data.csv --target-col y --out-dir ./card_reports
+```
+*Note: The card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.*

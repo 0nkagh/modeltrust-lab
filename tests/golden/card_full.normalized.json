@@ -116,12 +116,6 @@
       "status": "partial"
     }
   ],
-  "reproduce_command": "python -m modeltrust card -i tests/fixtures/eval_preds.csv --target-col y --pred-col pred --group-col grp --evaluate --shift --split-mode group --test-size 0.2 --out-dir 'C:\\Users\\agah\\AppData\\Local\\Temp\\modeltrust-pytest\\test_card_full_golden0'",
-  "run": {
-    "command": "python -m modeltrust card -i tests/fixtures/eval_preds.csv --target-col y --pred-col pred --group-col grp --evaluate --shift --split-mode group --test-size 0.2 --out-dir 'C:\\Users\\agah\\AppData\\Local\\Temp\\modeltrust-pytest\\test_card_full_golden0'",
-    "generated_at": null,
-    "seed": 42
-  },
   "scope": {
     "external_data_downloaded": false,
     "model_loaded": false,

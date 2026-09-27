@@ -98,3 +98,6 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-072 | Belirsizlik fixture'ları hata σ'sına göre ölçeklenmiş yarıçaplarla üretilir (σ=1; R=1.645 kalibre, R=0.4 aşırı güvenli); testler ölçülen kapsamaya şartname bandıyla bağlanır. |
 | D-073 | Golden dosyaları depoda LF satır sonuyla saklanır; Windows çalışma kopyasındaki CRLF git normalizasyonuyla commit edilir. |
 | D-074 | Model card bir sertifika değildir; yalnız bu veri kümesi ve bu ayarlarla üretilmiş teşhis özetini taşır ve performans garantisi içermez. |
+| D-075 | modeltrust card modülü: schema+profile+leakage+split her zaman çalışır; evaluate/shift girdileri isteğe bağlıdır ve ayrı bayrak gerektirmez. |
+| D-076 | Karttaki 10 sorunun durum kuralları METHODS §11 tablosuyla sabittir; kural değişikliği yeni karar numarası gerektirir. |
+| D-077 | Model card bir sertifika değildir; performans/uyumluluk iddiası içermez, yalnız teşhis özetidir. |

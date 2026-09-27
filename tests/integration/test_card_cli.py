@@ -40,13 +40,13 @@ def test_card_determinism(tmpdir):
         sys.executable, "-m", "modeltrust", "card",
         "-i", "tests/fixtures/eval_preds.csv",
         "--target-col", "y", "--pred-col", "pred",
-        "--evaluate", "--out-dir", out1
+        "--out-dir", out1
     ]
     cmd2 = [
         sys.executable, "-m", "modeltrust", "card",
         "-i", "tests/fixtures/eval_preds.csv",
         "--target-col", "y", "--pred-col", "pred",
-        "--evaluate", "--out-dir", out2
+        "--out-dir", out2
     ]
     
     subprocess.run(cmd1, capture_output=True, check=True)
@@ -81,7 +81,6 @@ def test_card_full_golden(tmpdir):
         "-i", "tests/fixtures/eval_preds.csv",
         "--target-col", "y", "--pred-col", "pred",
         "--group-col", "grp",
-        "--evaluate", "--shift",
         "--split-mode", "group", "--test-size", "0.2",
         "--out-dir", out
     ]
@@ -94,6 +93,12 @@ def test_card_full_golden(tmpdir):
     # Remove environment which contains platform specific data
     if "environment" in card:
         del card["environment"]
+        
+    if "reproduce_command" in card:
+        del card["reproduce_command"]
+        
+    if "run" in card:
+        del card["run"]
         
     # Normalize paths
     card["input"]["path"] = card["input"]["path"].replace("\\", "/")
