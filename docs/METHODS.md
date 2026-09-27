@@ -98,7 +98,7 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
   - OLS eğitimi sırasında, hedefte veya herhangi bir özelliğinde (feature) NaN olan satırlar eğitim kümesinden düşülür.
 - **Cross-Validation (CV):** K-katlı çapraz doğrulama (CV) modülleri (random, group, temporal) desteklenir. Modüle özgü bölme mantıkları (örneğin grup bütünlüğünü bozmayan greedy group allocation) uygulanır. Eğer test kümesindeki veri çok küçükse (`CV_MIN_FOLD_SIZE < 3`) kat değerlendirilmez (`not_assessable`).
 - **Grup Hatası (Group Error):** Grup modunda (`--split-mode group`), test kümesinde yer alan her bir grup için test hataları (n, MAE, RMSE, mean residual) bağımsız hesaplanarak listelenir. MAE değerine göre gruplar sıralanır ve en kötü performans gösteren gruplar (`TOP_WORST_GROUPS = 3`) belirlenir. Yeterli örneğe sahip olmayan (`n < 5`) gruplar bu sıralamanın dışında bırakılır.
-  - **`coverage_ratio` Tanımı:** `coverage_ratio = n_rows_evaluated / n_rows_scored` olarak hesaplanır. Skorlanan toplam satırlar içinde, asgari grup büyüklüğü eşiğini (`MIN_GROUP_ROWS_FOR_ERROR = 5`) sağlayan ve grup hata sıralamasına dahil edilen geçerli satırların oranını ifade eder.
+  - **`coverage_ratio` Tanımı:** `coverage_ratio = n_rows_evaluated / n_rows_scored` olarak hesaplanır. Skorlanan toplam satırlar içinde, asgari grup büyüklüğü eşiğini (`MIN_GROUP_ROWS_FOR_ERROR = 5`) sağlayan ve grup hata sıralamasına dahil edilen geçerli satırların oranını ifade eder. Değerlendirilemeyen (not_assessable) sayısal alanlar raporda 0.000000 olarak gösterilmez; N/A ve reason_code (örn. `N/A (not_provided)`) ile gösterilir.
 
 ### 8.x Eşikler
 | Sabit Adı | Değer | Açıklama |

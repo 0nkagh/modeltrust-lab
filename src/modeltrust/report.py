@@ -257,8 +257,7 @@ def build_report_md(prov: dict) -> str:
             reason = ge.get("reason_code") or "not_provided"
             md.append(f"| N/A | N/A | N/A | N/A |")
             md.append(f"\n* Group errors not assessable: N/A ({reason}).")
-            cov_ratio = ge.get("coverage_ratio", 0.0)
-            md.append(f"- Coverage ratio: {cov_ratio:.6f}")
+            md.append(f"- Coverage ratio: N/A ({reason})")
 
         # Uncertainty intervals table
         md.append("\n### Uncertainty intervals")

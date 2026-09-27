@@ -253,3 +253,34 @@ def test_report_n_scored_label_trained_model():
         md = open(os.path.join(tmpdir, "report.md"), encoding="utf-8").read()
         assert "n_scored (split)" in md
         assert "n_scored (all rows provided)" not in md
+
+
+def test_scored_scope_label_empty_returns_matches_code():
+    assert scored_scope_label([]) == "n_scored (split)"
+
+
+def test_group_coverage_ratio_na_when_not_performed():
+    prov = {
+        "input": {
+            "path": "test.csv",
+            "sha256": "abc",
+            "nrows_total": 10,
+            "ncols": 2,
+            "columns": ["y", "x"],
+            "columns_sha256": "def",
+        },
+        "run_metadata": {"seed": 42},
+        "column_spec": {"target": "y"},
+        "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.2.6", "platform": "win32"},
+        "evaluation": {
+            "models": [],
+            "group_errors": {
+                "status": "not_assessable",
+                "reason_code": "not_provided",
+            },
+        },
+    }
+    md = build_report_md(prov)
+    assert "- Coverage ratio: N/A (not_provided)" in md
+    assert "- Coverage ratio: 0.000000" not in md
+
