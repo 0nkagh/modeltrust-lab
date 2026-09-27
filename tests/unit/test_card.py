@@ -149,14 +149,14 @@ def test_interval_coverage_null():
     assert card["metrics"]["interval_coverage"]["coverage"] == 0.5
 
 def test_n_scored_all_rows_label_and_value():
-    # Supplied-predictions mode: n_scored should equal total rows (no split applied).
+    # Supplied-predictions mode: n_train=0 → label 'all rows provided'
     # The card.md column header must say "all rows provided", not "split".
-    # Fixture eval_preds.csv has 30 rows; n_scored expected == 30.
     prov = {
         "evaluation": {
             "models": [{
                 "name": "supplied_predictions",
                 "status": "performed",
+                "n_train": 0,
                 "n_scored": 30,
                 "mae": 1.0,
                 "rmse": 1.732051,
@@ -172,3 +172,28 @@ def test_n_scored_all_rows_label_and_value():
     md = build_card_md(card)
     assert "n_scored (all rows provided)" in md
     assert "n_scored (split)" not in md
+    assert "n_scored (scope varies)" not in md
+
+
+def test_n_scored_split_label():
+    # Trained model mode: n_train>0 → label 'split'
+    prov = {
+        "evaluation": {
+            "models": [{
+                "name": "ols_baseline",
+                "status": "performed",
+                "n_train": 32,
+                "n_test": 8,
+                "n_scored": 8,
+                "mae": 0.5,
+                "rmse": 0.7,
+                "r2": 0.9,
+                "r2_status": "performed",
+            }]
+        }
+    }
+    card = build_card_json(prov, "cmd")
+    md = build_card_md(card)
+    assert "n_scored (split)" in md
+    assert "n_scored (all rows provided)" not in md
+

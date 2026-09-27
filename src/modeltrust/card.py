@@ -1,5 +1,6 @@
 import os
 import json
+from modeltrust.report import scored_scope_label
 
 def build_card_json(prov, reproduce_command):
     questions = []
@@ -277,10 +278,10 @@ def build_card_md(card):
     metrics = card.get("metrics", {})
     models = metrics.get("models", [])
     if models:
-        # Note: for supplied_predictions mode n_scored covers all rows provided
-        # (no split is applied). Label reflects this.
-        lines.append("| Model | MAE | RMSE | R\u00b2 | n_scored (all rows provided) |")
-        lines.append("|---|---|---|---|---|")
+        # Use shared scope-aware label: supplied_predictions (n_train=0) -> 'all rows provided'
+        # trained model (n_train>0) -> 'split'; mixed -> 'scope varies'
+        lines.append(f"| Model | MAE | RMSE | R\u00b2 | {scored_scope_label(models)} |")
+        lines.append("|---|---|---|---|---|") 
         for m in models:
             lines.append(f"| {m['name']} | {m.get('mae', 'N/A')} | {m.get('rmse', 'N/A')} | {m.get('r2', 'N/A')} | {m.get('n_scored', 'N/A')} |")
     else:

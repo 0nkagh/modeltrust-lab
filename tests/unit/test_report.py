@@ -3,7 +3,7 @@ import os
 import tempfile
 from tests.conftest import run_cli
 import pandas as pd
-from modeltrust.report import build_report_md
+from modeltrust.report import build_report_md, scored_scope_label
 
 def test_report_files_created_and_canonical():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -116,7 +116,7 @@ def test_report_evaluate_markdown_structure():
     }
     md = build_report_md(fake_prov)
     assert "## 9. Model evaluation" in md
-    assert "| Model | MAE | RMSE | R² | n_scored (split) |" in md
+    assert "| Model | MAE | RMSE | R² | n_scored (all rows provided) |" in md
     assert "| Fold | MAE | RMSE | R² |" in md
     assert "| supplied_predictions | 1.000000 | 1.732051 | 0.500000 | 10 |" in md
     assert "Cross-validation not assessable: N/A (not_provided)" in md
@@ -182,3 +182,74 @@ def test_report_shift_markdown_structure():
     assert "| shift | ood.feature_range |" in md
     assert "| shift |" in md
     assert "--shift" in md
+
+
+# --- scored_scope_label unit tests (3 scenarios) ---
+
+def test_scored_scope_label_all_rows_provided():
+    """All n_train == 0 → supplied_predictions mode → 'all rows provided'."""
+    rows = [
+        {"name": "supplied_predictions", "n_train": 0},
+        {"name": "supplied_predictions", "n_train": 0},
+    ]
+    assert scored_scope_label(rows) == "n_scored (all rows provided)"
+
+
+def test_scored_scope_label_split():
+    """All n_train > 0 → trained model mode → 'split'."""
+    rows = [
+        {"name": "ols_baseline", "n_train": 32},
+        {"name": "mean_baseline", "n_train": 32},
+    ]
+    assert scored_scope_label(rows) == "n_scored (split)"
+
+
+def test_scored_scope_label_mixed():
+    """Mixed n_train (some 0, some >0) → 'scope varies'."""
+    rows = [
+        {"name": "supplied_predictions", "n_train": 0},
+        {"name": "ols_baseline", "n_train": 32},
+    ]
+    assert scored_scope_label(rows) == "n_scored (scope varies)"
+
+
+def test_scored_scope_label_empty():
+    """Empty rows list → default 'split' (no data to decide)."""
+    assert scored_scope_label([]) == "n_scored (split)"
+
+
+def test_report_n_scored_label_supplied_predictions():
+    """When pred-col is supplied (n_train=0), report model table uses 'all rows provided'."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli([
+            "report",
+            "--input", "tests/fixtures/eval_preds.csv",
+            "--target-col", "y",
+            "--pred-col", "pred",
+            "--group-col", "grp",
+            "--evaluate",
+            "--out-dir", tmpdir,
+        ])
+        assert res.returncode == 0
+        md = open(os.path.join(tmpdir, "report.md"), encoding="utf-8").read()
+        assert "n_scored (all rows provided)" in md
+        assert "n_scored (split)" not in md
+
+
+def test_report_n_scored_label_trained_model():
+    """When model is trained (ols/mean, n_train>0), report model table uses 'split'."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli([
+            "report",
+            "--input", "tests/fixtures/eval_exact_linear.csv",
+            "--target-col", "y",
+            "--model", "ols",
+            "--evaluate",
+            "--out-dir", tmpdir,
+        ])
+        assert res.returncode == 0
+        md = open(os.path.join(tmpdir, "report.md"), encoding="utf-8").read()
+        assert "n_scored (split)" in md
+        assert "n_scored (all rows provided)" not in md

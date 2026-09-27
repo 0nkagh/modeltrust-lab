@@ -1,6 +1,25 @@
 import json
 import os
 
+
+def scored_scope_label(rows: list) -> str:
+    """Return the n_scored column header based on n_train values in model rows.
+
+    - All rows have n_train == 0 (supplied_predictions mode) -> 'n_scored (all rows provided)'
+    - All rows have n_train  > 0 (trained model mode)       -> 'n_scored (split)'
+    - Mixed (some 0, some >0)                               -> 'n_scored (scope varies)'
+    """
+    if not rows:
+        return "n_scored (split)"
+    has_zero = any(r.get("n_train", 0) == 0 for r in rows)
+    has_pos = any((r.get("n_train") or 0) > 0 for r in rows)
+    if has_zero and has_pos:
+        return "n_scored (scope varies)"
+    if has_zero:
+        return "n_scored (all rows provided)"
+    return "n_scored (split)"
+
+
 def build_report_md(prov: dict) -> str:
     md = []
     md.append("# ModelTrust Lab — Diagnostic Report")
@@ -176,7 +195,8 @@ def build_report_md(prov: dict) -> str:
         
         # Models table
         md.append("### Models")
-        md.append("| Model | MAE | RMSE | R² | n_scored (split) |")
+        _model_rows = ev.get("models", [])
+        md.append(f"| Model | MAE | RMSE | R² | {scored_scope_label(_model_rows)} |")
         md.append("|---|---|---|---|---|")
         for m in ev.get("models", []):
             m_name = m.get("name", "unknown")

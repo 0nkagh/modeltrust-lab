@@ -211,9 +211,14 @@ Model card bir **sertifika değildir**. Herhangi bir modelin "production-ready" 
 - Metrik tablosundaki `n_scored (all rows provided)` kolonu bu gerçeği yansıtır: değer, sağlanan veri setindeki NaN-olmayan satır sayısıdır; bir test split'inin büyüklüğü değildir.
 - `--split-mode` ve `--test-size` argümanları bu modda train/test split metrikleri üretmez; split modülü bağımsız olarak ayrı leakage denetimleri için çalışır.
 
-### 11.5 `n_scored` Kapsamı — Model Eğitim Modu
+### 11.5 `n_scored` Dinamik Kapsam Kuralı
 
-`--pred-col` verilmediğinde CLI dahili OLS ve mean baseline modellerini eğitir. Bu modda `n_scored`, split sonucundaki **test setinin** satır sayısını (NaN olmayan) gösterir.
+Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dinamik olarak belirlenir (`scored_scope_label` yardımcı fonksiyonu — tek kaynak, `report.py` içinde tanımlı, card ve report tarafından paylaşılır):
 
-- `n_scored` değerinin tutarlılığı, baseline ve OLS modellerinin aynı test setini kullandığını doğrular.
-- İki çıktı arasındaki `n_scored` karşılaştırması: `--pred-col` modunda tüm veri seti (örn. 30), eğitim modunda yalnızca test split'i (örn. 6, `--test-size 0.2` ile) sayılır.
+| n_train durumu | Başlık |
+|---|---|
+| Tüm satırlarda `n_train == 0` | `n_scored (all rows provided)` |
+| Tüm satırlarda `n_train > 0` | `n_scored (split)` |
+| Karmaşık küme (hem 0 hem >0) | `n_scored (scope varies)` + warnings notu |
+
+`n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde.
