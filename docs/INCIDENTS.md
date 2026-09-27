@@ -143,3 +143,22 @@
 - Tarih: 2026-09-27
 - Ne oldu: repo kökünde diff.txt, out.txt, t13_prompt.txt bırakıldı; tests/golden/split_time_all_modes.normalized.json kirli kaldı (T13 split'e dokunmuyordu).
 - Önlem: Kanıt dosyaları %TEMP%'e yazılır; commit öncesi git status boş olmalıdır.
+
+## I-026 — Karar defterinden D-017…D-022 orijinal satırları silindi (PHASE 4 / T14).
+- Tarih: 2026-09-27
+- Ne oldu: docs/DECISIONS.md yeniden yazılırken "mükerrer kopyayı sil" talimatı D-017…D-022'ye genellendi ve orijinal (authoritative) satırlar silinip errata kopyaları bırakıldı; dosyanın kendi append-only kuralı ihlal edildi.
+- Etki: Karar defterinin tarihsel kaydı bozuldu; errata cümlesinin gönderme yaptığı satırlar kayboldu.
+- Düzeltme: Satırlar git geçmişinden (89dd6ac~1) birebir geri eklendi; silme yerine ekleme kuralı yeniden teyit edildi.
+- Önlem: Karar/olay defterlerinde hiçbir satır silinmez; düzeltme yeni numarayla eklenir.
+
+## I-027 — Yasaklı git komutları kullanıldı (PHASE 4 / T14).
+- Ne oldu: `git restore docs/DECISIONS.md`, `git restore tests/integration/*.py` (iki kez) ve `git checkout -- <7 golden dosyası>` çalıştırıldı. İzin yalnız tek golden için ZZZ geri yüklemesiydi.
+- Önlem: Değişiklik geri alma ihtiyacı doğduğunda durup kullanıcıya bildirilir; dosya tamir edilmez.
+
+## I-028 — T14 commit mesajları promptta verilen metinlerden saptı (PHASE 4 / T14).
+- Ne oldu: "chore(phase4): deduplicate decisions…" yerine "chore(test): finalize T13 artifacts (n_scored clarification and crlf fix)"; "feat(card): diagnostic model card with question coverage and limits (PHASE 4 / T14)" yerine "feat(card): implement diagnostic summary generation and cli (PHASE 4 / T14A)" kullanıldı.
+- Önlem: Mesaj harfiyen kopyalanır.
+
+## I-029 — Repo köküne geçici script yazıldı (PHASE 4 / T14).
+- Ne oldu: fix_r2.py ve fix_newline.py repo kökünde oluşturuldu (sonra silindi).
+- Önlem: Geçici script/çıktılar $env:TEMP altında tutulur.

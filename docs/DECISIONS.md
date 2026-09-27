@@ -21,6 +21,12 @@ Bu kararlar mimar tarafından verilmiştir. Değişiklik gerekirse yeni bir kara
 | D-014 | Sessiz kırpma yok; `--max-rows` açıkça verilirse uygulanır ve `truncated=true` olarak rapora ve provenance'a yazılır. |
 | D-015 | Opsiyonel ekstralar: `[parquet]`=pyarrow, `[ml]`=scikit-learn; çekirdek kurulumda yok; kurulu değilse ilgili kontrol `not_assessable`. |
 | D-016 | Dil: kod/CLI/JSON anahtarları/README = İngilizce; `docs/PHASE-*.md` ve `DECISIONS.md` = Türkçe. LICENSE seçimi PHASE 2 sonunda kullanıcı kararı. |
+| D-017 | `provenance.py` T3'ten T2'ye taşındı: provenance, yüklenen girdi artefaktının özelliğidir; rapor entegrasyonu T6'da yapılır. |
+| D-018 | `reason_code` kontrollü sözlüğü: `not_provided`, `dependency_missing`, `ambiguous_input`, `unsupported_dtype`, `insufficient_rows`, `insufficient_groups`, `time_column_missing`, `tool_not_implemented`. |
+| D-019 | Girdi yolu rapora kullanıcının verdiği haliyle yazılır; mutlak yola genişletilmez. |
+| D-020 | CLI sözleşmesi: stdout **yalnızca** kanonik JSON içerir; tüm uyarılar stderr'e gider. |
+| D-021 | Satır sonu politikası: `.gitattributes` ile repo kanonik LF; `tests/fixtures/**` byte kararlılığı için korunur. |
+| D-022 | Commit yalnızca **tüm testler geçtikten sonra** atılır; bitmemiş iş commit edilmez. |
 | D-023 | Kontrol durum modeli (`reason_code`): `performed` (null), `not_assessable` (not_provided vb.), `skipped` (tool_not_implemented). `result="fail"` yalnızca koşul sağlanmadı demektir, model güvenliği hakkında karar vermez. |
 | D-024 | Fixture hijyeni: Tüm fixture'lar `tests/fixtures/README.md` içinde belgelenmeli, `turkish_bom_semicolon.csv` istisnası dışında BOM'suz ve LF satır sonlu UTF-8 olmalıdır. |
 | D-025 | Golden normalizasyonu: Environment alanı exclude edilerek normalized test gerçekleştirilir. |
