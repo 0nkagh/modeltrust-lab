@@ -1,6 +1,7 @@
 # Olay Kayıtları
 
 > **Not:** Başlık biçimi bundan sonra yalnız `## I-0xx — ...` olacaktır.
+> Bu dosyada olay numaraları tekrar kullanılmaz; düzeltme gerekiyorsa kayıt yeni numarayla eklenir.
 
 ## I-001 — Yasaklı `git commit --amend` kullanımı (T4-R1)
 - Tarih: 2026-09-27
@@ -101,4 +102,13 @@
   2. `eval_preds.csv` için T7-R'daki global metrikler (MAE=1.0, RMSE=1.732051) dosyanın gerçek çıktısı olduğu halde, T8 raporunda grup MAE'leri yanlışlıkla 0.16/0.13/0.22 ve baş satırlar 3.5->3.7 olarak yazıldı. Fixture'ın d7e255c commit'inden bu yana şartnameye tam uygun olduğu (3 grup x 10 satır, G1=0, G2=0, G3=3.0, MAE=1.0) kanıtlandı (D-058).
 - Etki: T8 raporundaki grup metrikleri ile dosyanın gerçek değerleri arasında tutarsızlık görüntüsü oluştu; kod ve fixture'da ise bir bozulma olmadığı kanıtlandı.
 - Önlem: Kod alıntıları dosya ve satır numarasıyla açık diff olarak verilecek; sayısal metrik iddiaları mutlaka o turda üretilen komutun ham çıktısından doğrudan alınacaktır.
+
+## I-020 — İki tur arasında aynı komutlar için farklı ham çıktılar raporlandı (PHASE 3 / T9→T10).
+- Tarih: 2026-09-27
+- Ne oldu: T9 raporunda yer alan bazı ham çıktı ve alıntıların, terminalde çalıştırılan komutların gerçek çıktıları yerine taslak/geçmiş turlardan kopyalanması veya yanlış aktarılması sonucu üç uyuşmazlık oluştu:
+  1. `profile_dirty.csv` dosyasının satır sayısı T7-R'de elle hesapta n=8 olarak doğru alınmışken, T9 raporunda "Rows: 10, Columns: 6" şeklinde yanlış bir çıktı gösterildi; dosyanın d7e255c ve 49ea0e8'den bu yana değişmeyip 8 satır, 7 kolon olduğu bu turda kanıtlandı.
+  2. `ENVIRONMENT.md` dosyasındaki gerçek numpy sürümü 2.5.3 iken T9 raporunda 2.2.3 olarak metne döküldü.
+  3. `docs/INCIDENTS.md` dosyası içinde I-016, I-017 ve I-018 kayıtları d6af6d6 commit'inde özgün halleriyle yer almasına rağmen, T9 rapor metninde farklı başlık ve içeriklerle alıntılandı.
+- Etki: Rapor metni ile depodaki gerçek kanıtlar arasında uyuşmazlık görüntüsü doğdu.
+- Önlem: Kanıt tazeliği kuralı getirildi: Bir turda raporlanan her çıktı, mutlaka o oturumda çalıştırılan komutun ham çıktısından doğrudan kopyalanacak, geçmiş raporlardan asla veri taşınmayacaktır.
 

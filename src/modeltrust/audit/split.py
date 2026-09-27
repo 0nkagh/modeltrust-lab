@@ -28,7 +28,7 @@ def build_split(df: pd.DataFrame, spec: ColumnSpec, mode: str = "all", test_size
                 "q75": round(float(s.quantile(0.75)), 6),
             }
         
-        # Standardized absolute mean difference (Cohen's d with pooled variance)
+        # Standardized absolute mean difference (Cohen's d with unweighted average sample variance, ddof=1)
         var_train = float(y_train.var(ddof=1) if len(y_train)>1 else 0.0)
         var_test = float(y_test.var(ddof=1) if len(y_test)>1 else 0.0)
         

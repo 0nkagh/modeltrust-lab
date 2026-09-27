@@ -58,10 +58,10 @@ Aşağıdaki sızıntı türleri statik denetim (yalnızca CSV) aracılığıyla
 | Kontrol Adı | Kapsam / Açıklama | Eşik / Kural | Sonuç / Davranış |
 | --- | --- | --- | --- |
 | `preprocess.fit_scope` | Pipeline fit kapsamı (train-only fit yapılıp yapılmadığı) | CSV'den tespit edilemez | Her zaman `not_assessable`, `reason_code="requires_pipeline_code"` |
-| `preprocess.global_standardization_signature` | Tüm veri üzerinde standartlaştırma (z-score) imzası | `abs(mean) <= 1e-9` ve (`abs(std_ddof0 - 1) <= 1e-9` veya `abs(std_ddof1 - 1) <= 1e-9`) (`n >= 10`) | `fail` (teşhis göstergesi) |
-| `preprocess.global_minmax_signature` | Tüm veri üzerinde min-max ölçekleme imzası | `min ≈ 0` ve `max ≈ 1` (`atol=1e-9`, `n >= 10`) | `fail` (teşhis göstergesi) |
-| `preprocess.feature_target_near_deterministic` | Özellik ile hedef arasında deterministiğe yakın doğrusal ilişki | `abs(corr) >= 0.999` (`n >= 20`) | `fail` (teşhis göstergesi) |
-| `preprocess.redundant_feature_pair` | İki sayısal özellik arasında aşırı yüksek korelasyon | `abs(corr) >= 0.999` (`n >= 20`) | `pass` (bilgi amaçlı), uyarı: `redundant_features` |
+| `preprocess.global_standardization_signature` | Tüm veri üzerinde standartlaştırma (z-score) imzası | `abs(mean) <= PREPROCESS_NUMERIC_TOL (1e-9)` ve (`abs(std_ddof0 - 1) <= PREPROCESS_NUMERIC_TOL` veya `abs(std_ddof1 - 1) <= PREPROCESS_NUMERIC_TOL`) (`n >= PREPROCESS_MIN_ROWS (10)`) | `fail` (teşhis göstergesi) |
+| `preprocess.global_minmax_signature` | Tüm veri üzerinde min-max ölçekleme imzası | `min ≈ 0` ve `max ≈ 1` (`atol=PREPROCESS_NUMERIC_TOL (1e-9)`, `n >= PREPROCESS_MIN_ROWS (10)`) | `fail` (teşhis göstergesi) |
+| `preprocess.feature_target_near_deterministic` | Özellik ile hedef arasında deterministiğe yakın doğrusal ilişki | `abs(corr) >= FEATURE_TARGET_DET_MIN (0.999)` (`n >= MIN_PAIRS_FOR_CORRELATION (20)`) | `fail` (teşhis göstergesi) |
+| `preprocess.redundant_feature_pair` | İki sayısal özellik arasında aşırı yüksek korelasyon | `abs(corr) >= REDUNDANT_PAIR_MIN (0.999)` (`n >= MIN_PAIRS_FOR_CORRELATION (20)`) | `pass` (bilgi amaçlı), uyarı: `redundant_features` |
 | `preprocess.suspicious_feature_name` | Şüpheli özellik isim kalıpları (`target`, `_mean`, `zscore` vb.) | Kalıp eşleşmesi (case-insensitive) | `pass` (asla fail değil), uyarı: `suspicious_feature_names` |
 
 Bu kontroller imza temellidir; pipeline kodunun train-only fit yaptığını kanıtlamaz. Tespit edilemeyenler: hedefle türetilmiş özellikler, test istatistikleriyle doldurma (imputation), tüm veriyle yapılan özellik seçimi. → bunlar raporda `not_assessable` olarak görünür.
@@ -98,6 +98,7 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
   - OLS eğitimi sırasında, hedefte veya herhangi bir özelliğinde (feature) NaN olan satırlar eğitim kümesinden düşülür.
 - **Cross-Validation (CV):** K-katlı çapraz doğrulama (CV) modülleri (random, group, temporal) desteklenir. Modüle özgü bölme mantıkları (örneğin grup bütünlüğünü bozmayan greedy group allocation) uygulanır. Eğer test kümesindeki veri çok küçükse (`CV_MIN_FOLD_SIZE < 3`) kat değerlendirilmez (`not_assessable`).
 - **Grup Hatası (Group Error):** Grup modunda (`--split-mode group`), test kümesinde yer alan her bir grup için test hataları (n, MAE, RMSE, mean residual) bağımsız hesaplanarak listelenir. MAE değerine göre gruplar sıralanır ve en kötü performans gösteren gruplar (`TOP_WORST_GROUPS = 3`) belirlenir. Yeterli örneğe sahip olmayan (`n < 5`) gruplar bu sıralamanın dışında bırakılır.
+  - **`coverage_ratio` Tanımı:** `coverage_ratio = n_rows_evaluated / n_rows_scored` olarak hesaplanır. Skorlanan toplam satırlar içinde, asgari grup büyüklüğü eşiğini (`MIN_GROUP_ROWS_FOR_ERROR = 5`) sağlayan ve grup hata sıralamasına dahil edilen geçerli satırların oranını ifade eder.
 
 ### 8.x Eşikler
 | Sabit Adı | Değer | Açıklama |
@@ -106,6 +107,10 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
 | `MIN_GROUP_ROWS_FOR_ERROR` | 5 | Bir grubun hata sıralamasına (worst_by_mae) dahil edilmesi için gereken asgari satır sayısı |
 | `TOP_WORST_GROUPS` | 3 | En yüksek MAE değerine sahip listelenecek maksimum grup adedi |
 | `CV_MIN_FOLD_SIZE` | 3 | Bir CV katının değerlendirilebilmesi için gereken asgari test satırı sayısı |
+| `MIN_ROWS_FOR_COPY_CHECK` | 5 | Hedef kolon kopyası denetimi için asgari satır sayısı |
+| `MIN_ROWS_FOR_INDEX_CHECK` | 10 | ID benzeri özellik denetimi için asgari satır sayısı |
+| `PREPROCESS_MIN_ROWS` | 10 | Ön işleme imza denetimleri için asgari satır sayısı |
+| `MIN_PAIRS_FOR_CORRELATION` | 20 | Korelasyon ve deterministik özellik-hedef ilişkisi için asgari satır sayısı |
 
 ### 8.y Neyi ölçmez
 Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, kalibrasyon ve belirsizlik kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.

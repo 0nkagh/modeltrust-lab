@@ -50,4 +50,6 @@ tzdata          2026.4
     ```powershell
     [System.Environment]::SetEnvironmentVariable("OPENBLAS_NUM_THREADS", $null, "User")
     ```
+  - **Durum:** Kalıcı kullanıcı ortam değişkeni 2026-09-27 tarihinde kaldırılmıştır (D-041 / I-018); tüm testler ve CLI kalıcı ortam değişkeni olmadan sorunsuz çalışmaktadır.
+
 

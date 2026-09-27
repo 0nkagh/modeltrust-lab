@@ -155,8 +155,23 @@ def test_split_target_summary_known_diff():
     assert abs(ts["abs_std_mean_diff"] - 1.5) < 1e-9
 
 def test_split_target_summary_unequal_sizes_formula():
-    train_vals = [-1.0, -np.sqrt(0.5), np.sqrt(0.5), 1.0] # n=4, mean 0.0, var 1.0
-    test_vals = [3.0 - np.sqrt(4.5), 3.0 + np.sqrt(4.5)] # n=2, mean 3.0, var 9.0
+    # Synthetic unequal size partition:
+    # Train: n=4, values = [-1.0, -sqrt(0.5), sqrt(0.5), 1.0] -> mean = 0.0, var(ddof=1) = 1.0
+    # Test:  n=2, values = [3.0 - sqrt(4.5), 3.0 + sqrt(4.5)] -> mean = 3.0, var(ddof=1) = 9.0
+    # Mean difference: |0.0 - 3.0| = 3.0
+    #
+    # Formula 1 (Canonical - Unweighted sample variance average):
+    #   denom = sqrt((var_tr + var_te) / 2) = sqrt((1.0 + 9.0) / 2) = sqrt(5.0) ≈ 2.236067977
+    #   abs_std_mean_diff = 3.0 / 2.236067977 ≈ 1.341640786 -> 1.341641
+    #
+    # Formula 2 (Alternative - Pooled variance weighted by ddof):
+    #   pooled_var = ((4-1)*1.0 + (2-1)*9.0) / (4 + 2 - 2) = (3 + 9) / 4 = 3.0
+    #   denom = sqrt(3.0) ≈ 1.732050808
+    #   abs_std_mean_diff = 3.0 / 1.732050808 ≈ 1.732050808 -> 1.732051
+    #
+    # The test verifies that split.py uses canonical Formula 1 (1.341641) and strictly rejects Formula 2 (1.732051).
+    train_vals = [-1.0, -np.sqrt(0.5), np.sqrt(0.5), 1.0]
+    test_vals = [3.0 - np.sqrt(4.5), 3.0 + np.sqrt(4.5)]
     n = 6
     y = np.zeros(n)
     
@@ -178,6 +193,10 @@ def test_split_target_summary_unequal_sizes_formula():
     assert abs(ts["train"]["std"] - 1.0) < 1e-5
     assert abs(ts["test"]["mean"] - 3.0) < 1e-5
     assert abs(ts["test"]["std"] - 3.0) < 1e-5
+    
+    # Assert canonical unweighted formula value:
     assert abs(ts["abs_std_mean_diff"] - 1.341641) < 1e-5
+    # Distinctly rejects weighted pooled variance formula:
+    assert abs(ts["abs_std_mean_diff"] - 1.732051) > 0.35
 
 
