@@ -116,10 +116,24 @@ def test_report_evaluate_markdown_structure():
     }
     md = build_report_md(fake_prov)
     assert "## 9. Model evaluation" in md
+    assert "| Model | MAE | RMSE | R² | n_scored |" in md
+    assert "| Fold | MAE | RMSE | R² |" in md
     assert "| supplied_predictions | 1.000000 | 1.732051 | 0.500000 | 10 |" in md
     assert "Cross-validation not assessable: N/A (not_provided)" in md
     assert "| G1 | 10 | 1.000000 | 1.000000 |" in md
     assert "- Coverage ratio: 1.000000" in md
     assert "- Thresholds: MIN_ROWS_FOR_METRICS=10, TOP_WORST_GROUPS=3" in md
     assert "- Not assessable: cv_folds_size_sane (not_provided)" in md
+
+def test_report_scope_wording_and_metric_headers():
+    fake_prov = {
+        "input": {"path": "test.csv", "sha256": "abc", "nrows_total": 10, "ncols": 2, "columns_sha256": "def"},
+        "run_metadata": {"seed": 42},
+        "environment": {"python": "3.11", "pandas": "2.0"},
+        "column_spec": {"target": "y", "prediction": None, "group": None, "time": None, "subset": None},
+    }
+    md = build_report_md(fake_prov)
+    assert "pipeline-code level" in md
+    assert "- Out of scope: pipeline-code level preprocessing leakage (fit scope cannot be inspected from a file), feature engineering transformations, sampling bias, label noise, database join leakage, temporal causality violations." in md
+
 

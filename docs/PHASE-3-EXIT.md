@@ -35,7 +35,7 @@ PHASE 3 kapsamında ModelTrust Lab teşhis araç setine aşağıdaki yetenekler 
 
 ## 2. Test Envanteri
 
-T10 oturumunda `.\.venv\Scripts\python.exe -m pytest --collect-only -q` çıktısıyla toplanan **16 dosya ve 109 test**:
+T10 ve T11 oturumlarında `.\.venv\Scripts\python.exe -m pytest --collect-only -q` çıktısıyla toplanan **16 dosya ve 110 test**:
 
 | Test Dosyası | Test Sayısı | Tür |
 |---|---|---|
@@ -52,10 +52,10 @@ T10 oturumunda `.\.venv\Scripts\python.exe -m pytest --collect-only -q` çıktı
 | `tests/unit/test_high_cardinality.py` | 1 | Unit |
 | `tests/unit/test_leakage.py` | 23 | Unit |
 | `tests/unit/test_profile.py` | 6 | Unit |
-| `tests/unit/test_report.py` | 7 | Unit |
+| `tests/unit/test_report.py` | 8 | Unit |
 | `tests/unit/test_schema.py` | 3 | Unit |
 | `tests/unit/test_split.py` | 13 | Unit |
-| **Toplam** | **109** | **109 passed (38.41s)** |
+| **Toplam** | **110** | **110 passed (42.27s)** |
 
 ---
 
@@ -114,3 +114,20 @@ Gelecek aşama (PHASE 4) için planlanan geliştirme alanları:
 - Model belirsizlik ve kalibrasyon teşhisleri.
 - Otomatik Model Kartı (Model Card) JSON/Markdown ihracı.
 - Tekrarlanabilirlik paketi (container/environment kilitleme desteği).
+
+---
+
+## 7. T11 Ek Kanıtları
+
+PHASE 3 kapanışında kalan kanıt boşlukları ve doküman uzlaştırmaları T11 oturumunda tamamlanmıştır:
+1. **`ENVIRONMENT.md` Ham Dökümü ve Sürüm Uyumu (A1):**
+   - Dosya ham olarak doğrulanmış; Python (3.12.8), numpy (2.5.3), pandas (3.0.6) ve pytest (9.1.1) sürümlerinin aktif sanal ortam çıktılarıyla birebir örtüştüğü teyit edilmiştir.
+   - `OPENBLAS_NUM_THREADS` bloğunun `d6af6d6` commit'inde (13 satır) eklendiği ve `0116628` commit'inde kaldırılma notunun işlendiği gösterilmiştir.
+2. **`split.py` Git Geçmişi ve Diff Kanıtı (A2):**
+   - `d7e255c` ve `0116628` commit diff'leri ham olarak dökülmüş, `pooled_var` değişkeninin depoda hiçbir zaman yer almadığı (`git log -S "pooled_var"` boş) kesinleştirilmiştir; `I-020` kaydına alt madde 4 olarak eklenmiştir.
+3. **Karar Sayımı Doğrulaması (A3):**
+   - `docs/DECISIONS.md` içinde `^\| D-\d{3}` deseniyle eşleşen 66 satırın tamamı dökülmüş; `D-001…D-060` aralığında 60 özgün kararın eksiksiz bulunduğu, 6 mükerrer satırın ise `D-017…D-022` errata/authoritative tablosuna ait olduğu doğrulanmıştır (`D-001…D-060 | 60 | 60 | 6 | 0 | 6 (D-017…D-022)`).
+4. **Doküman ve Etiket Düzeltmeleri (A4):**
+   - Markdown raporunda model tablosundaki metrik başlığı `R²` olarak teyit edilmiş ve testlerle kilitlenmiştir.
+   - Bölüm 7 kapsam cümlesi `Out of scope: pipeline-code level preprocessing leakage (fit scope cannot be inspected from a file)...` olarak güncellenmiş ve test kapsamına alınmıştır.
+

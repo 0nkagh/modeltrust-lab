@@ -121,7 +121,7 @@ def build_report_md(prov: dict) -> str:
     md.append("\n## 7. Limitations & scope")
     md.append("- Scope: Tabular regression only.")
     md.append("- Purpose: Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.")
-    md.append("- Out of scope: Preprocessing and Feature Engineering leakage, Sampling bias, Label noise, Database join leakage, Temporal causality violations.")
+    md.append("- Out of scope: pipeline-code level preprocessing leakage (fit scope cannot be inspected from a file), feature engineering transformations, sampling bias, label noise, database join leakage, temporal causality violations.")
     
     # 8. How to reproduce
     md.append("\n## 8. How to reproduce")

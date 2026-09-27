@@ -167,3 +167,8 @@ def test_report_evaluate_golden():
             golden = f.read()
             
         assert normalized == golden
+        
+        with open(os.path.join(tmpdir, "report.md"), "r", encoding="utf-8") as f:
+            md_text = f.read()
+        assert "| Model | MAE | RMSE | R² | n_scored |" in md_text
+        assert "pipeline-code level" in md_text

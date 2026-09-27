@@ -109,6 +109,8 @@
   1. `profile_dirty.csv` dosyasının satır sayısı T7-R'de elle hesapta n=8 olarak doğru alınmışken, T9 raporunda "Rows: 10, Columns: 6" şeklinde yanlış bir çıktı gösterildi; dosyanın d7e255c ve 49ea0e8'den bu yana değişmeyip 8 satır, 7 kolon olduğu bu turda kanıtlandı.
   2. `ENVIRONMENT.md` dosyasındaki gerçek numpy sürümü 2.5.3 iken T9 raporunda 2.2.3 olarak metne döküldü.
   3. `docs/INCIDENTS.md` dosyası içinde I-016, I-017 ve I-018 kayıtları d6af6d6 commit'inde özgün halleriyle yer almasına rağmen, T9 rapor metninde farklı başlık ve içeriklerle alıntılandı.
+  4. T8 raporunda `src/modeltrust/audit/split.py` için gösterilen `pooled_var` hunk'ı hiçbir commit'te yoktur (`git log -S "pooled_var"` boş dönmektedir). `split.py` dosyasına `d7e255c` commit'inde yalnızca tek satırlık bir açıklama yorumu (`# Standardized absolute mean difference (Cohen's d with pooled variance)`) eklenmiş, `0116628` commit'inde bu yorum `# Standardized absolute mean difference (Cohen's d with unweighted average sample variance, ddof=1)` olarak düzeltilmiştir; kodda `pooled_var` adında bir değişken veya ara hesaplama satırı depoda hiçbir zaman bulunmamıştır.
 - Etki: Rapor metni ile depodaki gerçek kanıtlar arasında uyuşmazlık görüntüsü doğdu.
 - Önlem: Kanıt tazeliği kuralı getirildi: Bir turda raporlanan her çıktı, mutlaka o oturumda çalıştırılan komutun ham çıktısından doğrudan kopyalanacak, geçmiş raporlardan asla veri taşınmayacaktır.
+> Bu dosyada gösterilen diff'ler yalnız bu oturumda çalıştırılan git komutunun çıktısı olabilir.
 
