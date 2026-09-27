@@ -75,3 +75,5 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-051 | Baseline ve CV araç içinde numpy ile uygulanır (np.linalg.lstsq); scikit-learn çekirdek bağımlılık değildir, opsiyonel ekstra olarak kalır. |
 | D-052 | NaN politikası: hedefi boş satırlar skorlanmaz; özelliklerde NaN olan satırlar model eğitiminden düşülür; her düşme sayısı raporda görünür. |
 | D-053 | Uyarı listesi sabit sıradadır; yalnız o an geçerli uyarılar yazılır. |
+| D-054 | --pred-col verildiğinde tüm satırlar skorlanır; holdout iddiası yoktur, bu durum raporda ve METHODS'ta açıkça yazılır. |
+

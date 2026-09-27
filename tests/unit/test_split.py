@@ -124,3 +124,33 @@ def test_split_target_summary_coincidental_zero_diff():
     assert ts["test"]["mean"] == 11.25
     assert ts["abs_std_mean_diff"] == 0.0
 
+def test_split_target_summary_known_diff():
+    # Synthetic data: train mean=10, std=2; test mean=13, std=2 -> abs_std_mean_diff == 1.5
+    import pandas as pd
+    n = 10
+    y = np.zeros(n)
+    train_vals = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 13.0]
+    test_vals = [13.0 - np.sqrt(2), 13.0 + np.sqrt(2)]
+    
+    rng = np.random.default_rng(42)
+    perm = rng.permutation(n).tolist()
+    test_idx = sorted(perm[:2])
+    train_idx = sorted(perm[2:])
+    
+    for i, idx in enumerate(train_idx):
+        y[idx] = train_vals[i]
+    for i, idx in enumerate(test_idx):
+        y[idx] = test_vals[i]
+        
+    df = pd.DataFrame({"y": y})
+    spec = ColumnSpec(target="y")
+    res = build_split(df, spec, mode="random", test_size=0.2, seed=42)
+    ts = res["modes"]["random"]["target_summary"]
+    assert ts is not None
+    assert abs(ts["train"]["mean"] - 10.0) < 1e-9
+    assert abs(ts["train"]["std"] - 2.0) < 1e-9
+    assert abs(ts["test"]["mean"] - 13.0) < 1e-9
+    assert abs(ts["test"]["std"] - 2.0) < 1e-9
+    assert abs(ts["abs_std_mean_diff"] - 1.5) < 1e-9
+
+

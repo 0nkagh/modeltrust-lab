@@ -81,3 +81,15 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
   - OLS eğitimi sırasında, hedefte veya herhangi bir özelliğinde (feature) NaN olan satırlar eğitim kümesinden düşülür.
 - **Cross-Validation (CV):** K-katlı çapraz doğrulama (CV) modülleri (random, group, temporal) desteklenir. Modüle özgü bölme mantıkları (örneğin grup bütünlüğünü bozmayan greedy group allocation) uygulanır. Eğer test kümesindeki veri çok küçükse (`CV_MIN_FOLD_SIZE < 3`) kat değerlendirilmez (`not_assessable`).
 - **Grup Hatası (Group Error):** Grup modunda (`--split-mode group`), test kümesinde yer alan her bir grup için test hataları (n, MAE, RMSE, mean residual) bağımsız hesaplanarak listelenir. MAE değerine göre gruplar sıralanır ve en kötü performans gösteren gruplar (`TOP_WORST_GROUPS = 3`) belirlenir. Yeterli örneğe sahip olmayan (`n < 5`) gruplar bu sıralamanın dışında bırakılır.
+
+### 8.x Eşikler
+| Sabit Adı | Değer | Açıklama |
+| --- | --- | --- |
+| `MIN_ROWS_FOR_METRICS` | 10 | Metriklerin hesaplanabilmesi için gereken asgari satır sayısı |
+| `MIN_GROUP_ROWS_FOR_ERROR` | 5 | Bir grubun hata sıralamasına (worst_by_mae) dahil edilmesi için gereken asgari satır sayısı |
+| `TOP_WORST_GROUPS` | 3 | En yüksek MAE değerine sahip listelenecek maksimum grup adedi |
+| `CV_MIN_FOLD_SIZE` | 3 | Bir CV katının değerlendirilebilmesi için gereken asgari test satırı sayısı |
+
+### 8.y Neyi ölçmez
+Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, kalibrasyon ve belirsizlik kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.
+

@@ -78,3 +78,19 @@
 - Tarih: 2026-09-27
 - Ne oldu: T7A ve T7B adımlarında git commit mesajları promptta verilen kesin metinlerden saptı ("fix(phase3): align report with golden, update exit codes and flag table (PHASE 3 / T7A)" yerine "fix(report): update section 5 title..." ve "feat(phase3): evaluate CLI with baseline models, CV, group errors (PHASE 3 / T7B)" yerine "feat(evaluate): add baseline models..."); ayrıca T7B'de oluşturulan test fixture'ları (`eval_*.csv`) açık git add listesinde yer almadığı için çalışma alanında izlenmeyen (untracked) dosyalar olarak kaldı.
 - Önlem: D-038 ve D-040 yönetişim kuralları sıkılaştırıldı; T7-R turunda izlenmeyen fixture'lar repoya dahil edildi, commit mesajı ve açık stage listesi harfiyen uygulandı.
+
+## I-016 — T7-R'de bildirilmemiş 1 satırlık split.py değişikliği (PHASE 3 / T7-R).
+- Tarih: 2026-09-27
+- Ne oldu: T7-R commit'inde `src/modeltrust/audit/split.py` dosyasına formülü açıklayan tek satırlık bir yorum (`# Standardized absolute mean difference (Cohen's d with pooled variance)`) eklendi ancak bu değişiklik rapora açık bir diff olarak yazılmadı. Değişiklik davranışı etkilememekle birlikte D-037/D-039 ilkelerine aykırıdır.
+- Önlem: Yorum/kozmetik olsa dahi her kod değişikliği rapora ham diff olarak konulmadan commit edilmeyecektir.
+
+## I-017 — group_errors eşiği ve supplied_predictions test kümesi dilimleme hatası (PHASE 3 / T8)
+- Tarih: 2026-09-27
+- Ne oldu: `--pred-col` sağlandığında model eğitimi yapılmayıp tüm satırlar (`n_scored = len(df)`) değerlendirildiği halde, `compute_group_errors` fonksiyonu veriyi `test_idx` (%20 dilim) üzerinden filtreledi. Bu nedenle `eval_preds.csv` içindeki 3 grubun her biri 10 satıra ($\ge 5$) sahip olmasına rağmen test diliminde $< 5$ satıra düştü ve `worst_by_mae` listesi boş (`[]`) kaldı.
+- Önlem: `compute_group_errors` fonksiyonu `model == "supplied"` durumunda tüm satırları değerlendirecek şekilde düzeltildi (D-054); `tests/unit/test_evaluate.py` dosyasına regresyon testi eklendi.
+
+## I-018 — Kullanıcı düzeyinde kalıcı ortam değişkeni bildirimsiz yazıldı (PHASE 3 / T7-R).
+- Tarih: 2026-09-27
+- Ne oldu: Windows 11 ortamında çoklu alt süreç (subprocess) testleri sırasında ortaya çıkan `OpenBLAS error: Memory allocation still failed after 10 retries, giving up` hatasını aşmak için `OPENBLAS_NUM_THREADS=1` ortam değişkeni kullanıcı (User) seviyesinde kalıcı olarak yazıldı ve bu durum kullanıcıya bildirilmedi.
+- Önlem: Kullanıcı düzeyindeki kalıcı değişken kaldırıldı; gereklilik gerekçesi ve hata logu `docs/ENVIRONMENT.md` içine belgelendi; ortam değişikliklerinin sessizce yapılmaması kuralı pekiştirildi.
+

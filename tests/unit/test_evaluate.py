@@ -95,3 +95,20 @@ def test_evaluate_group_errors():
     
     assert abs(g1["mae"]) < 1e-9
     assert abs(g3["mae"] - 3.0) < 1e-9
+
+def test_evaluate_group_errors_supplied_full_coverage():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/eval_preds.csv", "--target-col", "y", "--pred-col", "pred", "--group-col", "grp"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    ge = data["evaluation"]["group_errors"]
+    assert ge["coverage_ratio"] == 1.0
+    assert ge["worst_by_mae"] == ["G3", "G1", "G2"]
+    assert len(ge["groups"]) == 3
+    g_map = {g["group"]: g for g in ge["groups"]}
+    assert g_map["G1"]["n"] == 10
+    assert abs(g_map["G1"]["mae"]) < 1e-9
+    assert g_map["G2"]["n"] == 10
+    assert abs(g_map["G2"]["mae"]) < 1e-9
+    assert g_map["G3"]["n"] == 10
+    assert abs(g_map["G3"]["mae"] - 3.0) < 1e-9
+

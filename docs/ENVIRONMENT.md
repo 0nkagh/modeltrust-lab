@@ -41,3 +41,13 @@ tzdata          2026.4
   - `tmp_path` fixture'ı test çalıştırıcısında ara sıra `PermissionError: [WinError 5] Access is denied: 'C:\\Users\\agah\\AppData\\Local\\Temp\\pytest-of-agah'` hatası vermiştir (tek seferlik gözlem, yetki sorunu atlatılmıştır).
   - `tempfile.mkdtemp()` üzerinde geçici dosya okuma-yazma testi başarılıdır (Çıktı: `temp_write: ok`).
 - **Sapmalar / Notlar:** Bulunmamaktadır.
+- **Ortam Değişkeni Yönetimi (OPENBLAS_NUM_THREADS):**
+  - **Değişken Adı:** `OPENBLAS_NUM_THREADS`
+  - **Değeri:** `1`
+  - **Kapsam:** User (Kullanıcı düzeyi kalıcı ortam değişkeni)
+  - **Gerekçe:** Windows 11 üzerinde çok sayıda CLI alt sürecinin (subprocess) arka arkaya başlatıldığı test koşullarında, OpenBLAS'ın varsayılan iş parçacığı havuzu bellek tahsisinin başarısız olması (`OpenBLAS error: Memory allocation still failed after 10 retries, giving up`) ve alt süreçlerin çökmesini engellemek; tek iş parçacıklı deterministik matematiksel işlem sağlamak.
+  - **Kaldırma / Geri Alma Komutu:**
+    ```powershell
+    [System.Environment]::SetEnvironmentVariable("OPENBLAS_NUM_THREADS", $null, "User")
+    ```
+

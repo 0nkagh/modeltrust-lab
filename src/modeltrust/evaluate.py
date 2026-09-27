@@ -211,14 +211,16 @@ def compute_group_errors(df, spec, X_full, y_full, test_idx, train_idx, model, w
     if not spec.group:
         return {"status": "not_assessable", "reason_code": "not_provided", "model": None, "groups": [], "worst_by_mae": [], "coverage_ratio": 0.0}
         
-    y_test = y_full.iloc[test_idx]
-    X_test = X_full.iloc[test_idx]
-    
     rep_model = "ols_baseline"
     if model == "supplied":
-        preds = df[spec.prediction].iloc[test_idx]
+        y_test = y_full
+        preds = df[spec.prediction]
+        groups = df[spec.group].astype(str)
         rep_model = "supplied_predictions"
     else:
+        y_test = y_full.iloc[test_idx]
+        X_test = X_full.iloc[test_idx]
+        groups = df.iloc[test_idx][spec.group].astype(str)
         if model in ["ols", "both"]:
             y_train = y_full.iloc[train_idx]
             X_train = X_full.iloc[train_idx]
@@ -235,8 +237,6 @@ def compute_group_errors(df, spec, X_full, y_full, test_idx, train_idx, model, w
             mean_val = y_train[valid_train].mean() if valid_train.any() else 0.0
             preds = pd.Series(mean_val, index=y_test.index)
             rep_model = "mean_baseline"
-            
-    groups = df.iloc[test_idx][spec.group].astype(str)
     
     valid_mask = y_test.notna() & (preds.notna() if isinstance(preds, pd.Series) else ~np.isnan(preds))
     valid_y = y_test[valid_mask]
@@ -268,7 +268,7 @@ def compute_group_errors(df, spec, X_full, y_full, test_idx, train_idx, model, w
     if len(valid_for_worst) < len(out_groups) and "insufficient_group_rows" not in warnings:
         warnings.append("insufficient_group_rows")
         
-    worst = sorted(valid_for_worst, key=lambda x: x["mae"], reverse=True)[:3]
+    worst = sorted(valid_for_worst, key=lambda x: (-x["mae"], x["group"]))[:3]
     worst_names = [w["group"] for w in worst]
     
     total_valid = sum(g["n"] for g in out_groups)
