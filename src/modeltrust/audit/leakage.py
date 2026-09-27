@@ -12,6 +12,16 @@ NEAR_COPY_CORR_ABS_MIN = 0.999
 INDEX_LIKE_UNIQUE_RATIO_MIN = 0.99
 ATOL_NUMERIC_EQUALITY = 1e-12
 EXAMPLE_LIMIT = 5
+PREPROCESS_MIN_ROWS = 10
+PREPROCESS_NUMERIC_TOL = 1e-9
+FEATURE_TARGET_DET_MIN = 0.999
+REDUNDANT_PAIR_MIN = 0.999
+
+SUSPICIOUS_PATTERNS = [
+    "target", "label", "outcome", "_mean", "_std", "zscore", "z_score", 
+    "scaled", "_norm", "_pct", "_rank", "_ratio", "_lag", "_lead", 
+    "future", "rolling", "pred", "score"
+]
 
 def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
     n_rows = len(df)
@@ -329,6 +339,240 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
             "evidence": None
         })
 
+    # 7. preprocess.fit_scope
+    checks.append({
+        "name": "preprocess.fit_scope",
+        "status": "not_assessable",
+        "result": None,
+        "reason_code": "requires_pipeline_code",
+        "detail": "Whether transformers, imputers or encoders were fit on training data only cannot be determined from a CSV. Pipeline code is out of scope for v1.",
+        "evidence": None
+    })
+
+    # 8. preprocess.global_standardization_signature
+    if n_rows < PREPROCESS_MIN_ROWS:
+        checks.append({
+            "name": "preprocess.global_standardization_signature",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "insufficient_rows",
+            "detail": "",
+            "evidence": None
+        })
+    else:
+        std_evidence = []
+        for col in feature_cols:
+            col_s = df[col]
+            if pd.api.types.is_numeric_dtype(col_s):
+                valid_s = col_s.dropna()
+                if len(valid_s) >= PREPROCESS_MIN_ROWS:
+                    m = float(valid_s.mean())
+                    s0 = float(valid_s.std(ddof=0))
+                    s1 = float(valid_s.std(ddof=1)) if len(valid_s) > 1 else s0
+                    if abs(m) <= PREPROCESS_NUMERIC_TOL and (abs(s0 - 1.0) <= PREPROCESS_NUMERIC_TOL or abs(s1 - 1.0) <= PREPROCESS_NUMERIC_TOL):
+                        std_evidence.append({
+                            "column": str(col),
+                            "mean": round(m, 6),
+                            "std_ddof0": round(s0, 6),
+                            "std_ddof1": round(s1, 6)
+                        })
+        if std_evidence:
+            checks.append({
+                "name": "preprocess.global_standardization_signature",
+                "status": "performed",
+                "result": "fail",
+                "reason_code": None,
+                "detail": "consistent with standardization fitted on the full dataset; this is a diagnostic indicator, not proof.",
+                "evidence": sorted(std_evidence, key=lambda x: x["column"])[:EXAMPLE_LIMIT]
+            })
+        else:
+            checks.append({
+                "name": "preprocess.global_standardization_signature",
+                "status": "performed",
+                "result": "pass",
+                "reason_code": None,
+                "detail": "",
+                "evidence": None
+            })
+
+    # 9. preprocess.global_minmax_signature
+    if n_rows < PREPROCESS_MIN_ROWS:
+        checks.append({
+            "name": "preprocess.global_minmax_signature",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "insufficient_rows",
+            "detail": "",
+            "evidence": None
+        })
+    else:
+        minmax_evidence = []
+        for col in feature_cols:
+            col_s = df[col]
+            if pd.api.types.is_numeric_dtype(col_s):
+                valid_s = col_s.dropna()
+                if len(valid_s) >= PREPROCESS_MIN_ROWS:
+                    c_min = float(valid_s.min())
+                    c_max = float(valid_s.max())
+                    if abs(c_min) <= PREPROCESS_NUMERIC_TOL and abs(c_max - 1.0) <= PREPROCESS_NUMERIC_TOL:
+                        minmax_evidence.append({
+                            "column": str(col),
+                            "min": round(c_min, 6),
+                            "max": round(c_max, 6)
+                        })
+        if minmax_evidence:
+            checks.append({
+                "name": "preprocess.global_minmax_signature",
+                "status": "performed",
+                "result": "fail",
+                "reason_code": None,
+                "detail": "consistent with min-max scaling fitted on the full dataset; this is a diagnostic indicator, not proof.",
+                "evidence": sorted(minmax_evidence, key=lambda x: x["column"])[:EXAMPLE_LIMIT]
+            })
+        else:
+            checks.append({
+                "name": "preprocess.global_minmax_signature",
+                "status": "performed",
+                "result": "pass",
+                "reason_code": None,
+                "detail": "",
+                "evidence": None
+            })
+
+    # 10. preprocess.feature_target_near_deterministic
+    if spec.target and spec.target in df.columns:
+        if n_rows < MIN_PAIRS_FOR_CORRELATION:
+            checks.append({
+                "name": "preprocess.feature_target_near_deterministic",
+                "status": "not_assessable",
+                "result": None,
+                "reason_code": "insufficient_rows",
+                "detail": "",
+                "evidence": None
+            })
+        else:
+            target_s = df[spec.target]
+            det_evidence = []
+            if pd.api.types.is_numeric_dtype(target_s):
+                for col in feature_cols:
+                    col_s = df[col]
+                    if pd.api.types.is_numeric_dtype(col_s):
+                        mask = target_s.notna() & col_s.notna()
+                        if mask.sum() >= MIN_PAIRS_FOR_CORRELATION:
+                            corr = target_s[mask].corr(col_s[mask])
+                            if pd.notna(corr) and abs(corr) >= FEATURE_TARGET_DET_MIN:
+                                det_evidence.append({
+                                    "column": str(col),
+                                    "abs_correlation": round(float(abs(corr)), 6),
+                                    "n": int(mask.sum())
+                                })
+            if det_evidence:
+                checks.append({
+                    "name": "preprocess.feature_target_near_deterministic",
+                    "status": "performed",
+                    "result": "fail",
+                    "reason_code": None,
+                    "detail": "Near-deterministic relationship between feature and target; this is a diagnostic indicator, not proof.",
+                    "evidence": sorted(det_evidence, key=lambda x: x["column"])[:EXAMPLE_LIMIT]
+                })
+            else:
+                checks.append({
+                    "name": "preprocess.feature_target_near_deterministic",
+                    "status": "performed",
+                    "result": "pass",
+                    "reason_code": None,
+                    "detail": "",
+                    "evidence": None
+                })
+    else:
+        checks.append({
+            "name": "preprocess.feature_target_near_deterministic",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "not_provided",
+            "detail": "",
+            "evidence": None
+        })
+
+    # 11. preprocess.redundant_feature_pair
+    has_redundant_features = False
+    if n_rows < MIN_PAIRS_FOR_CORRELATION:
+        checks.append({
+            "name": "preprocess.redundant_feature_pair",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "insufficient_rows",
+            "detail": "",
+            "evidence": None
+        })
+    else:
+        redundant_evidence = []
+        num_feature_cols = [c for c in feature_cols if pd.api.types.is_numeric_dtype(df[c])]
+        for i in range(len(num_feature_cols)):
+            for j in range(i + 1, len(num_feature_cols)):
+                c1, c2 = num_feature_cols[i], num_feature_cols[j]
+                s1, s2 = df[c1], df[c2]
+                mask = s1.notna() & s2.notna()
+                if mask.sum() >= MIN_PAIRS_FOR_CORRELATION:
+                    corr = s1[mask].corr(s2[mask])
+                    if pd.notna(corr) and abs(corr) >= REDUNDANT_PAIR_MIN:
+                        redundant_evidence.append({
+                            "feature_a": str(c1),
+                            "feature_b": str(c2),
+                            "abs_correlation": round(float(abs(corr)), 6),
+                            "n": int(mask.sum())
+                        })
+        if redundant_evidence:
+            has_redundant_features = True
+            checks.append({
+                "name": "preprocess.redundant_feature_pair",
+                "status": "performed",
+                "result": "pass",
+                "reason_code": None,
+                "detail": "Redundant feature pairs detected with high correlation; informational diagnostic only, not leakage proof.",
+                "evidence": sorted(redundant_evidence, key=lambda x: (x["feature_a"], x["feature_b"]))[:EXAMPLE_LIMIT]
+            })
+        else:
+            checks.append({
+                "name": "preprocess.redundant_feature_pair",
+                "status": "performed",
+                "result": "pass",
+                "reason_code": None,
+                "detail": "",
+                "evidence": None
+            })
+
+    # 12. preprocess.suspicious_feature_name
+    has_suspicious_names = False
+    matched_name_evidence = []
+    for col in feature_cols:
+        col_lower = str(col).lower()
+        matching = [p for p in SUSPICIOUS_PATTERNS if p in col_lower]
+        if matching:
+            matched_name_evidence.append({
+                "column": str(col),
+                "matched_pattern": matching[0]
+            })
+    if matched_name_evidence:
+        has_suspicious_names = True
+        checks.append({
+            "name": "preprocess.suspicious_feature_name",
+            "status": "performed",
+            "result": "pass",
+            "reason_code": None,
+            "detail": "Suspicious feature names detected; informational diagnostic only, not leakage proof.",
+            "evidence": sorted(matched_name_evidence, key=lambda x: x["column"])[:EXAMPLE_LIMIT]
+        })
+    else:
+        checks.append({
+            "name": "preprocess.suspicious_feature_name",
+            "status": "performed",
+            "result": "pass",
+            "reason_code": None,
+            "detail": "",
+            "evidence": None
+        })
+
     suspicion_count = sum(1 for c in checks if c["result"] == "fail")
     summary = {
         "performed": sum(1 for c in checks if c["status"] == "performed"),
@@ -345,6 +589,8 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
     if spec.group is None: warnings.append("group_not_provided")
     if spec.time is None: warnings.append("time_not_provided")
     if n_rows < 5: warnings.append("insufficient_rows")
+    if has_redundant_features: warnings.append("redundant_features")
+    if has_suspicious_names: warnings.append("suspicious_feature_names")
 
     return {
         "leakage_schema_version": 1,
@@ -360,6 +606,10 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
             "NEAR_COPY_CORR_ABS_MIN": NEAR_COPY_CORR_ABS_MIN,
             "INDEX_LIKE_UNIQUE_RATIO_MIN": INDEX_LIKE_UNIQUE_RATIO_MIN,
             "ATOL_NUMERIC_EQUALITY": ATOL_NUMERIC_EQUALITY,
-            "EXAMPLE_LIMIT": EXAMPLE_LIMIT
+            "EXAMPLE_LIMIT": EXAMPLE_LIMIT,
+            "PREPROCESS_MIN_ROWS": PREPROCESS_MIN_ROWS,
+            "PREPROCESS_NUMERIC_TOL": PREPROCESS_NUMERIC_TOL,
+            "FEATURE_TARGET_DET_MIN": FEATURE_TARGET_DET_MIN,
+            "REDUNDANT_PAIR_MIN": REDUNDANT_PAIR_MIN
         }
     }

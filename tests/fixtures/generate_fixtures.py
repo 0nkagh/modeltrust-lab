@@ -106,6 +106,48 @@ def generate_eval_const_target(path: Path):
     csv_str = df.to_csv(index=False, lineterminator='\n')
     path.write_bytes(csv_str.encode('utf-8'))
 
+def generate_leak_std_full(path: Path):
+    x_raw = np.arange(1, 31, dtype=float)
+    x_z = (x_raw - x_raw.mean()) / x_raw.std(ddof=0)
+    y = x_raw * 0.5 + 3.0
+    df = pd.DataFrame({'x_raw': x_raw, 'x_z': x_z, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_leak_minmax_full(path: Path):
+    x_raw = np.arange(1, 26, dtype=float)
+    x_norm = (x_raw - x_raw.min()) / (x_raw.max() - x_raw.min())
+    y = x_raw * 2.0 + 1.0
+    df = pd.DataFrame({'x_raw': x_raw, 'x_norm': x_norm, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_leak_det_feature(path: Path):
+    rng = np.random.RandomState(42)
+    y = np.arange(1, 31, dtype=float)
+    x = rng.randn(30)
+    x_det = 2.0 * y + 1.0
+    df = pd.DataFrame({'x': x, 'x_det': x_det, 'y': y})
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
+def generate_leak_name_hints(path: Path):
+    rng1 = np.random.RandomState(1)
+    rng2 = np.random.RandomState(2)
+    rng3 = np.random.RandomState(3)
+    y = np.arange(1, 21, dtype=float)
+    y_mean_3 = rng1.randn(20)
+    x_ratio = rng2.randn(20)
+    z_score_x = rng3.randn(20)
+    df = pd.DataFrame({
+        'y_mean_3': y_mean_3,
+        'x_ratio': x_ratio,
+        'z_score_x': z_score_x,
+        'y': y
+    })
+    csv_str = df.to_csv(index=False, lineterminator='\n')
+    path.write_bytes(csv_str.encode('utf-8'))
+
 if __name__ == "__main__":
     out_dir = Path(__file__).parent
     generate_leak_clean(out_dir / "leak_clean.csv")
@@ -116,4 +158,9 @@ if __name__ == "__main__":
     generate_eval_preds(out_dir / "eval_preds.csv")
     generate_eval_nan(out_dir / "eval_nan.csv")
     generate_eval_const_target(out_dir / "eval_const_target.csv")
+    generate_leak_std_full(out_dir / "leak_std_full.csv")
+    generate_leak_minmax_full(out_dir / "leak_minmax_full.csv")
+    generate_leak_det_feature(out_dir / "leak_det_feature.csv")
+    generate_leak_name_hints(out_dir / "leak_name_hints.csv")
     print("Fixtures generated.")
+

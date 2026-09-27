@@ -84,27 +84,79 @@
         "reason_code": "not_provided",
         "result": null,
         "status": "not_assessable"
+      },
+      {
+        "detail": "Whether transformers, imputers or encoders were fit on training data only cannot be determined from a CSV. Pipeline code is out of scope for v1.",
+        "evidence": null,
+        "name": "preprocess.fit_scope",
+        "reason_code": "requires_pipeline_code",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.global_standardization_signature",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.global_minmax_signature",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.feature_target_near_deterministic",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.redundant_feature_pair",
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
+      },
+      {
+        "detail": "",
+        "evidence": null,
+        "name": "preprocess.suspicious_feature_name",
+        "reason_code": null,
+        "result": "pass",
+        "status": "performed"
       }
     ],
     "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
     "leakage_schema_version": 1,
     "summary": {
       "fail": 0,
-      "not_assessable": 6,
-      "performed": 0,
+      "not_assessable": 11,
+      "performed": 1,
       "skipped": 0,
       "suspicion_count": 0,
-      "total": 6
+      "total": 12
     },
     "thresholds": {
       "ATOL_NUMERIC_EQUALITY": 1e-12,
       "EXACT_COPY_EQUALITY_RATIO": 1.0,
       "EXAMPLE_LIMIT": 5,
+      "FEATURE_TARGET_DET_MIN": 0.999,
       "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
       "MIN_PAIRS_FOR_CORRELATION": 20,
       "MIN_ROWS_FOR_COPY_CHECK": 5,
       "MIN_ROWS_FOR_INDEX_CHECK": 10,
-      "NEAR_COPY_CORR_ABS_MIN": 0.999
+      "NEAR_COPY_CORR_ABS_MIN": 0.999,
+      "PREPROCESS_MIN_ROWS": 10,
+      "PREPROCESS_NUMERIC_TOL": 1e-09,
+      "REDUNDANT_PAIR_MIN": 0.999
     },
     "warnings": [
       "subset_not_provided",

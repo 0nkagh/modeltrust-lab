@@ -10,6 +10,10 @@
 | `INDEX_LIKE_UNIQUE_RATIO_MIN` | 0.99 |
 | `ATOL_NUMERIC_EQUALITY` | 1e-12 |
 | `EXAMPLE_LIMIT` | 5 |
+| `PREPROCESS_MIN_ROWS` | 10 |
+| `PREPROCESS_NUMERIC_TOL` | 1e-9 |
+| `FEATURE_TARGET_DET_MIN` | 0.999 |
+| `REDUNDANT_PAIR_MIN` | 0.999 |
 
 ## Kapsam Dışı Bırakılanlar
 Aşağıdaki sızıntı türleri statik denetim (yalnızca CSV) aracılığıyla güvenilir bir şekilde tespit edilemeyeceği için kasıtlı olarak kapsam dışı bırakılmıştır:
@@ -48,6 +52,19 @@ Aşağıdaki sızıntı türleri statik denetim (yalnızca CSV) aracılığıyla
 - **Ne Ölçer:** Zaman bazlı (temporal) bir ayrım yapılması beklendiğinde, eğitim (train) kümesindeki bazı örneklerin, test kümesinden daha güncel (ileriki tarihli) olup olmadığını.
 - **Nasıl Ölçer:** `subset_col` train/test gibi zaman sırası varsayımı içeriyorsa (bunu doğrudan doğrulayamaz, ancak uyarı verebilir), alt kümelerin max/min zaman damgaları arasında açık bir çakışma (overlap) veya tersine dönme olup olmadığını kontrol eder.
 - **Eşik Gerekçesi:** Test kümesinin en eski (min) tarihi, Train kümesinin en yeni (max) tarihinden eski ise bir uyarı tetiklenir (overlap > 0).
+ 
+## Preprocessing İmza Kontrolleri (Preprocessing Signature Checks)
+
+| Kontrol Adı | Kapsam / Açıklama | Eşik / Kural | Sonuç / Davranış |
+| --- | --- | --- | --- |
+| `preprocess.fit_scope` | Pipeline fit kapsamı (train-only fit yapılıp yapılmadığı) | CSV'den tespit edilemez | Her zaman `not_assessable`, `reason_code="requires_pipeline_code"` |
+| `preprocess.global_standardization_signature` | Tüm veri üzerinde standartlaştırma (z-score) imzası | `abs(mean) <= 1e-9` ve (`abs(std_ddof0 - 1) <= 1e-9` veya `abs(std_ddof1 - 1) <= 1e-9`) (`n >= 10`) | `fail` (teşhis göstergesi) |
+| `preprocess.global_minmax_signature` | Tüm veri üzerinde min-max ölçekleme imzası | `min ≈ 0` ve `max ≈ 1` (`atol=1e-9`, `n >= 10`) | `fail` (teşhis göstergesi) |
+| `preprocess.feature_target_near_deterministic` | Özellik ile hedef arasında deterministiğe yakın doğrusal ilişki | `abs(corr) >= 0.999` (`n >= 20`) | `fail` (teşhis göstergesi) |
+| `preprocess.redundant_feature_pair` | İki sayısal özellik arasında aşırı yüksek korelasyon | `abs(corr) >= 0.999` (`n >= 20`) | `pass` (bilgi amaçlı), uyarı: `redundant_features` |
+| `preprocess.suspicious_feature_name` | Şüpheli özellik isim kalıpları (`target`, `_mean`, `zscore` vb.) | Kalıp eşleşmesi (case-insensitive) | `pass` (asla fail değil), uyarı: `suspicious_feature_names` |
+
+Bu kontroller imza temellidir; pipeline kodunun train-only fit yaptığını kanıtlamaz. Tespit edilemeyenler: hedefle türetilmiş özellikler, test istatistikleriyle doldurma (imputation), tüm veriyle yapılan özellik seçimi. → bunlar raporda `not_assessable` olarak görünür.
 
 ## Yorumlama
 Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators only)**. Bir kuralın işaretlenmesi veride kesin bir hata olduğu anlamına gelmez (meşru bir durum olabilir). Aynı şekilde, bir bayrak olmaması da sızıntı (leakage) veya hata olmadığı garantisini vermez.

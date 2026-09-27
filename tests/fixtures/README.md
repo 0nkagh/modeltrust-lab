@@ -28,3 +28,8 @@
 | eval_preds.csv | Supplied predictions calculation | MAE is exactly 1.0 | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | eval_nan.csv | NaN row dropping in evaluation | drops 4 in feature, 3 in target | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | eval_const_target.csv | Zero variance target handling | r2_status = not_assessable | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| leak_std_full.csv | Full dataset standardization check | preprocess.global_standardization_signature fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| leak_minmax_full.csv | Full dataset minmax scaling check | preprocess.global_minmax_signature fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| leak_det_feature.csv | Near deterministic feature correlation | preprocess.feature_target_near_deterministic fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| leak_name_hints.csv | Suspicious feature naming hints | preprocess.suspicious_feature_name warning | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+

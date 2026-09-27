@@ -1,35 +1,35 @@
 {
   "column_spec": {
-    "group": "grp",
+    "group": null,
     "prediction": null,
-    "subset": "subset",
+    "subset": null,
     "target": "y",
     "time": null
   },
   "input": {
     "bom_stripped": false,
     "columns": [
-      "y",
-      "x1",
-      "x2",
-      "grp",
-      "subset"
+      "x_raw",
+      "x_z",
+      "y"
     ],
-    "columns_sha256": "4397a0c7878d32b1f64a0c46dcb30f0fe6dfd12b060225a18515d0723e65c1f8",
+    "columns_sha256": "5500a2f63231a34dff3004b65254688a643dbaedb19d9d34575491a5a5bc535e",
     "decimal": "dot",
     "delimiter": ",",
     "duplicate_headers": [],
     "encoding": "utf-8-sig",
     "format": "csv",
-    "ncols": 5,
+    "ncols": 3,
     "nrows_read": 30,
     "nrows_total": 30,
-    "path": "tests/fixtures/leak_clean.csv",
-    "sha256": "1e9791f91c542ffa4a8db35e425612b79ad9890e7b7949d8c607ad1def609f2b",
-    "size_bytes": 2016,
+    "path": "tests/fixtures/leak_std_full.csv",
+    "sha256": "d12908a659a909dd55123b51e702397a0c6252fa161a9450d1b5319207c42d03",
+    "size_bytes": 879,
     "truncated": false,
     "unnamed_columns": [],
     "warnings": [
+      "subset_not_provided",
+      "group_not_provided",
       "time_not_provided"
     ]
   },
@@ -44,36 +44,54 @@
         "status": "performed"
       },
       {
-        "detail": "",
-        "evidence": null,
+        "detail": "Target near copy found",
+        "evidence": [
+          {
+            "abs_correlation": 1.0,
+            "column": "x_raw",
+            "equality_ratio": 0.033333
+          },
+          {
+            "abs_correlation": 1.0,
+            "column": "x_z",
+            "equality_ratio": 0.0
+          }
+        ],
         "name": "target_copy_near",
         "reason_code": null,
-        "result": "pass",
+        "result": "fail",
         "status": "performed"
       },
       {
-        "detail": "",
-        "evidence": null,
+        "detail": "Index-like feature found",
+        "evidence": [
+          {
+            "column": "x_raw",
+            "is_integer_dtype": true,
+            "is_monotonic_increasing": true,
+            "unique_ratio": 1.0
+          }
+        ],
         "name": "index_like_feature",
         "reason_code": null,
-        "result": "pass",
+        "result": "fail",
         "status": "performed"
       },
       {
         "detail": "",
         "evidence": null,
         "name": "subset_row_overlap",
-        "reason_code": null,
-        "result": "pass",
-        "status": "performed"
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
       },
       {
         "detail": "",
         "evidence": null,
         "name": "subset_group_overlap",
-        "reason_code": null,
-        "result": "pass",
-        "status": "performed"
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
       },
       {
         "detail": "",
@@ -92,11 +110,18 @@
         "status": "not_assessable"
       },
       {
-        "detail": "",
-        "evidence": null,
+        "detail": "consistent with standardization fitted on the full dataset; this is a diagnostic indicator, not proof.",
+        "evidence": [
+          {
+            "column": "x_z",
+            "mean": 0.0,
+            "std_ddof0": 1.0,
+            "std_ddof1": 1.017095
+          }
+        ],
         "name": "preprocess.global_standardization_signature",
         "reason_code": null,
-        "result": "pass",
+        "result": "fail",
         "status": "performed"
       },
       {
@@ -108,16 +133,34 @@
         "status": "performed"
       },
       {
-        "detail": "",
-        "evidence": null,
+        "detail": "Near-deterministic relationship between feature and target; this is a diagnostic indicator, not proof.",
+        "evidence": [
+          {
+            "abs_correlation": 1.0,
+            "column": "x_raw",
+            "n": 30
+          },
+          {
+            "abs_correlation": 1.0,
+            "column": "x_z",
+            "n": 30
+          }
+        ],
         "name": "preprocess.feature_target_near_deterministic",
         "reason_code": null,
-        "result": "pass",
+        "result": "fail",
         "status": "performed"
       },
       {
-        "detail": "",
-        "evidence": null,
+        "detail": "Redundant feature pairs detected with high correlation; informational diagnostic only, not leakage proof.",
+        "evidence": [
+          {
+            "abs_correlation": 1.0,
+            "feature_a": "x_raw",
+            "feature_b": "x_z",
+            "n": 30
+          }
+        ],
         "name": "preprocess.redundant_feature_pair",
         "reason_code": null,
         "result": "pass",
@@ -135,11 +178,11 @@
     "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
     "leakage_schema_version": 1,
     "summary": {
-      "fail": 0,
-      "not_assessable": 2,
-      "performed": 10,
+      "fail": 4,
+      "not_assessable": 4,
+      "performed": 8,
       "skipped": 0,
-      "suspicion_count": 0,
+      "suspicion_count": 4,
       "total": 12
     },
     "thresholds": {
@@ -157,7 +200,10 @@
       "REDUNDANT_PAIR_MIN": 0.999
     },
     "warnings": [
-      "time_not_provided"
+      "subset_not_provided",
+      "group_not_provided",
+      "time_not_provided",
+      "redundant_features"
     ]
   },
   "run_metadata": {
@@ -204,9 +250,9 @@
       {
         "detail": "",
         "name": "optional_columns_present",
-        "reason_code": null,
-        "result": "pass",
-        "status": "performed"
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
       },
       {
         "detail": "",
@@ -218,15 +264,15 @@
       {
         "detail": "",
         "name": "group_column_cardinality",
-        "reason_code": null,
-        "result": "pass",
-        "status": "performed"
+        "reason_code": "not_provided",
+        "result": null,
+        "status": "not_assessable"
       }
     ],
     "summary": {
       "fail": 0,
-      "not_assessable": 1,
-      "performed": 7,
+      "not_assessable": 3,
+      "performed": 5,
       "skipped": 0,
       "total": 8
     }
