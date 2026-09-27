@@ -309,3 +309,38 @@ def test_card_interval_fields_missing_not_uydurma():
     q8 = next(q for q in card["questions"] if q["id"] == 8)
     assert q8["status"] == "not_assessable"
     assert "incomplete" in q8["evidence"]
+
+
+def test_card_split_skipped_recorded_with_reason(tmpdir):
+    out = str(tmpdir)
+    cmd = [
+        sys.executable, "-m", "modeltrust", "card",
+        "-i", "tests/fixtures/intervals_calibrated.csv",
+        "--target-col", "y",
+        "--lower-col", "lo",
+        "--upper-col", "hi",
+        "--out-dir", out
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0
+    with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
+        card = json.load(f)
+
+    # §4'te split satırı var
+    sp_summary = next((cs for cs in card["checks_summary"] if cs["module"] == "split"), None)
+    assert sp_summary is not None
+    assert sp_summary["total"] == 3
+    assert sp_summary["performed"] == 0
+    assert sp_summary["fail"] == 0
+    assert sp_summary["not_assessable"] == 3
+
+    # §5'te split kaydı reason_code ile var
+    sp_na = [na for na in card["not_assessable"] if na["module"] == "split"]
+    assert len(sp_na) == 3
+    for na in sp_na:
+        assert na["reason_code"] == "not_provided"
+
+    # Q3 not_assessable
+    q3 = next(q for q in card["questions"] if q["id"] == 3)
+    assert q3["status"] == "not_assessable"
+    assert "reason_code=not_provided" in q3["evidence"]

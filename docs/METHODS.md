@@ -177,8 +177,8 @@ ModelTrust Lab `shift` modülü (`src/modeltrust/audit/shift.py`), eğitim ve te
 1. **Scope & disclaimer:** Kartın bir sertifika olmadığı, performans garantisi sunmadığı belirtilir.
 2. **Data provenance:** Girdi veri yolunu, satır/kolon sayısını, veri hash'ini, kullanılan sürüm ve seed bilgilerini içerir.
 3. **Questions answered:** Modüllerin çalışabilirlik durumuna göre 10 kritik soruya verilen yanıtlar (durum ve kanıt) tablosu.
-4. **Checks summary:** Modül bazında (örn. `leakage`) gerçekleştirilen, başarısız olan ve yapılamayan denetimlerin sayımı.
-5. **Not assessable:** Gerçekleştirilemeyen denetimlerin listesi ve nedenleri (reason_code).
+4. **Checks summary:** Modül bazında (örn. `leakage`) gerçekleştirilen, başarısız olan ve yapılamayan denetimlerin sayımı. Bir modül atlandığında (örn. split çalıştırılmadığında), modül özette toplam kontrol sayısı, performed=0, fail=0 ve not_assessable olarak kayda geçer.
+5. **Not assessable:** Gerçekleştirilemeyen denetimlerin listesi ve nedenleri (reason_code). Atlanan modüllerin kontrolleri ilgili reason_code (örn. `not_provided`) ile burada listelenir.
 6. **Metrics:** Modelin ölçülen hata metrikleri, çapraz doğrulama (CV) sonuçları ve varsa belirsizlik aralığı (uncertainty interval) kapsamı.
 7. **Thresholds:** Kullanılan konfigürasyon ve eşik değerleri (örn. `OOD_MAHALANOBIS_RATIO_MIN`).
 8. **Limitations:** Aracın kısıtlamaları (sadece tabular regression, p-değeri yok, vb.) ve uyarılar.

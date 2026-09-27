@@ -43,9 +43,10 @@ def build_card_json(prov, reproduce_command):
         if rand_status != "not_assessable":
             questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "answered", "evidence": f"split.modes.random={rand_status}"})
         else:
-            questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split.modes.random not performed"})
+            rc = sp.get("modes", {}).get("random", {}).get("reason_code") or "not_provided"
+            questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": f"split.modes.random not performed (reason_code={rc})"})
     else:
-        questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split not performed"})
+        questions.append({"id": 3, "question": "Train/test or group leakage?", "status": "not_assessable", "evidence": "split.modes.random not performed (reason_code=not_provided)"})
         
     # Q4
     if sp:
@@ -58,7 +59,7 @@ def build_card_json(prov, reproduce_command):
         else:
             questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "not enough split modes for comparison"})
     else:
-        questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "split not performed"})
+        questions.append({"id": 4, "question": "Split strategy difference?", "status": "partial", "evidence": "split not performed (reason_code=not_provided)"})
         
     # Q5
     ev = prov.get("evaluation")
@@ -168,6 +169,10 @@ def build_card_json(prov, reproduce_command):
                 performed += 1
         if total > 0:
             checks_summary.append({"module": "split", "total": total, "performed": performed, "fail": fail, "not_assessable": na})
+    else:
+        checks_summary.append({"module": "split", "total": 3, "performed": 0, "fail": 0, "not_assessable": 3})
+        for m in ["random", "group", "temporal"]:
+            not_assessable.append({"module": "split", "check": f"modes.{m}", "reason_code": "not_provided"})
         
     if sh:
         total = 0; performed = 0; fail = 0; na = 0

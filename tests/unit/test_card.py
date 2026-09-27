@@ -131,11 +131,27 @@ def test_not_assessable_logic():
         }
     }
     card = build_card_json(prov, "cmd")
-    na = card["not_assessable"]
-    assert len(na) == 1
-    assert na[0]["module"] == "leakage"
-    assert na[0]["check"] == "c1"
-    assert na[0]["reason_code"] == "r1"
+    leakage_na = [x for x in card["not_assessable"] if x["module"] == "leakage"]
+    assert len(leakage_na) == 1
+    assert leakage_na[0]["module"] == "leakage"
+    assert leakage_na[0]["check"] == "c1"
+    assert leakage_na[0]["reason_code"] == "r1"
+
+def test_card_skipped_split_checks_summary():
+    prov = {
+        "profile": {"duplicate_rows": {"exact_duplicate_count": 0}},
+    }
+    card = build_card_json(prov, "cmd")
+    sp_summary = next((cs for cs in card["checks_summary"] if cs["module"] == "split"), None)
+    assert sp_summary is not None
+    assert sp_summary["total"] == 3
+    assert sp_summary["performed"] == 0
+    assert sp_summary["fail"] == 0
+    assert sp_summary["not_assessable"] == 3
+
+    sp_na = [na for na in card["not_assessable"] if na["module"] == "split"]
+    assert len(sp_na) == 3
+    assert all(na["reason_code"] == "not_provided" for na in sp_na)
 
 def test_interval_coverage_null():
     prov = {
