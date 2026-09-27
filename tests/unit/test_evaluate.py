@@ -132,37 +132,49 @@ def test_evaluate_mae_rmse_group_invariance():
     assert abs(global_rmse - weighted_rmse) <= 1e-6
 
 def test_evaluate_uncertainty_calibrated():
-    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_calibrated.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.95"])
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_calibrated.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.9"])
     assert res.returncode == 0
     data = json.loads(res.stdout)
     unc = data["evaluation"]["uncertainty"]
     assert unc["status"] == "performed"
-    assert unc["coverage"] == 1.0  # rng uniform +1 makes all cover
+    # Measured coverage: 0.910
+    assert 0.85 <= unc["coverage"] <= 0.95
     assert unc["invalid_bounds_rows"] == 0
+    assert any(c["name"] == "interval.nominal_gap" and c["result"] == "pass" for c in unc["checks"])
+    assert "non_nominal_coverage" not in unc["warnings"]
     
 def test_evaluate_uncertainty_overconfident():
-    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_overconfident.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.95"])
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_overconfident.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.9"])
     assert res.returncode == 0
     data = json.loads(res.stdout)
     unc = data["evaluation"]["uncertainty"]
-    assert unc["coverage"] < 0.95
+    # Measured coverage: 0.325
+    assert unc["coverage"] < 0.5
+    assert any(c["name"] == "interval.nominal_gap" and c["result"] == "fail" for c in unc["checks"])
     assert "non_nominal_coverage" in unc["warnings"]
     
 def test_evaluate_uncertainty_grouped():
-    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_grouped.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--group-col", "grp"])
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_grouped.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--group-col", "grp", "--nominal-coverage", "0.9"])
     assert res.returncode == 0
     data = json.loads(res.stdout)
     unc = data["evaluation"]["uncertainty"]
     assert unc["coverage_by_group"] is not None
     assert len(unc["coverage_by_group"]) == 2
     assert any(c["name"] == "interval.group_coverage_uniformity" and c["result"] == "fail" for c in unc["checks"])
+    
+    # Measured A: 0.925, B: 0.200
+    grp_a = next(g for g in unc["coverage_by_group"] if g["group"] == "A")
+    grp_b = next(g for g in unc["coverage_by_group"] if g["group"] == "B")
+    assert grp_a["coverage"] >= 0.80
+    assert grp_b["coverage"] <= 0.50
 
 def test_evaluate_uncertainty_invalid():
     res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_invalid.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi"])
     assert res.returncode == 0
     data = json.loads(res.stdout)
     unc = data["evaluation"]["uncertainty"]
-    assert unc["invalid_bounds_rows"] == 1
+    assert unc["invalid_bounds_rows"] == 3
+    assert any(c["name"] == "interval.bounds_valid" and c["result"] == "fail" for c in unc["checks"])
     assert "invalid_bounds" in unc["warnings"]
 
 def test_evaluate_uncertainty_cli_args():

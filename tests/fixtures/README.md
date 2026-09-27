@@ -35,7 +35,7 @@
 | shift_ood.csv | OOD feature range detection | x_out outside_ratio=1.0, ood.feature_range fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | shift_drift.csv | Distribution shift detection via KS | x feature KS >= 0.5, drift.feature_ks fail | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
 | shift_clean.csv | No shift / clean baseline | all shift checks pass | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
-| intervals_calibrated.csv | Uncertainty coverage check | all intervals cover target | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
-| intervals_overconfident.csv | Uncertainty coverage gap check | nominal coverage not met | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
-| intervals_grouped.csv | Uncertainty group uniformity check | large gap in group coverage | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
-| intervals_invalid.csv | Uncertainty bounds check | lower bound > upper bound | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| intervals_calibrated.csv | Uncertainty coverage check | measured coverage: 0.910 (nominal 0.90) | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| intervals_overconfident.csv | Uncertainty coverage gap check | measured coverage: 0.325 (nominal 0.90) | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| intervals_grouped.csv | Uncertainty group uniformity check | measured coverage: A=0.925, B=0.200 | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |
+| intervals_invalid.csv | Uncertainty bounds check | invalid bounds (lo > hi) in 3 rows | `.\.venv\Scripts\python.exe tests\fixtures\generate_fixtures.py` |

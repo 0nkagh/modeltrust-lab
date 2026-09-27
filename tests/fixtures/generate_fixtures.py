@@ -182,50 +182,44 @@ def generate_shift_clean(path: Path):
     path.write_bytes(csv_str.encode('utf-8'))
 
 def generate_intervals_calibrated(path: Path):
-    rng = np.random.default_rng(42)
-    y = rng.normal(0, 1, 100)
-    lo = y - 1.0 - rng.uniform(0.1, 0.5, 100)
-    hi = y + 1.0 + rng.uniform(0.1, 0.5, 100)
-    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    rng = np.random.default_rng(20240927)
+    y = rng.normal(0, 1, 200)
+    pred = y + rng.normal(0, 1, 200)
+    lo = pred - 1.645
+    hi = pred + 1.645
+    df = pd.DataFrame({'y': np.round(y, 4), 'lo': np.round(lo, 4), 'hi': np.round(hi, 4)})
     path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
 
 def generate_overconfident(path: Path):
-    rng = np.random.default_rng(42)
-    y = rng.normal(0, 1, 100)
-    y_pred = y + rng.normal(0, 1, 100)
-    lo = y_pred - 0.1
-    hi = y_pred + 0.1
-    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    rng = np.random.default_rng(20240927)
+    y = rng.normal(0, 1, 200)
+    pred = y + rng.normal(0, 1, 200)
+    lo = pred - 0.4
+    hi = pred + 0.4
+    df = pd.DataFrame({'y': np.round(y, 4), 'lo': np.round(lo, 4), 'hi': np.round(hi, 4)})
     path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
 
 def generate_grouped(path: Path):
-    rng = np.random.default_rng(42)
-    y_g1 = rng.normal(0, 1, 50)
-    y_pred_g1 = y_g1 + rng.normal(0, 0.5, 50)
-    lo_g1 = y_pred_g1 - 2.0
-    hi_g1 = y_pred_g1 + 2.0
-    
-    y_g2 = rng.normal(0, 1, 50)
-    y_pred_g2 = y_g2 + rng.normal(0, 1.0, 50)
-    lo_g2 = y_pred_g2 - 0.1
-    hi_g2 = y_pred_g2 + 0.1
-    
-    df = pd.DataFrame({
-        'y': np.concatenate([y_g1, y_g2]),
-        'lo': np.concatenate([lo_g1, lo_g2]),
-        'hi': np.concatenate([hi_g1, hi_g2]),
-        'grp': ['G1']*50 + ['G2']*50
-    })
+    rng = np.random.default_rng(20240927)
+    y = rng.normal(0, 1, 80)
+    pred = y + rng.normal(0, 1, 80)
+    grp = np.array(['A']*40 + ['B']*40)
+    lo = np.where(grp == 'A', pred - 1.645, pred - 0.4)
+    hi = np.where(grp == 'A', pred + 1.645, pred + 0.4)
+    df = pd.DataFrame({'y': np.round(y, 4), 'grp': grp, 'lo': np.round(lo, 4), 'hi': np.round(hi, 4)})
     path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
 
 def generate_invalid(path: Path):
-    rng = np.random.default_rng(42)
-    y = rng.normal(0, 1, 25)
-    lo = y - 1.0
-    hi = y + 1.0
-    lo[5] = 10.0
-    hi[5] = 0.0
-    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    rng = np.random.default_rng(20240927)
+    y = rng.normal(0, 1, 30)
+    pred = y + rng.normal(0, 1, 30)
+    lo = pred - 1.0
+    hi = pred + 1.0
+    invalid_idx = rng.choice(30, 3, replace=False)
+    temp = lo[invalid_idx]
+    lo[invalid_idx] = hi[invalid_idx]
+    hi[invalid_idx] = temp
+    df = pd.DataFrame({'y': np.round(y, 4), 'lo': np.round(lo, 4), 'hi': np.round(hi, 4)})
     path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
 
 if __name__ == "__main__":

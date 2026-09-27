@@ -80,28 +80,28 @@
     "models": [
       {
         "dropped_rows": 0,
-        "mae": 0.759009,
-        "n_scored": 20,
-        "n_test": 20,
-        "n_train": 80,
+        "mae": 0.81989,
+        "n_scored": 40,
+        "n_test": 40,
+        "n_train": 160,
         "name": "mean_baseline",
-        "r2": -0.249421,
+        "r2": -0.000487,
         "r2_status": "performed",
         "reason_code": null,
-        "rmse": 0.86612,
+        "rmse": 1.08366,
         "status": "performed"
       },
       {
         "dropped_rows": 0,
-        "mae": 0.759009,
-        "n_scored": 20,
-        "n_test": 20,
-        "n_train": 80,
+        "mae": 0.81989,
+        "n_scored": 40,
+        "n_test": 40,
+        "n_train": 160,
         "name": "ols_baseline",
-        "r2": -0.249421,
+        "r2": -0.000487,
         "r2_status": "performed",
         "reason_code": null,
-        "rmse": 0.86612,
+        "rmse": 1.08366,
         "status": "performed"
       }
     ],
@@ -133,7 +133,7 @@
           "status": "performed"
         },
         {
-          "detail": "Observed coverage: 1.0",
+          "detail": "Observed coverage: 0.91",
           "evidence": {},
           "name": "interval.coverage_computed",
           "reason_code": null,
@@ -141,11 +141,11 @@
           "status": "performed"
         },
         {
-          "detail": "gap=0.1",
+          "detail": "gap=0.01",
           "evidence": {},
           "name": "interval.nominal_gap",
           "reason_code": null,
-          "result": "fail",
+          "result": "pass",
           "status": "performed"
         },
         {
@@ -157,52 +157,52 @@
           "status": "not_assessable"
         }
       ],
-      "coverage": 1.0,
+      "coverage": 0.91,
       "coverage_by_group": null,
       "coverage_by_width_bin": [
         {
           "bin": 1,
-          "coverage": 1.0,
-          "n": 25,
-          "width_max": 2.477417
+          "coverage": 0.91,
+          "n": 200,
+          "width_max": 3.29
         },
         {
           "bin": 2,
-          "coverage": 1.0,
-          "n": 25,
-          "width_max": 2.578618
+          "coverage": null,
+          "n": 0,
+          "width_max": null
         },
         {
           "bin": 3,
-          "coverage": 1.0,
-          "n": 25,
-          "width_max": 2.726435
+          "coverage": null,
+          "n": 0,
+          "width_max": null
         },
         {
           "bin": 4,
-          "coverage": 1.0,
-          "n": 25,
-          "width_max": 2.908109
+          "coverage": null,
+          "n": 0,
+          "width_max": null
         }
       ],
-      "coverage_gap": 0.1,
+      "coverage_gap": 0.01,
       "coverage_gap_status": "performed",
-      "coverage_k": 100,
+      "coverage_k": 182,
       "coverage_wilson_95": {
-        "high": 1.0,
-        "k": 100,
-        "low": 0.963005,
-        "n": 100,
+        "high": 0.942313,
+        "k": 182,
+        "low": 0.862233,
+        "n": 200,
         "z": 1.96
       },
       "dropped_rows": 0,
       "interpretation": "Observed coverage on the provided data only. Single split, finite sample; no distribution-free guarantee. Small-sample uncertainty is reported as a Wilson interval.",
       "invalid_bounds_rows": 0,
       "lower_col": "lo",
-      "mean_interval_width": 2.586518,
-      "median_interval_width": 2.579289,
-      "n_rows": 100,
-      "n_scored": 100,
+      "mean_interval_width": 3.29,
+      "median_interval_width": 3.29,
+      "n_rows": 200,
+      "n_scored": 200,
       "nominal_coverage": 0.9,
       "reason_code": null,
       "status": "performed",
@@ -215,9 +215,7 @@
       },
       "uncertainty_schema_version": 1,
       "upper_col": "hi",
-      "warnings": [
-        "non_nominal_coverage"
-      ]
+      "warnings": []
     },
     "warnings": [
       "cv_not_requested"
@@ -237,11 +235,11 @@
     "encoding": "utf-8-sig",
     "format": "csv",
     "ncols": 3,
-    "nrows_read": 100,
-    "nrows_total": 100,
+    "nrows_read": 200,
+    "nrows_total": 200,
     "path": "tests/fixtures/intervals_calibrated.csv",
-    "sha256": "a894aea206ab1c48e121852c5db6fca61d3db815c44fa6fa8e8d19ee246e10c9",
-    "size_bytes": 5873,
+    "sha256": "c61eac4bed2c9240add09ccc0223faa7458011faa7c9929fc354e44b24feb4b5",
+    "size_bytes": 4460,
     "truncated": false,
     "unnamed_columns": [],
     "warnings": [
