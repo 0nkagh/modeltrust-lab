@@ -102,5 +102,5 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-076 | Karttaki 10 sorunun durum kuralları METHODS §11 tablosuyla sabittir; kural değişikliği yeni karar numarası gerektirir. |
 | D-077 | Model card bir sertifika değildir; performans/uyumluluk iddiası içermez, yalnız teşhis özetidir. |
 | D-078 | Metrik tablosunda n_scored kapsamı dinamiktir: tüm satırlarda n_train=0 ise "n_scored (all rows provided)", aksi hâlde "n_scored (split)"; karışık kümede "n_scored (scope varies)" ve warnings notu. Card ve report aynı yardımcı fonksiyonu kullanır. |
-| D-079 | card komutu verilen kolon bayraklarının girdide bulunmasını zorunlu kılar; bulunmayan kolon için exit 2 ve "Error: --<bayrak> '<ad>' not found in input columns". Diğer alt komutların kolon doğrulanması biliçli olarak bu sürümün kapsamı dışındadır (T15 adayı). |
+| D-079 | card komutu verilen kolon bayraklarının girdide bulunmasını zorunlu kılar; bulunmayan kolon için exit 2 ve "Error: --<bayrak> '<ad>' not found in input columns". Diğer alt komutların kolon doğrulanması bilinçli olarak bu sürümün kapsamı dışındadır (T15 adayı). |
 | D-080 | Karar defteri append-only'dir: aynı numaranın birden fazla satırı bulunabilir (errata); errata satırları numarasında "(errata)" işareti taşır ve hiçbir satır silinmez. |

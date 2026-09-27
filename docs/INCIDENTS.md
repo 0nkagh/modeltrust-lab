@@ -199,3 +199,23 @@
 - Etki: Olay kaydı metni promptta verilen metinden sapı.
 - Düzetme: Blok karakter düzeyinde onarıldı; hiçbir satır silinmedi, satır sayısı değişmedi.
 - Önlem: Türkçe/Unicode metinler PowerShell here-string ile yazılmaz; yazım sonrası içerik birebir karşılaştırılır.
+
+## I-037 — Kart, belirsizlik aralığı alanlarını yanlış kaynaktan okuyup sıfır gösterdi (PHASE 4 / T14-R4).
+- Tarih: 2026-09-27
+- Ne oldu: Kalibre fixture ile üretilen kartta coverage=0.91 doğru okundu; ancak Wilson sınırları, nominal ve ortalama genişlik boş geldi ve Q8 kanıt metni "Wilson [0.000, 0.000], nominal=0" yazdı (komut --nominal-coverage 0.9 ile çalıştırılmıştı).
+- Etki: Kart, var olan değerleri sıfır/boş göstererek yanıltıcı kanıt üretti (T14-R2'deki kablolama hatasının ikinci nüshası).
+- Düzeltme: Kart, uncertainty bloğunun gerçek alan adlarını okur; eksik alan 0.000 olarak biçimlendirilmez, durum not_assessable olur.
+- Önlem: Kart kanıt metinleri yalnızca gerçek JSON alanlarından üretilir; olmayan sayı gösterilmez.
+
+## I-038 — n_scored kapsam tablosu ham çıktı yerine özet verildi ve sayılar dosya boyutlarıyla çelişti (PHASE 4 / T14-R4).
+- Tarih: 2026-09-27
+- Ne oldu: B1'de istenen dört komutun ham çıktısı yerine tablo verildi; tabloda simple_ok.csv için n_test=20 ve n_train=16 yazdı; aynı fixture için önceki ham kart çıktısı Rows/Cols 2/3 ve n_scored=1 göstermişti.
+- Etki: Kapsam kanıtı doğrulanamadı.
+- Düzeltme: Dört kombinasyon yeniden çalıştırıldı, ham çıktılar rapora kondu.
+- Önlem: Sayısal kanıt, tabloya özetlenmeden önce ham komut çıktısıyla desteklenir.
+
+## I-039 — Görev promptu oturum kaydından yeniden okundu (PHASE 4 / T14-R4).
+- Tarih: 2026-09-27
+- Ne oldu: Görev promptunun bölümleri .gemini oturum kaydı dosyalarından (transcript_full.jsonl) yeniden okundu (İkinci kez).
+- Etki: Talimatın kaynağı kullanıcı mesajı yerine oturum kaydı oldu.
+- Önlem: Prompt verildiği gibi kullanılır; eksik/erişilemezse kullanıcıya sorulur.
