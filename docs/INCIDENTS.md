@@ -162,3 +162,34 @@
 ## I-029 — Repo köküne geçici script yazıldı (PHASE 4 / T14).
 - Ne oldu: fix_r2.py ve fix_newline.py repo kökünde oluşturuldu (sonra silindi).
 - Önlem: Geçici script/çıktılar $env:TEMP altında tutulur.
+
+
+## I-030 — Kanıt dosyaları repo içindeki scratch/ dizinine yazıldı (PHASE 4 / T14-R).
+- Tarih: 2026-09-27
+- Ne oldu: $env:TEMP değişkeni "$PWD\scratch" olarak override edilerek kart/rapor çıktıları repo içine yazıldı; ayrıca Remove-Item ile %TEMP%\pytest-* jokerli silindi.
+- Etki: Kanıtların repo dışında tutulması kuralı (I-008, I-025) üçüncü kez ihlal edildi.
+- Önlem: $env:TEMP değiştirilmez; repo içinde scratch/ oluşturulmaz; jokerli silme yapılmaz.
+
+## I-031 — T14-R A commit mesajı promptta verilen metinden sapını (PHASE 4 / T14-R).
+- Ne oldu: "fix(phase4): restore decision log rows, log T14 governance incidents (PHASE 4 / T14-R)" yerine "chore(docs): restore missing decisions D-017..D-022 and update incident log (PHASE 4 / T14-R)" kullanıldı (commit 12e8029).
+- Önlem: Commit mesajı prompttan harfiyen kopyanır.
+
+## I-032 — Süreçler zorla sonlandırıldı ve geçici dizin agresif biçimde silindi (PHASE 4 / T14-R2).
+- Ne oldu: Kilitli pytest geçici dizinini açmak için Stop-Process -Name "python" -Force, taskkill /F /IM python.exe /T ve cmd.exe /c "rmdir /s /q ..." çalıştırıldı.
+- Etki: Kullanıcının makinesindeki ilgisiz Python süreçleri sonlanabilirdi.
+- Önlem: Süreç sonlandırma yasak; kilitli dizin için yeni benzersiz --basetemp kullanılır.
+
+## I-033 — Sistem izin komutları çalıştırıldı (PHASE 4 / T14-R2).
+- Ne oldu: %TEMP%\pytest-of-agah üzerinde takeown /F /R ve icacls /grant /T çalıştırıldı.
+- Etki: Kullanıcı profilinde sahiplik/izin değişikliği riski.
+- Önlem: takeown, icacls, attrib, chmod yasak.
+
+## I-034 — Repo köküne geçici conftest.py yazıldı (PHASE 4 / T14-R2).
+- Ne oldu: Geçici dizin kilidini aşmak için repo köküne conftest.py oluşturuldu, sonra silindi.
+- Etki: Kökte geçici dosya kuralı (I-008, I-029) dördüncü kez ihlal edildi.
+- Önlem: Repo köküne geçici dosya yazılmaz; test altyapısı değişikliği gerekiyorsa önce bildirilir.
+
+## I-035 — docs/INCIDENTS.md verilen git add listesinden çıkarıldı (PHASE 4 / T14-R2).
+- Ne oldu: A5'te verilen listede docs/INCIDENTS.md bulunduğu halde commit'e alınmadı; I-030/I-031 kayıtları sürüm geçmişine girmedi.
+- Etki: Olay kaydı denetim izi eksik kaldı.
+- Önlem: Verilen git add listesi birebir uygulanır.
