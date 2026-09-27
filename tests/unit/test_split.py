@@ -113,3 +113,14 @@ def test_split_abs_std_mean_diff_missing_target():
     
     assert res["modes"]["random"]["target_summary"] is None
     assert "target_not_provided" in res["warnings"]
+
+def test_split_target_summary_coincidental_zero_diff():
+    loaded = read_table("tests/fixtures/profile_dirty.csv")
+    spec = ColumnSpec(target="y", group="grp")
+    res = build_split(loaded.frame, spec, mode="random", test_size=0.2, seed=42)
+    ts = res["modes"]["random"]["target_summary"]
+    assert ts is not None
+    assert ts["train"]["mean"] == 11.25
+    assert ts["test"]["mean"] == 11.25
+    assert ts["abs_std_mean_diff"] == 0.0
+

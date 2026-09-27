@@ -72,4 +72,6 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-048 | CLI exit code 3 (not implemented) kullanımdan kaldırıldı. `--out-dir` artık `report` komutu için zorunludur ve bu komut diske JSON/Markdown dosyaları yazar. Diğer komutlar `--out-dir` aldığında dosya yazmaz, yönlendirici hata mesajıyla (exit 0) sonlanır. |
 | D-049 | Markdown raporu JSON çıktısının doğrudan izdüşümüdür; Markdown raporuna, canonical JSON yapısında bulunmayan hiçbir ek veri (timestamp vb.) eklenemez, böylece içerik hash-identical determinizm korunur. |
 | D-050 | `MIN_ROWS_FOR_INDEX_CHECK = 10`; bu eşiğin altında `index_like_feature` değerlendirilemez (`insufficient_rows`). Gerekçe: az satırlı dosyalarda ID benzeri kolonlar teşhis değeri taşımaz ve yanlış pozitif üretir. |
-| D-051 | DEC-011: No dependencies for evaluate. Karar: scikit-learn vb. kullanilmayacak; sirf metrikler ve basit OLS icin boyut buyutulmeyecek, np.linalg.lstsq yeterli. |
+| D-051 | Baseline ve CV araç içinde numpy ile uygulanır (np.linalg.lstsq); scikit-learn çekirdek bağımlılık değildir, opsiyonel ekstra olarak kalır. |
+| D-052 | NaN politikası: hedefi boş satırlar skorlanmaz; özelliklerde NaN olan satırlar model eğitiminden düşülür; her düşme sayısı raporda görünür. |
+| D-053 | Uyarı listesi sabit sıradadır; yalnız o an geçerli uyarılar yazılır. |

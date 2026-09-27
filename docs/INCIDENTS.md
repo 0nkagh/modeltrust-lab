@@ -1,5 +1,7 @@
 # Olay Kayıtları
 
+> **Not:** Başlık biçimi bundan sonra yalnız `## I-0xx — ...` olacaktır.
+
 ## I-001 — Yasaklı `git commit --amend` kullanımı (T4-R1)
 - Tarih: 2026-09-27
 - Ne oldu: R1 commit'i atıldıktan sonra `git commit --amend --no-edit` çalıştırıldı.
@@ -66,11 +68,13 @@
 - Etki: Az satırlı dosyalarda monoton tamsayı değerler için teşhis değeri taşımayan yanlış pozitif leakage şüphesi (`fail`) üretildi.
 - Önlem: `MIN_ROWS_FOR_INDEX_CHECK = 10` eşiği eklendi; 10 satırdan az girdilerde denetim `status="not_assessable"`, `reason_code="insufficient_rows"` olarak işaretlendi (D-050).
 
+## I-014 — int64 JSON serileştirme hatası (T7B)
+- Tarih: 2026-09-27
+- Hata: `modeltrust evaluate` çıktısı yazdırılırken numpy `int64` tipleri `json.dumps` tarafından reddedildi.
+- Kök Neden: Pandas indekslerinden ve numpy fonksiyonlarından dönen satır sayıları (örn. `len(train_idx)`) standart `int` değil `np.int64` tipliydi.
+- Çözüm: `evaluate.py` içindeki json sözlüğüne giren tüm `int64` tipleri `int()` sarmalayıcısı ile standart python integer'a dönüştürüldü.
 
-## INC-005: Object of type int64 is not JSON serializable
-* **Tarih:** 2026-09-27
-* **Hata:** \modeltrust evaluate\ çıktısı yazdırılırken numpy \int64\ tipleri \json.dumps\ tarafından reddedildi.
-* **Kök Neden:** Pandas indekslerinden ve numpy fonksiyonlarından dönen satır sayıları (örn. \len(train_idx)\) standart \int\ değil \
-p.int64\ tipliydi.
-* **Çözüm:** \valuate.py\ içindeki json sözlüğüne giren tüm \int64\ tipleri \int()\ sarmalayıcısı ile standart python integer'a dönüştürüldü.
-
+## I-015 — T7A/T7B commit mesajları ve add listeleri promptta verilen metinlerden saptı (PHASE 3 / T7).
+- Tarih: 2026-09-27
+- Ne oldu: T7A ve T7B adımlarında git commit mesajları promptta verilen kesin metinlerden saptı ("fix(phase3): align report with golden, update exit codes and flag table (PHASE 3 / T7A)" yerine "fix(report): update section 5 title..." ve "feat(phase3): evaluate CLI with baseline models, CV, group errors (PHASE 3 / T7B)" yerine "feat(evaluate): add baseline models..."); ayrıca T7B'de oluşturulan test fixture'ları (`eval_*.csv`) açık git add listesinde yer almadığı için çalışma alanında izlenmeyen (untracked) dosyalar olarak kaldı.
+- Önlem: D-038 ve D-040 yönetişim kuralları sıkılaştırıldı; T7-R turunda izlenmeyen fixture'lar repoya dahil edildi, commit mesajı ve açık stage listesi harfiyen uygulandı.
