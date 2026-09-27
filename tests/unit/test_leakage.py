@@ -37,7 +37,7 @@ def test_leak_copy():
     assert ck["evidence"][0]["column"] == "x_copy"
     assert ck["evidence"][0]["equality_ratio"] == 1.0
     
-    assert get_check(leak, "index_like_feature")["result"] == "pass"
+    assert get_check(leak, "index_like_feature")["status"] == "not_assessable"
 
 def test_leak_nearcopy():
     loaded = read_table("tests/fixtures/leak_nearcopy.csv")
@@ -57,6 +57,17 @@ def test_leak_index():
     ck = get_check(leak, "index_like_feature")
     assert ck["result"] == "fail"
     assert ck["evidence"][0]["column"] == "row_id"
+
+def test_leak_index_insufficient_rows():
+    loaded = read_table("tests/fixtures/simple_ok.csv")
+    spec = ColumnSpec()
+    leak = build_leakage(loaded.frame, spec)
+    
+    ck = get_check(leak, "index_like_feature")
+    assert ck["status"] == "not_assessable"
+    assert ck["result"] is None
+    assert ck["reason_code"] == "insufficient_rows"
+    assert ck["evidence"] is None
 
 def test_leak_overlap():
     loaded = read_table("tests/fixtures/leak_overlap.csv")
@@ -131,6 +142,7 @@ def test_interpretation_and_thresholds():
     
     assert leak["interpretation"] == "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage."
     assert leak["thresholds"]["EXACT_COPY_EQUALITY_RATIO"] == 1.0
+    assert leak["thresholds"]["MIN_ROWS_FOR_INDEX_CHECK"] == 10
     assert "suspicion_count" in leak["summary"]
 
 def test_validate_input_side_effect():

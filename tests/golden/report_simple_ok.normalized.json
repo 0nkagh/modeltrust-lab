@@ -54,19 +54,12 @@
         "status": "not_assessable"
       },
       {
-        "detail": "Index-like feature found",
-        "evidence": [
-          {
-            "column": "id",
-            "is_integer_dtype": true,
-            "is_monotonic_increasing": true,
-            "unique_ratio": 1.0
-          }
-        ],
+        "detail": "",
+        "evidence": null,
         "name": "index_like_feature",
-        "reason_code": null,
-        "result": "fail",
-        "status": "performed"
+        "reason_code": "insufficient_rows",
+        "result": null,
+        "status": "not_assessable"
       },
       {
         "detail": "",
@@ -96,11 +89,11 @@
     "interpretation": "Diagnostic indicators only. A flagged pattern may be legitimate. Absence of a flag does not establish absence of leakage.",
     "leakage_schema_version": 1,
     "summary": {
-      "fail": 1,
-      "not_assessable": 5,
-      "performed": 1,
+      "fail": 0,
+      "not_assessable": 6,
+      "performed": 0,
       "skipped": 0,
-      "suspicion_count": 1,
+      "suspicion_count": 0,
       "total": 6
     },
     "thresholds": {
@@ -110,6 +103,7 @@
       "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
       "MIN_PAIRS_FOR_CORRELATION": 20,
       "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "MIN_ROWS_FOR_INDEX_CHECK": 10,
       "NEAR_COPY_CORR_ABS_MIN": 0.999
     },
     "warnings": [

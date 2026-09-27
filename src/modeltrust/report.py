@@ -23,7 +23,6 @@ def build_report_md(prov: dict) -> str:
     md.append("|---|---|---|---|---|")
     modules = ["schema", "profile", "leakage", "split"]
     for mod in modules:
-        if mod == "profile": continue
         if not prov.get(mod): continue
         perf = not_assess = skip = fail = 0
         for c in prov[mod].get("checks", []):

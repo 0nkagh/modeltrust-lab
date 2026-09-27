@@ -69,3 +69,14 @@ def test_report_split_null_if_not_requested():
             
         assert data.get("split") is None
         assert "split_not_requested" in data["input"]["warnings"]
+
+def test_report_section_2_summary_table_includes_profile():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(["report", "--input", "tests/fixtures/simple_ok.csv", "--out-dir", tmpdir])
+        assert res.returncode == 0
+        md_path = os.path.join(tmpdir, "report.md")
+        with open(md_path, "r", encoding="utf-8") as f:
+            md = f.read()
+            
+        assert "| Module | Performed | Not Assessable | Skipped | Fail |" in md
+        assert "| profile |" in md

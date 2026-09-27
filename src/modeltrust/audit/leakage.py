@@ -6,6 +6,7 @@ from modeltrust.schema import ColumnSpec
 
 MIN_ROWS_FOR_COPY_CHECK = 5
 MIN_PAIRS_FOR_CORRELATION = 20
+MIN_ROWS_FOR_INDEX_CHECK = 10
 EXACT_COPY_EQUALITY_RATIO = 1.0
 NEAR_COPY_CORR_ABS_MIN = 0.999
 INDEX_LIKE_UNIQUE_RATIO_MIN = 0.99
@@ -126,7 +127,16 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
     # 3. index_like_feature
     index_like_fail = False
     index_evidence = []
-    if n_rows > 0:
+    if n_rows < MIN_ROWS_FOR_INDEX_CHECK:
+        checks.append({
+            "name": "index_like_feature",
+            "status": "not_assessable",
+            "result": None,
+            "reason_code": "insufficient_rows",
+            "detail": "",
+            "evidence": None
+        })
+    else:
         for col in feature_cols:
             col_s = df[col]
             is_int = pd.api.types.is_integer_dtype(col_s)
@@ -163,15 +173,6 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
             "reason_code": None,
             "detail": "Index-like feature found" if index_like_fail else "",
             "evidence": sorted(index_evidence, key=lambda x: x["column"])[:EXAMPLE_LIMIT] if index_evidence else None
-        })
-    else:
-        checks.append({
-            "name": "index_like_feature",
-            "status": "not_assessable",
-            "result": None,
-            "reason_code": "insufficient_rows",
-            "detail": "",
-            "evidence": None
         })
 
     # 4. subset_row_overlap
@@ -354,6 +355,7 @@ def build_leakage(df: pd.DataFrame, spec: ColumnSpec) -> dict[str, Any]:
         "thresholds": {
             "MIN_ROWS_FOR_COPY_CHECK": MIN_ROWS_FOR_COPY_CHECK,
             "MIN_PAIRS_FOR_CORRELATION": MIN_PAIRS_FOR_CORRELATION,
+            "MIN_ROWS_FOR_INDEX_CHECK": MIN_ROWS_FOR_INDEX_CHECK,
             "EXACT_COPY_EQUALITY_RATIO": EXACT_COPY_EQUALITY_RATIO,
             "NEAR_COPY_CORR_ABS_MIN": NEAR_COPY_CORR_ABS_MIN,
             "INDEX_LIKE_UNIQUE_RATIO_MIN": INDEX_LIKE_UNIQUE_RATIO_MIN,

@@ -53,3 +53,16 @@
 ## I-011 — T5'teki `git add .` kalıntıları (T6A)
 - Ne oldu: T5'teki `git add .` kullanımı sebebiyle repoya çöp dosyalar sokuldu (`split_*_all.json`, `exit4_*.txt`, `test_out*.txt`, `leak_out.json`).
 - Önlem: T6A'da `git rm` + `.gitignore` güncellemeleri ile temizlendi.
+
+## I-012 — T6'da liste dışı iki test dosyasının commit edilmesi ve gerekçe beyanı
+- Tarih: 2026-09-27
+- Ne oldu: T6'da promptta verilen `git add` listesine ek olarak iki test dosyası (`tests/integration/test_leakage_cli.py` ve `tests/unit/test_profile.py`) commit edildi, gerekçe beyan edilmedi; T7'de beyan verildi.
+- Gerekçe: T6'da `report` komutu uygulanıp exit code 3 (not implemented) kaldırılınca ve `--out-dir` zorunlu tutulunca, bu iki test dosyasında yer alan ve `report` için exit code 3 bekleyen testler exit code 2 (usage error) beklentisine güncellenmek zorundaydı; aksi takdirde test paketi kırmızıya düşüyordu.
+- Önlem: D-037/D-040 hatırlatıldı.
+
+## I-013 — `index_like_feature` satır eşiği eksikliği ve yanlış pozitif üretimi
+- Tarih: 2026-09-27
+- Ne oldu: `index_like_feature` satır eşiği (≥10) uygulanmamıştı; 2 satırlık fixture'da (`simple_ok.csv`) yanlış pozitif üretti; T7'de eşik eklendi.
+- Etki: Az satırlı dosyalarda monoton tamsayı değerler için teşhis değeri taşımayan yanlış pozitif leakage şüphesi (`fail`) üretildi.
+- Önlem: `MIN_ROWS_FOR_INDEX_CHECK = 10` eşiği eklendi; 10 satırdan az girdilerde denetim `status="not_assessable"`, `reason_code="insufficient_rows"` olarak işaretlendi (D-050).
+

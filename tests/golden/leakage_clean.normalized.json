@@ -101,6 +101,7 @@
       "INDEX_LIKE_UNIQUE_RATIO_MIN": 0.99,
       "MIN_PAIRS_FOR_CORRELATION": 20,
       "MIN_ROWS_FOR_COPY_CHECK": 5,
+      "MIN_ROWS_FOR_INDEX_CHECK": 10,
       "NEAR_COPY_CORR_ABS_MIN": 0.999
     },
     "warnings": [
