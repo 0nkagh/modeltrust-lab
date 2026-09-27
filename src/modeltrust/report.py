@@ -238,8 +238,55 @@ def build_report_md(prov: dict) -> str:
             cov_ratio = ge.get("coverage_ratio", 0.0)
             md.append(f"- Coverage ratio: {cov_ratio:.6f}")
 
+        # Uncertainty intervals table
+        md.append("\n### Uncertainty intervals")
+        unc = ev.get("uncertainty", {})
+        if unc.get("status") == "performed":
+            md.append("| Coverage | Wilson 95% | Mean width | Median width | Nominal | Gap | Dropped |")
+            md.append("|---|---|---|---|---|---|---|")
+            cov = f"{unc['coverage']:.6f}"
+            wil = unc['coverage_wilson_95']
+            wil_str = f"[{wil['low']:.6f}, {wil['high']:.6f}]" if wil else "N/A"
+            m_wid = f"{unc['mean_interval_width']:.6f}"
+            med_wid = f"{unc['median_interval_width']:.6f}"
+            nom = f"{unc['nominal_coverage']:.6f}" if unc.get("nominal_coverage") is not None else "N/A"
+            gap = f"{unc['coverage_gap']:.6f}" if unc.get("coverage_gap") is not None else "N/A"
+            drop = str(unc.get("dropped_rows", 0))
+            md.append(f"| {cov} | {wil_str} | {m_wid} | {med_wid} | {nom} | {gap} | {drop} |")
+            
+            # Width bins
+            bins = unc.get("coverage_by_width_bin")
+            if bins:
+                md.append("\n#### Coverage by width bin")
+                md.append("| Bin | Max width | n | Coverage |")
+                md.append("|---|---|---|---|")
+                for b in bins:
+                    b_num = str(b["bin"])
+                    w_max = f"{b['width_max']:.6f}" if b.get("width_max") is not None else "N/A"
+                    n_b = str(b["n"])
+                    c_b = f"{b['coverage']:.6f}" if b.get("coverage") is not None else "N/A"
+                    md.append(f"| {b_num} | {w_max} | {n_b} | {c_b} |")
+                    
+            # Group coverage
+            grp_cov = unc.get("coverage_by_group")
+            if grp_cov:
+                md.append("\n#### Coverage by group")
+                md.append("| Group | n | Coverage | Mean width |")
+                md.append("|---|---|---|---|")
+                for gc in grp_cov:
+                    g_name = str(gc["group"])
+                    g_n = str(gc["n"])
+                    g_c = f"{gc['coverage']:.6f}" if gc.get("coverage") is not None else "N/A"
+                    g_w = f"{gc['mean_interval_width']:.6f}" if gc.get("mean_interval_width") is not None else "N/A"
+                    md.append(f"| {g_name} | {g_n} | {g_c} | {g_w} |")
+        else:
+            reason = unc.get("reason_code") or "not_provided"
+            md.append(f"- Uncertainty intervals not provided ({reason}).")
+
         # Thresholds and Not assessable lines
         thresh = ev.get("thresholds", {})
+        if unc and unc.get("thresholds"):
+            thresh.update(unc["thresholds"])
         thresh_parts = [f"{k}={v}" for k, v in sorted(thresh.items())]
         md.append(f"\n- Thresholds: {', '.join(thresh_parts)}")
         

@@ -327,3 +327,31 @@ def test_report_existing_goldens_unchanged():
         with open("tests/golden/report_evaluate.normalized.json", "r", encoding="utf-8") as f:
             golden2 = f.read()
         assert normalized2 == golden2
+
+def test_report_uncertainty_golden():
+    """Golden test for report --evaluate --lower-col --upper-col."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli([
+            "report", "--input", "tests/fixtures/intervals_calibrated.csv",
+            "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.9",
+            "--evaluate", "--out-dir", tmpdir
+        ])
+        assert res.returncode == 0
+
+        with open(os.path.join(tmpdir, "report.json"), "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+
+        if "environment" in data:
+            del data["environment"]
+
+        normalized = json.dumps(data, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+        golden_path = "tests/golden/report_uncertainty.normalized.json"
+
+        if os.environ.get("MODELTRUST_REGEN_GOLDEN") == "1":
+            with open(golden_path, "w", encoding="utf-8") as f:
+                f.write(normalized)
+
+        with open(golden_path, "r", encoding="utf-8") as f:
+            golden = f.read()
+
+        assert normalized == golden

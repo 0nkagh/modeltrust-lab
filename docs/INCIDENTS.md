@@ -120,3 +120,15 @@
 - Ne oldu: T12 ZZZ mutation doğrulama adımında, `.\.venv\Scripts\python.exe` yerine çıplak `python -c` komutu kullanılarak mutation uygulandı. Bu, `.venv` dışı yorumlayıcı çağrısıdır.
 - Etki: Ortam tutarsızlığı riski; ancak bu oturumda çıktı aynı kaldı ve herhangi bir hata üretmedi. Yüklü paketler aynı ortama ait olmadığı için sonuç farklı çıkabilirdi.
 - Önlem: Tüm Python komutları `.\.venv\Scripts\python.exe -m ...` ile çalıştırılacak; çıplak `python` veya `python -c` kullanımı yasaktır; mutation scriptleri dahil tüm betikler `.\.venv\Scripts\python.exe -c` ile çağrılacak.
+
+## I-022 — Kanıt ve geçici dosyaların repo köküne yazılması (PHASE 4 / T13)
+- Tarih: 2026-09-27
+- Ne oldu: T13 turunda komut çıktılarını yakalamak için geçici dosyalar (`diff.txt`, `out.txt`, `t13_prompt.txt`) `$env:TEMP` dizini yerine doğrudan repo köküne yazıldı ve bırakıldı.
+- Etki: Çalışma ağacı (working tree) kirlendi; izlenmeyen/gereksiz çöp dosyalar oluştu.
+- Önlem: Kanıt dosyaları ve geçici komut çıktıları sadece `$env:TEMP` (Windows) ortam değişkeni altındaki konumlara yazılacaktır. Ağaç temizliği adımıyla çöpler silinmiştir.
+
+## I-023 — Kapsama testlerinde ampirik ölçümler yerine teorik/ideal oranların assert edilmesi (PHASE 4 / T13)
+- Tarih: 2026-09-27
+- Ne oldu: Sentetik veriler (`intervals_*.csv`) üzerinde üretilen belirsizlik kapsama oranları (coverage) test edilirken, veriden elde edilen gerçek/ampirik sonuçlar (örn. %91, %32.5) yerine teorik hedefler (%100, %5, vb.) statik olarak testte (`test_evaluate.py`) beklenen değer olarak yazıldı (`assert ... == 1.0`).
+- Etki: Testlerin test ortamında kırmızıya (FAIL) düşmesine neden oldu, çünkü sentetik rastgelelik ile üretilen aralıklar teorik oranlara birebir değil, yaklaşımsal uymaktadır.
+- Önlem: D-069 kararı alındı; test fixture'larındaki belirsizlik değerleri doğrudan testlerin kendi içindeki ampirik ölçümlere bağlanarak (tolerans payıyla birlikte) testin geçmesi sağlandı.

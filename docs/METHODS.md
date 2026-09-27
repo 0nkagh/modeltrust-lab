@@ -111,6 +111,11 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
 | `MIN_ROWS_FOR_INDEX_CHECK` | 10 | ID benzeri özellik denetimi için asgari satır sayısı |
 | `PREPROCESS_MIN_ROWS` | 10 | Ön işleme imza denetimleri için asgari satır sayısı |
 | `MIN_PAIRS_FOR_CORRELATION` | 20 | Korelasyon ve deterministik özellik-hedef ilişkisi için asgari satır sayısı |
+| `MIN_ROWS_FOR_INTERVAL` | 20 | Belirsizlik (uncertainty) hesaplaması için asgari satır sayısı |
+| `WILSON_Z` | 1.96 | Wilson skor aralığı z-değeri (%95 güven) |
+| `COVERAGE_GAP_TOL` | 0.05 | Nominal kapsama ile ampirik kapsama arasındaki kabul edilebilir açık |
+| `GROUP_COVERAGE_RANGE_MAX` | 0.30 | Gruplar arası maksimum kapsama oranı farkı (uniformity tolerance) |
+| `WIDTH_BINS` | 4 | Aralık genişliği histogram kırılımı (bin sayısı) |
 
 ### 8.y Belirsizlik (Uncertainty)
 Eğer `evaluate` (veya `report --evaluate`) komutuna `--lower-col` ve `--upper-col` argümanları birlikte verilirse, modelin tahminsel belirsizlik (predictive uncertainty) performansı ölçülür ve evaluation bloğu içine `uncertainty` bölümü eklenir.
@@ -122,6 +127,8 @@ Eğer `evaluate` (veya `report --evaluate`) komutuna `--lower-col` ve `--upper-c
 
 **Yorumlama (Neyi Ölçmez):** 
 Belirsizlik göstergeleri "single split, no distribution-free guarantee" kapsamında çalışır. Hesaplanan oranlar sadece elde edilen test kümesine (single split) aittir, distribution-free bir istatistiksel geçerlilik taşımaz (ör. Conformal Prediction garantisi verilmez). Kapsama oranının nominal değere yakın olması, model aralıklarının "tamamen kalibre (fully reliable)" veya "production-ready" olduğu anlamına gelmez, yalnızca bir diagnostic indicator'dır.
+
+*Yarıçap/hata ölçeği notu: `intervals_*` sentetik verilerinde (fixture) hedef değişkenin gürültü standart sapması ($\sigma=1.0$) baz alınmış olup, güven aralığı hesaplamalarında yarıçap genişliği bu gürültü ölçeğiyle doğrudan ilişkilidir (örn. `%90` kapsama için ideal yarıçap yaklaşık `1.645 * 1.0`). Fixture'lar doğrudan bu prensiple üretilmiştir ve testler ölçülen ampirik kapsama oranlarına tolerans payıyla bağlanmıştır.*
 
 ### 8.z Neyi ölçmez
 Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, model kalibrasyon güvencesi kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.

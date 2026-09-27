@@ -80,16 +80,26 @@ modeltrust report --input data.csv --target-col y --group-col grp --pred-col my_
 *Note: This tool produces diagnostic indicators. It is not a certificate.*
 
 ### `evaluate`
-Evaluates models against simple baselines (mean, ols) and computes test metrics (MAE, RMSE, R²). Also supports CV and group-level error analysis.
+Evaluates models against simple baselines (mean, ols) and computes test metrics (MAE, RMSE, R²). Also supports CV, group-level error analysis, and uncertainty interval coverage.
 ```bash
 modeltrust evaluate --input data.csv --target-col y --pred-col my_preds --split-mode random --cv random --folds 5
 # Or to evaluate baselines:
 modeltrust evaluate --input data.csv --target-col y --model both
+
+# Uncertainty interval coverage evaluation:
+# Calibrated fixture (measured coverage: 0.910 vs nominal 0.90):
+modeltrust evaluate --input tests/fixtures/intervals_calibrated.csv --target-col y --lower-col lo --upper-col hi --nominal-coverage 0.9
+# Overconfident fixture (measured coverage: 0.325 vs nominal 0.90):
+modeltrust evaluate --input tests/fixtures/intervals_overconfident.csv --target-col y --lower-col lo --upper-col hi --nominal-coverage 0.9
 ```
 - `--model`: `mean`, `ols`, `both` (default). If `--pred-col` is given, the supplied predictions are evaluated.
 - `--split-mode`: `random` (default), `group`, `temporal`. Determines single holdout test allocation.
 - `--cv`: `none` (default), `random`, `group`, `temporal`. Performs cross-validation.
 - `--folds`: number of folds for CV (default 5).
+- `--lower-col`, `--upper-col`: Specify columns containing prediction interval bounds to calculate empirical coverage.
+- `--nominal-coverage`: Expected coverage probability (default 0.95).
+
+*Note: Diagnostic indicators only. Evaluated empirical coverage on a single split is not a distribution-free calibration guarantee.*
 
 ### `shift`
 Runs OOD and distribution shift diagnostics by splitting data and comparing train vs test distributions.
