@@ -147,3 +147,28 @@ def test_interval_coverage_null():
     prov["evaluation"]["uncertainty"] = {"status": "performed", "coverage": 0.5}
     card = build_card_json(prov, "cmd")
     assert card["metrics"]["interval_coverage"]["coverage"] == 0.5
+
+def test_n_scored_all_rows_label_and_value():
+    # Supplied-predictions mode: n_scored should equal total rows (no split applied).
+    # The card.md column header must say "all rows provided", not "split".
+    # Fixture eval_preds.csv has 30 rows; n_scored expected == 30.
+    prov = {
+        "evaluation": {
+            "models": [{
+                "name": "supplied_predictions",
+                "status": "performed",
+                "n_scored": 30,
+                "mae": 1.0,
+                "rmse": 1.732051,
+                "r2": 0.959956,
+                "r2_status": "performed",
+            }]
+        }
+    }
+    card = build_card_json(prov, "cmd")
+    model_row = card["metrics"]["models"][0]
+    assert model_row["n_scored"] == 30
+
+    md = build_card_md(card)
+    assert "n_scored (all rows provided)" in md
+    assert "n_scored (split)" not in md

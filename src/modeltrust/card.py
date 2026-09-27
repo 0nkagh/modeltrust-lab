@@ -277,8 +277,9 @@ def build_card_md(card):
     metrics = card.get("metrics", {})
     models = metrics.get("models", [])
     if models:
-        # Note: we use n_scored (split) as we just added to the report
-        lines.append("| Model | MAE | RMSE | R² | n_scored (split) |")
+        # Note: for supplied_predictions mode n_scored covers all rows provided
+        # (no split is applied). Label reflects this.
+        lines.append("| Model | MAE | RMSE | R\u00b2 | n_scored (all rows provided) |")
         lines.append("|---|---|---|---|---|")
         for m in models:
             lines.append(f"| {m['name']} | {m.get('mae', 'N/A')} | {m.get('rmse', 'N/A')} | {m.get('r2', 'N/A')} | {m.get('n_scored', 'N/A')} |")
