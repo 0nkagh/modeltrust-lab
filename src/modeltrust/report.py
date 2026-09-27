@@ -5,6 +5,7 @@ import os
 def scored_scope_label(rows: list) -> str:
     """Return the n_scored column header based on n_train values in model rows.
 
+    - Empty list (no model rows)                            -> 'n_scored (split)'
     - All rows have n_train == 0 (supplied_predictions mode) -> 'n_scored (all rows provided)'
     - All rows have n_train  > 0 (trained model mode)       -> 'n_scored (split)'
     - Mixed (some 0, some >0)                               -> 'n_scored (scope varies)'

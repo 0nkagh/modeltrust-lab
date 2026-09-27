@@ -176,7 +176,7 @@ ModelTrust Lab `shift` modülü (`src/modeltrust/audit/shift.py`), eğitim ve te
 ### 11.1 Kart Bölümleri
 1. **Scope & disclaimer:** Kartın bir sertifika olmadığı, performans garantisi sunmadığı belirtilir.
 2. **Data provenance:** Girdi veri yolunu, satır/kolon sayısını, veri hash'ini, kullanılan sürüm ve seed bilgilerini içerir.
-3. **Questions answered:** Modüllerin çalışabilirlik durumuna göre 10 kritik soruya verilen yanıtlar (durum ve kanıt) tablosu.
+3. **Questions answered:** Modüllerin çalışabilirlik durumuna göre 10 kritik soruya verilen yanıtlar (durum ve kanıt) tablosu. Split modülü yalnız `--group-col` veya `--time-col` verildiğinde çalışır; aksi hâlde kontroller atlanır ve reason_code ile kaydedilir.
 4. **Checks summary:** Modül bazında (örn. `leakage`) gerçekleştirilen, başarısız olan ve yapılamayan denetimlerin sayımı. Bir modül atlandığında (örn. split çalıştırılmadığında), modül özette toplam kontrol sayısı, performed=0, fail=0 ve not_assessable olarak kayda geçer.
 5. **Not assessable:** Gerçekleştirilemeyen denetimlerin listesi ve nedenleri (reason_code). Atlanan modüllerin kontrolleri ilgili reason_code (örn. `not_provided`) ile burada listelenir.
 6. **Metrics:** Modelin ölçülen hata metrikleri, çapraz doğrulama (CV) sonuçları ve varsa belirsizlik aralığı (uncertainty interval) kapsamı.
@@ -209,7 +209,7 @@ Model card bir **sertifika değildir**. Herhangi bir modelin "production-ready" 
 
 - **Split uygulanmaz.** Tüm sağlanan satırlar (NaN olmayan) metriğe dahil edilir.
 - Metrik tablosundaki `n_scored (all rows provided)` kolonu bu gerçeği yansıtır: değer, sağlanan veri setindeki NaN-olmayan satır sayısıdır; bir test split'inin büyüklüğü değildir.
-- `--split-mode` ve `--test-size` argümanları bu modda train/test split metrikleri üretmez; split modülü bağımsız olarak ayrı leakage denetimleri için çalışır.
+- `--split-mode` ve `--test-size` argümanları bu modda train/test split metrikleri üretmez. Split modülü yalnız `--group-col` veya `--time-col` sağlandığında çalışır; aksi hâlde split atlanır ve checks summary ile not_assessable listesine reason_code=not_provided olarak kaydedilir.
 
 ### 11.5 `n_scored` Dinamik Kapsam Kuralı
 
