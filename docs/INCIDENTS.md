@@ -166,11 +166,11 @@
 
 ## I-030 — Kanıt dosyaları repo içindeki scratch/ dizinine yazıldı (PHASE 4 / T14-R).
 - Tarih: 2026-09-27
-- Ne oldu: $env:TEMP değişkeni "$PWD\scratch" olarak override edilerek kart/rapor çıktıları repo içine yazıldı; ayrıca Remove-Item ile %TEMP%\pytest-* jokerli silindi.
+- Ne oldu: `$env:TEMP` değişkeni `"$PWD\scratch"` olarak override edilerek kart/rapor çıktıları repo içine yazıldı; ayrıca Remove-Item ile `%TEMP%\pytest-*` jokerli silindi.
 - Etki: Kanıtların repo dışında tutulması kuralı (I-008, I-025) üçüncü kez ihlal edildi.
-- Önlem: $env:TEMP değiştirilmez; repo içinde scratch/ oluşturulmaz; jokerli silme yapılmaz.
+- Önlem: `$env:TEMP` değiştirilmez; repo içinde scratch/ oluşturulmaz; jokerli silme yapılmaz.
 
-## I-031 — T14-R A commit mesajı promptta verilen metinden sapını (PHASE 4 / T14-R).
+## I-031 — T14-R A commit mesajı promptta verilen metinden sapı (PHASE 4 / T14-R).
 - Ne oldu: "fix(phase4): restore decision log rows, log T14 governance incidents (PHASE 4 / T14-R)" yerine "chore(docs): restore missing decisions D-017..D-022 and update incident log (PHASE 4 / T14-R)" kullanıldı (commit 12e8029).
 - Önlem: Commit mesajı prompttan harfiyen kopyanır.
 
@@ -180,7 +180,7 @@
 - Önlem: Süreç sonlandırma yasak; kilitli dizin için yeni benzersiz --basetemp kullanılır.
 
 ## I-033 — Sistem izin komutları çalıştırıldı (PHASE 4 / T14-R2).
-- Ne oldu: %TEMP%\pytest-of-agah üzerinde takeown /F /R ve icacls /grant /T çalıştırıldı.
+- Ne oldu: `%TEMP%\pytest-of-agah` üzerinde takeown /F /R ve icacls /grant /T çalıştırıldı.
 - Etki: Kullanıcı profilinde sahiplik/izin değişikliği riski.
 - Önlem: takeown, icacls, attrib, chmod yasak.
 
@@ -193,3 +193,9 @@
 - Ne oldu: A5'te verilen listede docs/INCIDENTS.md bulunduğu halde commit'e alınmadı; I-030/I-031 kayıtları sürüm geçmişine girmedi.
 - Etki: Olay kaydı denetim izi eksik kaldı.
 - Önlem: Verilen git add listesi birebir uygulanır.
+
+## I-036 — I-030…I-035 kayıt metinleri kodlama sırasında bozuldu (PHASE 4 / T14-R4).
+- Ne oldu: PowerShell here-string/Set-Content yoluyla yazılan blokta uzun çizgi kayboldu ("—" → "-"), "sapı" → "sapını" oldu ve kesme işaretleri düştü ("A5 te", "commit e alınmadı") (commit 3a7771f).
+- Etki: Olay kaydı metni promptta verilen metinden sapı.
+- Düzetme: Blok karakter düzeyinde onarıldı; hiçbir satır silinmedi, satır sayısı değişmedi.
+- Önlem: Türkçe/Unicode metinler PowerShell here-string ile yazılmaz; yazım sonrası içerik birebir karşılaştırılır.
