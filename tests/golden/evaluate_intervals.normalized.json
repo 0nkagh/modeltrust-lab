@@ -80,28 +80,28 @@
     "models": [
       {
         "dropped_rows": 0,
-        "mae": 24.21875,
-        "n_scored": 8,
-        "n_test": 8,
-        "n_train": 32,
+        "mae": 0.759009,
+        "n_scored": 20,
+        "n_test": 20,
+        "n_train": 80,
         "name": "mean_baseline",
-        "r2": -0.000534,
+        "r2": -0.249421,
         "r2_status": "performed",
         "reason_code": null,
-        "rmse": 27.058097,
+        "rmse": 0.86612,
         "status": "performed"
       },
       {
         "dropped_rows": 0,
-        "mae": 0.0,
-        "n_scored": 8,
-        "n_test": 8,
-        "n_train": 32,
+        "mae": 0.759009,
+        "n_scored": 20,
+        "n_test": 20,
+        "n_train": 80,
         "name": "ols_baseline",
-        "r2": 1.0,
+        "r2": -0.249421,
         "r2_status": "performed",
         "reason_code": null,
-        "rmse": 0.0,
+        "rmse": 0.86612,
         "status": "performed"
       }
     ],
@@ -113,9 +113,111 @@
       "TOP_WORST_GROUPS": 3
     },
     "uncertainty": {
-      "reason_code": "not_provided",
-      "status": "not_assessable",
-      "uncertainty_schema_version": 1
+      "checks": [
+        {
+          "detail": "",
+          "evidence": {},
+          "name": "interval.columns_present",
+          "reason_code": null,
+          "result": "pass",
+          "status": "performed"
+        },
+        {
+          "detail": "",
+          "evidence": {
+            "invalid_bounds_rows": 0
+          },
+          "name": "interval.bounds_valid",
+          "reason_code": null,
+          "result": "pass",
+          "status": "performed"
+        },
+        {
+          "detail": "Observed coverage: 1.0",
+          "evidence": {},
+          "name": "interval.coverage_computed",
+          "reason_code": null,
+          "result": "pass",
+          "status": "performed"
+        },
+        {
+          "detail": "gap=0.1",
+          "evidence": {},
+          "name": "interval.nominal_gap",
+          "reason_code": null,
+          "result": "fail",
+          "status": "performed"
+        },
+        {
+          "detail": "",
+          "evidence": {},
+          "name": "interval.group_coverage_uniformity",
+          "reason_code": "not_provided",
+          "result": null,
+          "status": "not_assessable"
+        }
+      ],
+      "coverage": 1.0,
+      "coverage_by_group": null,
+      "coverage_by_width_bin": [
+        {
+          "bin": 1,
+          "coverage": 1.0,
+          "n": 25,
+          "width_max": 2.477417
+        },
+        {
+          "bin": 2,
+          "coverage": 1.0,
+          "n": 25,
+          "width_max": 2.578618
+        },
+        {
+          "bin": 3,
+          "coverage": 1.0,
+          "n": 25,
+          "width_max": 2.726435
+        },
+        {
+          "bin": 4,
+          "coverage": 1.0,
+          "n": 25,
+          "width_max": 2.908109
+        }
+      ],
+      "coverage_gap": 0.1,
+      "coverage_gap_status": "performed",
+      "coverage_k": 100,
+      "coverage_wilson_95": {
+        "high": 1.0,
+        "k": 100,
+        "low": 0.963005,
+        "n": 100,
+        "z": 1.96
+      },
+      "dropped_rows": 0,
+      "interpretation": "Observed coverage on the provided data only. Single split, finite sample; no distribution-free guarantee. Small-sample uncertainty is reported as a Wilson interval.",
+      "invalid_bounds_rows": 0,
+      "lower_col": "lo",
+      "mean_interval_width": 2.586518,
+      "median_interval_width": 2.579289,
+      "n_rows": 100,
+      "n_scored": 100,
+      "nominal_coverage": 0.9,
+      "reason_code": null,
+      "status": "performed",
+      "thresholds": {
+        "COVERAGE_GAP_TOL": 0.05,
+        "GROUP_COVERAGE_RANGE_MAX": 0.3,
+        "MIN_ROWS_FOR_INTERVAL": 20,
+        "WIDTH_BINS": 4,
+        "WILSON_Z": 1.96
+      },
+      "uncertainty_schema_version": 1,
+      "upper_col": "hi",
+      "warnings": [
+        "non_nominal_coverage"
+      ]
     },
     "warnings": [
       "cv_not_requested"
@@ -124,21 +226,22 @@
   "input": {
     "bom_stripped": false,
     "columns": [
-      "x",
-      "y"
+      "y",
+      "lo",
+      "hi"
     ],
-    "columns_sha256": "9ab9de25768ac172235e119b76362ecddad33878fe9a7792cdddbe47236f9a87",
+    "columns_sha256": "b4b83fa31d0b0b5ff33c705deef1e83a6612d9f2edbe1342b4be410b63022c12",
     "decimal": "dot",
     "delimiter": ",",
     "duplicate_headers": [],
     "encoding": "utf-8-sig",
     "format": "csv",
-    "ncols": 2,
-    "nrows_read": 40,
-    "nrows_total": 40,
-    "path": "tests/fixtures/eval_exact_linear.csv",
-    "sha256": "eb52ab68d4a19dea0fb132f1d5f354ce51ed4e1bfad2aa95c1aa9c5bd68c62ac",
-    "size_bytes": 391,
+    "ncols": 3,
+    "nrows_read": 100,
+    "nrows_total": 100,
+    "path": "tests/fixtures/intervals_calibrated.csv",
+    "sha256": "a894aea206ab1c48e121852c5db6fca61d3db815c44fa6fa8e8d19ee246e10c9",
+    "size_bytes": 5873,
     "truncated": false,
     "unnamed_columns": [],
     "warnings": [

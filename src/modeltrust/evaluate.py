@@ -2,6 +2,235 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional
 
+# ---------------------------------------------------------------------------
+# Uncertainty / interval coverage
+# ---------------------------------------------------------------------------
+
+MIN_ROWS_FOR_INTERVAL = 20
+COVERAGE_GAP_TOL = 0.05
+GROUP_COVERAGE_RANGE_MAX = 0.30
+WILSON_Z = 1.96
+WIDTH_BINS = 4
+ATOL_NUMERIC_EQUALITY = 1e-12
+MIN_GROUP_ROWS_FOR_UNCERTAINTY = 5
+
+def _wilson_95(k: int, n: int) -> Dict[str, float]:
+    """Wilson score interval for a proportion."""
+    z = WILSON_Z
+    p = k / n
+    denom = 1.0 + z * z / n
+    center = (p + z * z / (2 * n)) / denom
+    margin = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    low = max(0.0, center - margin)
+    high = min(1.0, center + margin)
+    return {"low": round(float(low), 6), "high": round(float(high), 6), "z": z, "n": n, "k": k}
+
+def build_uncertainty(
+    df: pd.DataFrame,
+    y_col: str,
+    lower_col: str,
+    upper_col: str,
+    nominal_coverage: Optional[float],
+    group_col: Optional[str],
+) -> Dict[str, Any]:
+    """Compute observed coverage diagnostics. No distribution-free guarantee."""
+    warnings: List[str] = []
+
+    # Scored rows: all three present
+    mask = df[y_col].notna() & df[lower_col].notna() & df[upper_col].notna()
+    n_rows = int(len(df))
+    n_scored = int(mask.sum())
+    dropped_rows = n_rows - n_scored
+
+    if n_scored < MIN_ROWS_FOR_INTERVAL:
+        if dropped_rows > 0:
+            warnings.append("truncated_input")
+        warnings.append("insufficient_rows")
+        return {
+            "uncertainty_schema_version": 1,
+            "status": "not_assessable",
+            "reason_code": "insufficient_rows",
+            "lower_col": lower_col,
+            "upper_col": upper_col,
+            "n_rows": n_rows,
+            "n_scored": n_scored,
+            "dropped_rows": dropped_rows,
+            "coverage": None,
+            "coverage_k": None,
+            "coverage_wilson_95": None,
+            "mean_interval_width": None,
+            "median_interval_width": None,
+            "nominal_coverage": nominal_coverage,
+            "coverage_gap": None,
+            "coverage_gap_status": "not_assessable",
+            "invalid_bounds_rows": None,
+            "coverage_by_width_bin": None,
+            "coverage_by_group": None,
+            "checks": [
+                {"name": "interval.columns_present", "status": "performed", "result": "pass", "reason_code": None, "detail": "", "evidence": {}},
+                {"name": "interval.bounds_valid", "status": "not_assessable", "result": None, "reason_code": "insufficient_rows", "detail": "", "evidence": {}},
+                {"name": "interval.coverage_computed", "status": "not_assessable", "result": None, "reason_code": "insufficient_rows", "detail": "", "evidence": {}},
+                {"name": "interval.nominal_gap", "status": "not_assessable", "result": None, "reason_code": "insufficient_rows", "detail": "", "evidence": {}},
+                {"name": "interval.group_coverage_uniformity", "status": "not_assessable", "result": None, "reason_code": "insufficient_rows", "detail": "", "evidence": {}},
+            ],
+            "thresholds": {
+                "MIN_ROWS_FOR_INTERVAL": MIN_ROWS_FOR_INTERVAL,
+                "COVERAGE_GAP_TOL": COVERAGE_GAP_TOL,
+                "GROUP_COVERAGE_RANGE_MAX": GROUP_COVERAGE_RANGE_MAX,
+                "WILSON_Z": WILSON_Z,
+                "WIDTH_BINS": WIDTH_BINS,
+            },
+            "warnings": warnings,
+            "interpretation": "Observed coverage on the provided data only. Single split, finite sample; no distribution-free guarantee. Small-sample uncertainty is reported as a Wilson interval.",
+        }
+
+    y = df.loc[mask, y_col].values.astype(float)
+    lo = df.loc[mask, lower_col].values.astype(float)
+    hi = df.loc[mask, upper_col].values.astype(float)
+
+    # invalid bounds
+    invalid_bounds_mask = lo > hi + ATOL_NUMERIC_EQUALITY
+    invalid_bounds_rows = int(invalid_bounds_mask.sum())
+    bounds_valid_result = "fail" if invalid_bounds_rows > 0 else "pass"
+    if invalid_bounds_rows > 0:
+        warnings.append("invalid_bounds")
+
+    # coverage (closed interval; invalid bounds rows → False, not dropped)
+    covered = (lo <= y + ATOL_NUMERIC_EQUALITY) & (y <= hi + ATOL_NUMERIC_EQUALITY)
+    k = int(covered.sum())
+    coverage = round(float(k / n_scored), 6)
+    wilson = _wilson_95(k, n_scored)
+
+    # interval widths
+    widths = hi - lo
+    mean_width = round(float(np.mean(widths)), 6)
+    median_width = round(float(np.median(widths)), 6)
+
+    # nominal gap
+    if nominal_coverage is not None:
+        gap = round(float(coverage - nominal_coverage), 6)
+        gap_fail = abs(gap) > COVERAGE_GAP_TOL
+        gap_status = "performed"
+        gap_result = "fail" if gap_fail else "pass"
+        if gap_fail:
+            warnings.append("non_nominal_coverage")
+    else:
+        gap = None
+        gap_status = "not_assessable"
+        gap_result = None
+
+    # width bins (quantile-based edges)
+    q25 = float(np.percentile(widths, 25))
+    q50 = float(np.percentile(widths, 50))
+    q75 = float(np.percentile(widths, 75))
+    edges = [q25, q50, q75]
+
+    def _assign_bin(w):
+        for i, e in enumerate(edges):
+            if w <= e + ATOL_NUMERIC_EQUALITY:
+                return i + 1
+        return 4
+
+    bin_labels = np.array([_assign_bin(float(w)) for w in widths])
+    bins_out = []
+    for b in range(1, WIDTH_BINS + 1):
+        sel = bin_labels == b
+        n_b = int(sel.sum())
+        cov_b = round(float(covered[sel].sum() / n_b), 6) if n_b > 0 else None
+        width_max_b = round(float(widths[sel].max()), 6) if n_b > 0 else None
+        bins_out.append({"bin": b, "width_max": width_max_b, "n": n_b, "coverage": cov_b})
+
+    # group coverage
+    group_cov_out = None
+    group_check_status = "not_assessable"
+    group_check_rc = "not_provided"
+    group_check_result = None
+    group_check_detail = ""
+    if group_col and group_col in df.columns:
+        grp_series = df.loc[mask, group_col].astype(str)
+        group_rows_list = []
+        for g_name, g_idx in grp_series.groupby(grp_series).groups.items():
+            n_g = len(g_idx)
+            if n_g >= MIN_GROUP_ROWS_FOR_UNCERTAINTY:
+                cov_g = round(float(covered[grp_series.index.get_indexer(g_idx)].sum() / n_g), 6) if hasattr(grp_series.index, 'get_indexer') else None
+                # use positional indexing
+                pos_idx = [list(grp_series.index).index(i) for i in g_idx]
+                cov_g = round(float(covered[pos_idx].sum() / n_g), 6)
+                w_g = round(float(widths[pos_idx].mean()), 6)
+                group_rows_list.append({"group": str(g_name), "n": n_g, "coverage": cov_g, "mean_interval_width": w_g})
+        group_rows_list.sort(key=lambda x: x["group"])
+        if len(group_rows_list) >= 2:
+            covs = [r["coverage"] for r in group_rows_list]
+            cov_range = max(covs) - min(covs)
+            group_check_status = "performed"
+            group_check_rc = None
+            group_check_result = "fail" if cov_range > GROUP_COVERAGE_RANGE_MAX else "pass"
+            group_check_detail = f"Coverage range across groups: {round(cov_range, 6)}"
+            if group_check_result == "fail":
+                warnings.append("insufficient_group_rows")
+            group_cov_out = group_rows_list
+        else:
+            group_check_status = "not_assessable"
+            group_check_rc = "insufficient_group_rows"
+            warnings.append("insufficient_group_rows")
+            group_cov_out = group_rows_list if group_rows_list else None
+
+    # Ordered warnings (only valid entries)
+    WARN_ORDER = [
+        "interval_columns_excluded_from_features",
+        "invalid_bounds",
+        "non_nominal_coverage",
+        "insufficient_rows",
+        "insufficient_group_rows",
+        "not_provided",
+        "truncated_input",
+    ]
+    final_warns: List[str] = []
+    for w in WARN_ORDER:
+        if w in warnings and w not in final_warns:
+            final_warns.append(w)
+
+    checks = [
+        {"name": "interval.columns_present", "status": "performed", "result": "pass", "reason_code": None, "detail": "", "evidence": {}},
+        {"name": "interval.bounds_valid", "status": "performed", "result": bounds_valid_result, "reason_code": None, "detail": f"{invalid_bounds_rows} rows with lower > upper" if invalid_bounds_rows > 0 else "", "evidence": {"invalid_bounds_rows": invalid_bounds_rows}},
+        {"name": "interval.coverage_computed", "status": "performed", "result": "pass", "reason_code": None, "detail": f"Observed coverage: {coverage}", "evidence": {}},
+        {"name": "interval.nominal_gap", "status": gap_status, "result": gap_result, "reason_code": None if nominal_coverage is not None else "not_provided", "detail": f"gap={gap}" if gap is not None else "", "evidence": {}},
+        {"name": "interval.group_coverage_uniformity", "status": group_check_status, "result": group_check_result, "reason_code": group_check_rc, "detail": group_check_detail, "evidence": {}},
+    ]
+
+    return {
+        "uncertainty_schema_version": 1,
+        "status": "performed",
+        "reason_code": None,
+        "lower_col": lower_col,
+        "upper_col": upper_col,
+        "n_rows": n_rows,
+        "n_scored": n_scored,
+        "dropped_rows": dropped_rows,
+        "coverage": coverage,
+        "coverage_k": k,
+        "coverage_wilson_95": wilson,
+        "mean_interval_width": mean_width,
+        "median_interval_width": median_width,
+        "nominal_coverage": nominal_coverage,
+        "coverage_gap": gap,
+        "coverage_gap_status": gap_status,
+        "invalid_bounds_rows": invalid_bounds_rows,
+        "coverage_by_width_bin": bins_out,
+        "coverage_by_group": group_cov_out,
+        "checks": checks,
+        "thresholds": {
+            "MIN_ROWS_FOR_INTERVAL": MIN_ROWS_FOR_INTERVAL,
+            "COVERAGE_GAP_TOL": COVERAGE_GAP_TOL,
+            "GROUP_COVERAGE_RANGE_MAX": GROUP_COVERAGE_RANGE_MAX,
+            "WILSON_Z": WILSON_Z,
+            "WIDTH_BINS": WIDTH_BINS,
+        },
+        "warnings": final_warns,
+        "interpretation": "Observed coverage on the provided data only. Single split, finite sample; no distribution-free guarantee. Small-sample uncertainty is reported as a Wilson interval.",
+    }
+
+
 def compute_metrics(y_true, y_pred, warn_list: List[str]) -> Dict[str, Any]:
     mask = y_true.notna() & (y_pred.notna() if isinstance(y_pred, pd.Series) else ~np.isnan(y_pred))
     y_t = y_true[mask]
@@ -283,7 +512,19 @@ def compute_group_errors(df, spec, X_full, y_full, test_idx, train_idx, model, w
         "coverage_ratio": round(float(coverage), 6)
     }
 
-def build_evaluation(df: pd.DataFrame, spec: Any, model: str, split_mode: str, test_size: float, cv: str, folds: int, seed: int) -> Dict[str, Any]:
+def build_evaluation(
+    df: pd.DataFrame, 
+    spec: Any, 
+    model: str, 
+    split_mode: str, 
+    test_size: float, 
+    cv: str, 
+    folds: int, 
+    seed: int,
+    lower_col: Optional[str] = None,
+    upper_col: Optional[str] = None,
+    nominal_coverage: Optional[float] = None
+) -> Dict[str, Any]:
     warnings = []
     n = len(df)
     target_col = spec.target
@@ -293,6 +534,17 @@ def build_evaluation(df: pd.DataFrame, spec: Any, model: str, split_mode: str, t
     if spec.group: exclude_cols.append(spec.group)
     if spec.time: exclude_cols.append(spec.time)
     if spec.subset: exclude_cols.append(spec.subset)
+    
+    excluded_intervals = False
+    if lower_col and lower_col in df.columns:
+        exclude_cols.append(lower_col)
+        excluded_intervals = True
+    if upper_col and upper_col in df.columns:
+        exclude_cols.append(upper_col)
+        excluded_intervals = True
+        
+    if excluded_intervals:
+        warnings.append("interval_columns_excluded_from_features")
     
     numeric_features = []
     non_numeric = []
@@ -410,6 +662,20 @@ def build_evaluation(df: pd.DataFrame, spec: Any, model: str, split_mode: str, t
     cv_res = do_cv(df, spec, X_full, y_full, cv, folds, seed, model, warnings)
     ge_res = compute_group_errors(df, spec, X_full, y_full, test_idx, train_idx, model, warnings)
     
+    if lower_col and upper_col:
+        unc_res = build_uncertainty(df, target_col, lower_col, upper_col, nominal_coverage, spec.group)
+        # merge uncertainty warnings without duplicating
+        for w in unc_res["warnings"]:
+            if w not in warnings:
+                warnings.append(w)
+    else:
+        unc_res = {
+            "uncertainty_schema_version": 1,
+            "status": "not_assessable",
+            "reason_code": "not_provided"
+        }
+
+    
     checks = []
     checks.append({
         "name": "metrics_computed",
@@ -484,6 +750,7 @@ def build_evaluation(df: pd.DataFrame, spec: Any, model: str, split_mode: str, t
         "models": models_out,
         "cv": cv_res,
         "group_errors": ge_res,
+        "uncertainty": unc_res,
         "thresholds": {"MIN_ROWS_FOR_METRICS": 10, "MIN_GROUP_ROWS_FOR_ERROR": 5, "TOP_WORST_GROUPS": 3, "CV_MIN_FOLD_SIZE": 3},
         "checks": checks,
         "warnings": final_warns,

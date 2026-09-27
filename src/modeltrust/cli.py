@@ -53,6 +53,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
     report_parser.add_argument("--folds", type=int, default=5)
     report_parser.add_argument("--shift", action="store_true", help="Include distribution shift and OOD checks in report")
+    report_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
+    report_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
+    report_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
 
     def _add_common_args(p):
         p.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -96,6 +99,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     eval_parser.add_argument("--test-size", type=float, default=0.2)
     eval_parser.add_argument("--cv", choices=["none", "random", "group", "temporal"], default="none")
     eval_parser.add_argument("--folds", type=int, default=5)
+    eval_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
+    eval_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
+    eval_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
 
     # Shift command
     shift_parser = subparsers.add_parser("shift")
@@ -127,7 +133,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 2
 
         # Flags exclusive to --evaluate
-        evaluate_only_flags = ["--pred-col", "--model", "--cv", "--folds"]
+        evaluate_only_flags = ["--pred-col", "--model", "--cv", "--folds", "--lower-col", "--upper-col", "--nominal-coverage"]
         # Flags valid with --evaluate OR --shift
         evaluate_or_shift_flags = ["--split-mode", "--test-size"]
 
@@ -162,6 +168,12 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.cv == "temporal" and not args.time_col:
                 print("Error: --cv temporal requires --time-col", file=sys.stderr)
                 return 4
+            if bool(args.lower_col) != bool(args.upper_col):
+                print("Error: --lower-col and --upper-col must be provided together", file=sys.stderr)
+                return 2
+            if args.nominal_coverage is not None and not (0.0 < args.nominal_coverage < 1.0):
+                print("Error: --nominal-coverage must be between 0.0 and 1.0 exclusive", file=sys.stderr)
+                return 2
 
         if args.shift:
             if not args.target_col:
@@ -193,6 +205,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         if args.cv == "temporal" and not args.time_col:
             print("Error: --cv temporal requires --time-col", file=sys.stderr)
             return 4
+        if bool(args.lower_col) != bool(args.upper_col):
+            print("Error: --lower-col and --upper-col must be provided together", file=sys.stderr)
+            return 2
+        if args.nominal_coverage is not None and not (0.0 < args.nominal_coverage < 1.0):
+            print("Error: --nominal-coverage must be between 0.0 and 1.0 exclusive", file=sys.stderr)
+            return 2
 
     if args.command == "shift":
         if not args.target_col:
@@ -270,7 +288,10 @@ def main(argv: Optional[list[str]] = None) -> int:
                     test_size=args.test_size, 
                     cv=args.cv, 
                     folds=args.folds, 
-                    seed=args.seed
+                    seed=args.seed,
+                    lower_col=getattr(args, "lower_col", None),
+                    upper_col=getattr(args, "upper_col", None),
+                    nominal_coverage=getattr(args, "nominal_coverage", None)
                 )
 
             if args.command == "shift" or (args.command == "report" and args.shift):

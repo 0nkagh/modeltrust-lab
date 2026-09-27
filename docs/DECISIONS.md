@@ -88,6 +88,8 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 | D-064 | report --shift opsiyoneldir; açıldığında §6 iki tabloya genişler (split karşılaştırma + distribution shift & OOD) ve JSON'a shift bloğu eklenir; diğer golden'lar değişmez. --split-mode ve --test-size artık --evaluate veya --shift varlığını gerektirir. |
 | D-065 | `shift` ve `report --shift` için --target-col zorunludur (target_ks drift kontrolü hedef gerektirir); eksikse exit 2. |
 | D-066 | report --shift verilmeden --split-mode/--test-size kullanılamaz (exit 2); --shift ile birlikte kullanılabilir. |
+| D-067 | Belirsizlik (Uncertainty) değerlendirmesi evaluation bloğunun bir parçasıdır; `--lower-col` ve `--upper-col` (ve opsiyonel `--nominal-coverage`) verildiğinde aktifleşir. |
+| D-068 | Belirsizlik aralıklarının kapsamı "single split, no distribution-free guarantee" varsayımıyla çalışır ve kalibrasyon güvencesi ("aralıklar kalibre olduğu kanıtlandı") vermez; sadece ampirik "observed coverage" hesaplanır. Küçük örneklem aralığı için Wilson Score Interval kullanılır. |
 
 
 

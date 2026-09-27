@@ -131,3 +131,45 @@ def test_evaluate_mae_rmse_group_invariance():
     assert abs(global_mae - weighted_mae) <= 1e-9
     assert abs(global_rmse - weighted_rmse) <= 1e-6
 
+def test_evaluate_uncertainty_calibrated():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_calibrated.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.95"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    unc = data["evaluation"]["uncertainty"]
+    assert unc["status"] == "performed"
+    assert unc["coverage"] == 1.0  # rng uniform +1 makes all cover
+    assert unc["invalid_bounds_rows"] == 0
+    
+def test_evaluate_uncertainty_overconfident():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_overconfident.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "0.95"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    unc = data["evaluation"]["uncertainty"]
+    assert unc["coverage"] < 0.95
+    assert "non_nominal_coverage" in unc["warnings"]
+    
+def test_evaluate_uncertainty_grouped():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_grouped.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--group-col", "grp"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    unc = data["evaluation"]["uncertainty"]
+    assert unc["coverage_by_group"] is not None
+    assert len(unc["coverage_by_group"]) == 2
+    assert any(c["name"] == "interval.group_coverage_uniformity" and c["result"] == "fail" for c in unc["checks"])
+
+def test_evaluate_uncertainty_invalid():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/intervals_invalid.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi"])
+    assert res.returncode == 0
+    data = json.loads(res.stdout)
+    unc = data["evaluation"]["uncertainty"]
+    assert unc["invalid_bounds_rows"] == 1
+    assert "invalid_bounds" in unc["warnings"]
+
+def test_evaluate_uncertainty_cli_args():
+    res = run_cli(["evaluate", "--input", "tests/fixtures/invalid.csv", "--target-col", "y", "--lower-col", "lo"])
+    assert res.returncode == 2
+    assert "must be provided together" in res.stderr
+    
+    res2 = run_cli(["evaluate", "--input", "tests/fixtures/invalid.csv", "--target-col", "y", "--lower-col", "lo", "--upper-col", "hi", "--nominal-coverage", "1.5"])
+    assert res2.returncode == 2
+    assert "must be between 0.0 and 1.0 exclusive" in res2.stderr

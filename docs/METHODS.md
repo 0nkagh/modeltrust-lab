@@ -112,8 +112,19 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
 | `PREPROCESS_MIN_ROWS` | 10 | Ön işleme imza denetimleri için asgari satır sayısı |
 | `MIN_PAIRS_FOR_CORRELATION` | 20 | Korelasyon ve deterministik özellik-hedef ilişkisi için asgari satır sayısı |
 
-### 8.y Neyi ölçmez
-Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, kalibrasyon ve belirsizlik kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.
+### 8.y Belirsizlik (Uncertainty)
+Eğer `evaluate` (veya `report --evaluate`) komutuna `--lower-col` ve `--upper-col` argümanları birlikte verilirse, modelin tahminsel belirsizlik (predictive uncertainty) performansı ölçülür ve evaluation bloğu içine `uncertainty` bölümü eklenir.
+
+- **Kapsama Oranı (Coverage):** Test kümesindeki hedef değişkenin (target) alt ve üst sınırlar (`[lower, upper]`) içinde kalma oranıdır. Ampirik olarak (observed coverage) hesaplanır.
+- **Wilson Skoru:** Kapsama oranının 95% güven aralığı, küçük örneklem kararlılığı için $z=1.96$ (Wilson Score Interval) ile tahmin edilir.
+- **Grup Kapsaması:** Veri gruplara ayrılmışsa, her grubun kendi kapsama oranı ayrıca raporlanır. `MAX_GROUP_COVERAGE_GAP (0.10)` eşiği kullanılarak, gruplar arası maksimum kapsama farkının (max - min) çok yüksek olup olmadığı (`interval.group_coverage_uniformity`) denetlenir.
+- **Nominal Kapsama Karşılaştırması:** Kullanıcı `--nominal-coverage` (ör. 0.95) sağlarsa, ampirik kapsamın alt sınırının bu değere ulaşıp ulaşmadığı (`interval.coverage_gap`) kontrol edilir. Ulaşmıyorsa `non_nominal_coverage` uyarısı verilir.
+
+**Yorumlama (Neyi Ölçmez):** 
+Belirsizlik göstergeleri "single split, no distribution-free guarantee" kapsamında çalışır. Hesaplanan oranlar sadece elde edilen test kümesine (single split) aittir, distribution-free bir istatistiksel geçerlilik taşımaz (ör. Conformal Prediction garantisi verilmez). Kapsama oranının nominal değere yakın olması, model aralıklarının "tamamen kalibre (fully reliable)" veya "production-ready" olduğu anlamına gelmez, yalnızca bir diagnostic indicator'dır.
+
+### 8.z Neyi ölçmez
+Bu blok kullanıcının modelinin genel performansını ölçmez. `--pred-col` verildiğinde **tüm satırlar** skorlanır, holdout yoktur. Hiperparametre arama, sınıflandırma metrikleri, model kalibrasyon güvencesi kapsam dışıdır. OLS ve ortalama baseline yalnız araç içi referanstır.
 
 ## 9. Dağılım Kayması ve OOD (Gösterge)
 

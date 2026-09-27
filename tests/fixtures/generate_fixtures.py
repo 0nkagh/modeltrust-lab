@@ -181,6 +181,53 @@ def generate_shift_clean(path: Path):
     csv_str = df.to_csv(index=False, lineterminator='\n')
     path.write_bytes(csv_str.encode('utf-8'))
 
+def generate_intervals_calibrated(path: Path):
+    rng = np.random.default_rng(42)
+    y = rng.normal(0, 1, 100)
+    lo = y - 1.0 - rng.uniform(0.1, 0.5, 100)
+    hi = y + 1.0 + rng.uniform(0.1, 0.5, 100)
+    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
+
+def generate_overconfident(path: Path):
+    rng = np.random.default_rng(42)
+    y = rng.normal(0, 1, 100)
+    y_pred = y + rng.normal(0, 1, 100)
+    lo = y_pred - 0.1
+    hi = y_pred + 0.1
+    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
+
+def generate_grouped(path: Path):
+    rng = np.random.default_rng(42)
+    y_g1 = rng.normal(0, 1, 50)
+    y_pred_g1 = y_g1 + rng.normal(0, 0.5, 50)
+    lo_g1 = y_pred_g1 - 2.0
+    hi_g1 = y_pred_g1 + 2.0
+    
+    y_g2 = rng.normal(0, 1, 50)
+    y_pred_g2 = y_g2 + rng.normal(0, 1.0, 50)
+    lo_g2 = y_pred_g2 - 0.1
+    hi_g2 = y_pred_g2 + 0.1
+    
+    df = pd.DataFrame({
+        'y': np.concatenate([y_g1, y_g2]),
+        'lo': np.concatenate([lo_g1, lo_g2]),
+        'hi': np.concatenate([hi_g1, hi_g2]),
+        'grp': ['G1']*50 + ['G2']*50
+    })
+    path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
+
+def generate_invalid(path: Path):
+    rng = np.random.default_rng(42)
+    y = rng.normal(0, 1, 25)
+    lo = y - 1.0
+    hi = y + 1.0
+    lo[5] = 10.0
+    hi[5] = 0.0
+    df = pd.DataFrame({'y': y, 'lo': lo, 'hi': hi})
+    path.write_bytes(df.to_csv(index=False, lineterminator='\n').encode('utf-8'))
+
 if __name__ == "__main__":
     out_dir = Path(__file__).parent
     generate_leak_clean(out_dir / "leak_clean.csv")
@@ -198,6 +245,10 @@ if __name__ == "__main__":
     generate_shift_ood(out_dir / "shift_ood.csv")
     generate_shift_drift(out_dir / "shift_drift.csv")
     generate_shift_clean(out_dir / "shift_clean.csv")
+    generate_intervals_calibrated(out_dir / "intervals_calibrated.csv")
+    generate_overconfident(out_dir / "intervals_overconfident.csv")
+    generate_grouped(out_dir / "intervals_grouped.csv")
+    generate_invalid(out_dir / "intervals_invalid.csv")
     print("Fixtures generated.")
 
 
