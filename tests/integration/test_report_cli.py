@@ -398,7 +398,7 @@ def test_report_card_consistency_with_card_command():
         # Senaryo 1: eval_preds.csv
         rep_dir1 = os.path.join(tmpdir, 'rep1')
         card_dir1 = os.path.join(tmpdir, 'card1')
-        res_rep1 = run_cli(['report', '--input', 'tests/fixtures/eval_preds.csv', '--target-col', 'y', '--pred-col', 'pred', '--group-col', 'grp', '--evaluate', '--card', '--out-dir', rep_dir1])
+        res_rep1 = run_cli(['report', '--input', 'tests/fixtures/eval_preds.csv', '--target-col', 'y', '--pred-col', 'pred', '--group-col', 'grp', '--evaluate', '--shift', '--card', '--out-dir', rep_dir1])
         res_card1 = run_cli(['card', '--input', 'tests/fixtures/eval_preds.csv', '--target-col', 'y', '--pred-col', 'pred', '--group-col', 'grp', '--out-dir', card_dir1])
         assert res_rep1.returncode == 0
         assert res_card1.returncode == 0
@@ -415,7 +415,7 @@ def test_report_card_consistency_with_card_command():
         # Senaryo 2: intervals_calibrated.csv
         rep_dir2 = os.path.join(tmpdir, 'rep2')
         card_dir2 = os.path.join(tmpdir, 'card2')
-        res_rep2 = run_cli(['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--card', '--out-dir', rep_dir2])
+        res_rep2 = run_cli(['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', rep_dir2])
         res_card2 = run_cli(['card', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--out-dir', card_dir2])
         assert res_rep2.returncode == 0
         assert res_card2.returncode == 0
