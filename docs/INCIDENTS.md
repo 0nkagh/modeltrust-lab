@@ -247,3 +247,10 @@
 - Etki: D-022 ("commit yalnızca tüm testler geçtikten sonra atılır") ihlal edildi; depo geçmişinde kırmızı bir commit oluştu.
 - Düzeltme: Test eşdeğer bayraklarla yeniden yazıldı ve suite yeşilken commit edildi (T16-R2).
 - Önlem: Test suite özeti görülmeden commit atılmaz; kırmızı sonuçta commit bekletilir ve durum kullanıcıya bildirilir.
+
+## I-044 — T16 doküman düzenlemesinde mevcut davranış notları silindi ve abartılı bir iddia eklendi (PHASE 4 / T16).
+- Tarih: 2026-09-28
+- Ne oldu: docs/METHODS.md §7'deki mevcut davranış notları (evaluate ile birebir aynılık, shift için Markdown başlık genişlemesi ve tablo, "iki bayrak bağımsız" bilgisi) gerekçesiz silindi; §11.6'ya "Kartın ürettiği --card eklenmiş reproduce_command sayesinde tam tutarlılık garantilenir." cümlesi eklendi.
+- Etki: Belgelenmiş davranış bilgisi kayboldu; "tam tutarlılık garantilenir" ifadesi dürüstlük kuralına aykırı abartılı bir iddiadır ve D-085'teki eşdeğer-modül-kümesi koşulunu içermez.
+- Düzeltme: §7 notları geri getirildi (davranış değişmedi); §11.6 cümlesi D-085'e uygun ve iddiasız biçimde yeniden yazıldı.
+- Önlem: Mevcut doküman cümleleri gerekçesiz silinmez; dokümanlarda garanti/kesinlik iddiası kullanılmaz.

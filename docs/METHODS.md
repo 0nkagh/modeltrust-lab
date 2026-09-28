@@ -79,7 +79,7 @@ Tüm bu denetim çıktıları **teşhis göstergesidir (Diagnostic indicators on
   - **Temporal Split:** Veri, zaman kolonu ve ardından orijinal satır indeksine göre sıralanarak ayrılır.
 
 ## 7. Rapor Üretimi (Report Generation)
-- **Kapsam ve İçerik:** `tool`, `run_metadata`, `environment`, `input`, `column_spec`, `schema`, `profile`, `leakage` ve isteğe bağlı `split` bloklarını içeren kanonik bir JSON üretir. `--evaluate` argümanı verildiğinde (varsayılan olarak kapalıdır), üst düzey `evaluation` bloğu ve Markdown raporuna `## 9. Model evaluation` bölümü eklenir. `--shift` argümanı verildiğinde, üst düzey `shift` bloğu JSON'a eklenir. `--card` bayrağı verildiğinde `card.json` ve `card.md` dosyaları da aynı dizine aynı okuma (`prov`) üzerinden üretilir.
+- **Kapsam ve İçerik:** `tool`, `run_metadata`, `environment`, `input`, `column_spec`, `schema`, `profile`, `leakage` ve isteğe bağlı `split` bloklarını içeren kanonik bir JSON üretir. `--evaluate` argümanı verildiğinde (varsayılan olarak kapalıdır), üst düzey `evaluation` bloğu ve Markdown raporuna `## 9. Model evaluation` bölümü eklenir (davranış `evaluate` komutuyla birebir aynıdır). `--shift` argümanı verildiğinde (varsayılan olarak kapalıdır), üst düzey `shift` bloğu JSON'a eklenir; Markdown'da `## 6. Split comparison` başlığı `## 6. Split comparison and distribution shift` olarak genişler ve `### Distribution shift & OOD` tablosu (`| Check | Result | Detail |`) eklenir. `--card` bayrağı verildiğinde `card.json` ve `card.md` dosyaları da aynı dizine, aynı okuma (`prov`) üzerinden üretilir. Bu bayraklar bağımsız ve birlikte kullanılabilir.
 - **Markdown İzdüşümü:** JSON ile birlikte oluşturulan `report.md` dosyası, JSON çıktısının doğrudan izdüşümüdür. JSON yapısında bulunmayan hiçbir ek bilgi Markdown'a eklenmez.
 - **Determinizm:** Markdown raporundaki listeler ve tablolar deterministik bir sırada tutulur, ondalık sayılar formatlanarak verilir ve `not_assessable` olan kontroller atlanmaz, özel bir bölümde (`What could NOT be assessed`) raporlanır.
 - **Yorumlama Dili:** Rapor, modelin güvende olduğuna veya sızıntı olmadığına dair kesin sonuç cümleleri ("leakage-proof", "safe", "fully reliable" vb.) içermez. Sadece teşhis göstergesi olduğunu belirten uyarılar içerir.
@@ -221,10 +221,10 @@ Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dina
 | Tüm satırlarda `n_train > 0` | `n_scored (split)` |
 | Karmaşık küme (hem 0 hem >0) | `n_scored (scope varies)` + warnings notu |
 
-`n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde. Model listesi boşsa metrik tablosu basılmaz; etiket gözlemlenmez.
+`n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde. Kart çıktısında model listesi boşsa metrik tablosu basılmaz; etiket gözlemlenmez. Rapor çıktısında değerlendirme bloğu mevcutken model listesi boşsa tablo başlığı basılır ve D-078 uyarınca etiket 'n_scored (all rows provided)' olur.
 
 ### 11.6 Rapora Kart Gömülmesi (`--card`)
-`report` komutuna `--card` argümanı verilirse, rapor oluşturmak için bellek içine tek bir kez yüklenen veri ve oluşturulan `prov` nesnesi kullanılarak aynı dizine `card.json` ve `card.md` dosyaları da üretilir. Bu işlem sırasında veriler yeniden okunmaz, modüller yeniden çalıştırılmaz. Kartın ürettiği `--card` eklenmiş `reproduce_command` sayesinde tam tutarlılık garantilenir.
+`report` komutuna `--card` argümanı verilirse, rapor oluşturmak için bellek içine tek bir kez yüklenen veri ve oluşturulan `prov` nesnesi kullanılarak aynı dizine `card.json` ve `card.md` dosyaları da üretilir. Bu işlem sırasında veriler yeniden okunmaz, modüller yeniden çalıştırılmaz. Kart ile blok eşitliği yalnız aynı modül kümesinde beklenir (D-085); tutarlılık, test_report_card_consistency_with_card_command testiyle sınanır. Kart çıktısındaki `reproduce_command` alanı, kartı üreten gerçek komutu (rapor içinden üretildiyse `report --card` biçimini) yansıtır.
 
 ## 12. Reproducibility Manifest
 
