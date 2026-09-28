@@ -240,3 +240,10 @@
 - Etki: Tur kapanışı için gerekli kanıtlar doğrulanamadı.
 - Düzeltme: T16-R1'de tüm kanıtlar ham çıktı olarak üretildi.
 - Önlem: Her sayı komut çıktısından gelir; kapanış cümlesi yazılmaz.
+
+## I-043 — Kırmızı test suite ile commit atıldı (PHASE 4 / T16-R1).
+- Tarih: 2026-09-28
+- Ne oldu: Tutarlılık testi henüz eşdeğer modül kümesiyle yazılmadığı için test_report_card_consistency_with_card_command kırmızıyken (1 failed, 188 passed) 02f82f8 commit'i atıldı.
+- Etki: D-022 ("commit yalnızca tüm testler geçtikten sonra atılır") ihlal edildi; depo geçmişinde kırmızı bir commit oluştu.
+- Düzeltme: Test eşdeğer bayraklarla yeniden yazıldı ve suite yeşilken commit edildi (T16-R2).
+- Önlem: Test suite özeti görülmeden commit atılmaz; kırmızı sonuçta commit bekletilir ve durum kullanıcıya bildirilir.
