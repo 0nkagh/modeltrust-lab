@@ -261,3 +261,10 @@
 - Etki: Kullanıcıya açık arayüzün ilk temas yüzeyi çalışmıyordu; hata en az T13'ten (help metninin eklendiği tur) beri mevcuttu ancak hiçbir turda --help denenmediği için görülmedi.
 - Düzeltme: Help metinleri biçim-güvenli hale getirildi; tüm alt komutlar için --help exit 0 kilit testi eklendi (D-086).
 - Önlem: Kullanıcıya açık her arayüz (--help dahil) EXIT GATE kapsamında koşulur; metin biçimlendirmesi testle kilitlenir.
+
+## I-046 — README'deki örnek veri dosyası adı depoyla uyuşmuyordu (PHASE 4 / T17-R1).
+- Tarih: 2026-09-28
+- Ne oldu: README quickstart'ta ima edilen dosya adı (leakage_clean.csv) depodaki fixture adıyla (leak_clean.csv) uyuşmuyordu; T17 EXIT GATE test scriptinde bu eşleşme kullanılınca dosya bulunamadı (EXIT=4).
+- Etki: Doküman ile depo arasında uyumsuzluk; README'deki genel data.csv yer tutucusuna karşı depo fixture adı bilinmiyordu.
+- Düzeltme: README gerçek fixture adını içermediğinden README değiştirilmedi; EXIT GATE test scriptindeki eşleme düzeltildi (leak_clean.csv). README'deki iki gerçek dosya adı (intervals_calibrated.csv, intervals_overconfident.csv) depoda mevcuttur.
+- Önlem: Dokümandaki her gerçek dosya adı ve komut, EXIT GATE kapsamında depoya karşı doğrulanır.
