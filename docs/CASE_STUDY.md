@@ -133,9 +133,13 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
 
 ### D6 — Dağılım Kayması
 - **İlgili Soru**: Q6 ("Distribution drift?") ve Q7 ("Out-of-distribution (OOD) data?")
-- **Koşulan Komut**: `modeltrust report --input examples/case_study/case_study.csv --target-col y --time-col ts --shift ...`
-- **Durum**: `performed` (check: `pass`, **eşik altı / tespit edilmedi**)
-- **Ham Kanıt Alıntısı**:
+- **Koşulan Komutlar**:
+  - Varsayılan (rastgele bölme): `modeltrust shift --input examples/case_study/case_study.csv --target-col y --time-col ts`
+  - Temporal bölme: `modeltrust report --input ... --target-col y --time-col ts --split-mode temporal --shift --out-dir $t/t19r1_temporal`
+- **Durum**:
+  - Varsayılan (random) modda: `pass` (eşik altı, tespit edilmedi)
+  - Temporal modda: `fail` (tespit edildi)
+- **Ham Kanıt Alıntısı (varsayılan mod)**:
   ```json
   {
     "name": "drift.feature_ks",
@@ -150,7 +154,29 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "detail": "Diagnostic indicator: 0.008333 max outside ratio (heuristic threshold 0.10)"
   }
   ```
-- **Yorum**: `report --shift` komutu varsayılan olarak rastgele bölme uyguladığı için zamanın son %30'undaki kayma eğitim ve test alt kümelerine eşit dağılmış, KS istatistiği 0.1146 seviyesinde kalarak 0.25 sezgisel eşiğini aşmamıştır. Zaman tabanlı bir `shift` çağrısı olmaksızın rastgele bölmede kayma sezilmemiştir.
+- **Ham Kanıt Alıntısı (temporal mod)**:
+  ```json
+  {
+    "name": "drift.feature_ks",
+    "status": "performed",
+    "result": "fail",
+    "detail": "Diagnostic indicator: max KS stat=1.000000 across features (heuristic threshold 0.25)"
+  },
+  {
+    "name": "drift.target_ks",
+    "status": "performed",
+    "result": "fail",
+    "detail": "Diagnostic indicator: target KS stat=0.331250 (heuristic threshold 0.25)"
+  },
+  {
+    "name": "ood.feature_range",
+    "status": "performed",
+    "result": "fail",
+    "detail": "Diagnostic indicator: 1.000000 max outside ratio (heuristic threshold 0.10)"
+  }
+  ```
+  Temporal modda en yüksek KS istatistiği `x2` kolonunda 0.65 (`row_id` hariç, zaten tamsayı kimlik); hedef KS 0.331250; OOD `row_id` dışında `x1` ve `x2`'de birer satır eğitim aralığı dışında.
+- **Yorum**: Varsayılan rastgele bölmede zamanın son %30'undaki kayma eğitim ve test alt kümelerine eşit dağılmış, KS 0.1146 seviyesinde kalarak 0.25 eşiğini aşmamıştır. Temporal bölmede ise eğitim=ilk %80, test=son %20 olduğundan `x2 += 2.0` kayması doğrudan yakalanmış ve `drift.feature_ks`, `drift.target_ks`, `ood.feature_range` kontrolleri fail döndürmüştür. Bu, bölme modunun tespit kapasitesini doğrudan etkilediğini gösterir (I-051, D-095).
 
 ### D7 — Aşırı Dar Aralıklar
 - **İlgili Soru**: Q8 ("Uncertainty intervals?")
@@ -171,14 +197,25 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
 
 ### D8 — Bölgesel Hata Yoğunlaşması
 - **İlgili Soru**: Q5 ("Subpopulation or fairness disparities?")
-- **Koşulan Komut**: `modeltrust report` (ve `evaluate`)
-- **Durum**: `answered` (koşulan komutta `--group-col site` verildiği için site düzeyinde değerlendirildi)
-- **Ham Kanıt Alıntısı**:
-  `report` çıktısında grup hataları site bazında raporlanmıştır:
+- **Koşulan Komutlar**:
+  - İlk koşu: `modeltrust report ... --group-col site --evaluate` (site düzeyi)
+  - Hedefli koşu: `modeltrust report --input ... --target-col y --pred-col pred --group-col region --evaluate --out-dir $t/t19r1_region`
+- **Durum**:
+  - `--group-col site`: `answered` (site düzeyinde `worst_by_mae: ["S5", "S8", "S4"]`)
+  - `--group-col region`: `answered` (bölgesel eşitsizlik tespit edildi)
+- **Ham Kanıt Alıntısı (region koşusu)**:
   ```json
-  "worst_by_mae": ["S5", "S8", "S4"]
+  "group_errors": {
+    "groups": [
+      {"group": "A", "mae": 0.46471, "mean_residual": -0.007916, "n": 200, "rmse": 0.568517},
+      {"group": "B", "mae": 1.351882, "mean_residual": 0.194973, "n": 200, "rmse": 1.69947},
+      {"group": "C", "mae": 0.497436, "mean_residual": -0.007101, "n": 200, "rmse": 0.6057}
+    ],
+    "worst_by_mae": ["B", "C", "A"]
+  }
   ```
-- **Yorum**: Koşulan komutlarda `--group-col site` kullanıldığı için alt-küme analizi site düzeyinde çalışmıştır. Bölgesel (`region`) eşitsizlik bu komutta grup kolonu olarak girilmediği için doğrudan incelenmemiştir; girdi parametresi ne verildiyse araç yalnız onu denetler.
+  Genel model: `supplied_predictions MAE: 0.771342, RMSE: 1.092136, n=600`.
+- **Yorum**: B bölgesinde MAE (1.352) A (0.465) ve C (0.497) bölgelerinin yaklaşık 3 katıdır; RMSE oranı da benzerdir (1.699 vs 0.569/0.606). `--group-col region` verildiğinde araç bölgesel hata yoğunlaşmasını doğrudan raporlamıştır. İlk koşuda `--group-col site` kullanıldığı için bölge düzeyindeki eşitsizlik gözlenmemişti; girdi parametresi ne verildiyse araç yalnız onu denetler (I-051, D-095).
 
 ### D9 — Etiket Gürültüsü
 - **İlgili Soru**: —
@@ -186,11 +223,27 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
 - **Durum**: **Tespit edilmedi / Kontrol mevcut değil**
 - **Yorum**: ModelTrust Lab v1 tanı kapsamında ham tablolarda etiket gürültüsünü (ground-truth label corruption) doğrudan tespit eden bağımsız bir denetim modülü bulunmamaktadır. Bu durum tasarım gereği kapsam dışıdır ve bir bulgu olarak not edilmiştir.
 
+## 4.1. Mod ve Grup Kolonu Seçiminin Etkisi
+
+Aşağıdaki tablo, aynı veri kümesi üzerinde farklı bölme modu ve grup kolonu seçimlerinin tespit sonuçlarını nasıl değiştirdiğini göstermektedir.
+
+| Komut | Ölçüm | Sonuç |
+|---|---|---|
+| `shift --split-mode random` (varsayılan) | `drift.feature_ks` max KS=0.114583, eşik 0.25 | `pass` |
+| `shift --split-mode random` (varsayılan) | `ood.feature_range` max outside=0.008333, eşik 0.10 | `pass` |
+| `report --split-mode temporal --shift` | `drift.feature_ks` max KS=1.000000, eşik 0.25 | `fail` |
+| `report --split-mode temporal --shift` | `drift.target_ks` KS=0.331250, eşik 0.25 | `fail` |
+| `report --split-mode temporal --shift` | `ood.feature_range` max outside=1.000000, eşik 0.10 | `fail` |
+| `report --group-col site --evaluate` | `worst_by_mae` | `["S5", "S8", "S4"]` |
+| `report --group-col region --evaluate` | B bölgesi MAE=1.352, A=0.465, C=0.497 | `worst_by_mae: ["B", "C", "A"]` |
+
+Bu tablo, bölme modu ve grup kolonu seçiminin tespit kapasitesini doğrudan etkilediğini göstermektedir: D6 kusurunun hedeflendiği zaman-yerel kayma yalnız temporal modda yakalanır; D8'in bölgesel hata yoğunlaşması yalnız `--group-col region` ile görülür.
+
 ## 5. Tespit Edilmeyenler ve Değerlendirilemeyenler
 
 1. **D9 (Etiket Gürültüsü)**: Yukarıda açıklandığı üzere, araç bu kontrolü yapacak modüle sahip değildir (`kontrol mevcut değil`).
-2. **D4 (Yüksek Kardinaliteli ID)**: `row_id` tamsayıdır ancak D1 ile gelen kopyalar nedeniyle katı monotonluk bozulduğundan `index_like_feature` tetiklenmemiştir.
-3. **D6 (Dağılım Kayması)**: `report --shift` çağrısında `--split-mode temporal` verilmediğinde varsayılan rastgele bölme kullanıldığı için KS eşiği aşılmamıştır.
+2. **D4 (Yüksek Kardinaliteli ID)**: `row_id` tamsayıdır ancak D1 ile gelen kopyalar nedeniyle katı monotonluk bozulduğundan `index_like_feature` tetiklenmemiştir. Kod referansı: [`leakage.py:170`](file:///c:/Users/agah/Documents/modeltrust-lab/src/modeltrust/audit/leakage.py#L170) — `if is_int and unique_ratio >= INDEX_LIKE_UNIQUE_RATIO_MIN and is_monotonic:`.
+3. **D6 (Dağılım Kayması, varsayılan mod)**: `shift` çağrısında `--split-mode temporal` verilmediğinde varsayılan rastgele bölme kullanıldığı için KS eşiği aşılmamıştır. Temporal modda ise üç kontrol fail döndürmüştür (bkz. §4, D6 ve §4.1).
 4. **Değerlendirilemeyen Kontroller (`not_assessable`)**:
    - `leakage.preprocess.fit_scope` (`requires_pipeline_code`): Bir CSV tablosundan veri ön işleme adımlarının (scaler, encoder) yalnız eğitim kümesinde fit edilip edilmediği anlaşılamaz. Boru hattı kodu zorunludur.
    - `leakage.subset_row_overlap`, `subset_group_overlap`, `subset_time_ranges` (`not_provided`): Girdi tablosunda ayrık bir `subset` kolonu (örn. `train`/`test`) sağlanmamıştır.
@@ -209,6 +262,28 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
 ```
 
 Bu envanter, aracın neleri fiilen değerlendirdiğini, neleri fail olarak bayraklandırdığını ve nelerin eksik parametre ya da boru hattı kodu gereksinimi nedeniyle değerlendirilemediğini net biçimde göstermektedir.
+
+Leakage modülünde fail döndüren kontrollerin tam JSON çıktısı:
+
+```json
+{
+  "name": "target_copy_near",
+  "status": "performed",
+  "result": "fail",
+  "detail": "Target near copy found",
+  "evidence": [{"abs_correlation": 1.0, "column": "y_proxy", "equality_ratio": 0.0}]
+}
+```
+
+```json
+{
+  "name": "preprocess.feature_target_near_deterministic",
+  "status": "performed",
+  "result": "fail",
+  "detail": "Near-deterministic relationship between feature and target; this is a diagnostic indicator, not proof.",
+  "evidence": [{"abs_correlation": 1.0, "column": "y_proxy", "n": 600}]
+}
+```
 
 ## 7. Sınırlar
 
