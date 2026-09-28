@@ -221,7 +221,7 @@ Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dina
 | Tüm satırlarda `n_train > 0` | `n_scored (split)` |
 | Karmaşık küme (hem 0 hem >0) | `n_scored (scope varies)` + warnings notu |
 
-`n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde.
+`n_train == 0`: supplied_predictions modu; split uygulanmaz, skor tüm satırlarda. `n_train > 0`: dahili model eğitimi; skor yalnızca test split'inde. Model listesi boşsa metrik tablosu basılmaz; etiket gözlemlenmez.
 
 ## 12. Reproducibility Manifest
 
@@ -230,7 +230,7 @@ Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dina
 ### 12.1 Manifest Alanları
 - **`manifest_schema_version`:** Şema sürümü (tamsayı, 1).
 - **`tool`:** Aracın adı (`name`) ve sürümü (`version`).
-- **`command`:** Kartın §9 Reproduce bölümünde listelenen yeniden üretme CLI komutu (tek kaynaktan).
+- **`command`:** Kartın §9 Reproduce bölümünde listelenen yeniden üretme CLI komutu (tek kaynaktan; `--out-dir` yolunu içerir).
 - **`input`:** Kullanıcının verdiği girdi dosya yolu (`path`), girdi dosyasının SHA-256 bayt özeti (`sha256`), toplam satır sayısı (`rows`) ve kolon sayısı (`columns`).
 - **`environment`:** Çalışma ortamı bilgileri (`python` sürümü, `pandas` sürümü, `numpy` sürümü, `platform`).
 - **`seed`:** Rastgele sayı üretici tohumu (`seed`).
@@ -241,7 +241,7 @@ Metrik tablosundaki `n_scored` sütun başlığı model satırlarına göre dina
 
 ### 12.2 Determinizm ve Zaman Damgası Kuralı
 - Manifest hiçbir koşulda tarih veya saat damgası (timestamp) içermez.
-- Aynı girdi, seed ve ortamda ardışık çalıştırmalarda üretilen `manifest.json` bayt bayt özdeştir (hash-identical determinism).
+- Aynı girdi, seed, ortam ve aynı out-dir ile ardışık çalıştırmalarda üretilen `manifest.json` bayt bayt özdeştir (hash-identical determinism; farklı out-dir verildiğinde command alanı değişeceğinden manifest hash'i farklılaşır).
 
 ### 12.3 Git Erişilemezse Davranış
 - Git yüklü olmadığında, `.git` dizini bulunmadığında veya `git` komutları başarısız olduğunda çalıştırma kesintiye uğramaz.

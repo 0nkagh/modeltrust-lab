@@ -133,10 +133,10 @@ Example `manifest.json`:
 ```json
 {
   "manifest_schema_version": 1,
-  "tool": {"name": "modeltrust", "version": "0.1.0"},
+  "tool": {"name": "modeltrust", "version": "0.0.1.dev0"},
   "command": "python -m modeltrust card --input data.csv --target-col y --manifest --out-dir ./card_reports",
   "input": {"path": "data.csv", "sha256": "...", "rows": 200, "columns": 3},
-  "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.2.6", "platform": "win32"},
+  "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.5.3", "platform": "win32"},
   "seed": 42,
   "git": {"commit": "...", "dirty": false},
   "config": {"thresholds": {"MIN_ROWS_FOR_COPY_CHECK": 5}},
