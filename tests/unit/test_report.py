@@ -214,8 +214,8 @@ def test_scored_scope_label_mixed():
 
 
 def test_scored_scope_label_empty():
-    """Empty rows list → default 'split' (no data to decide)."""
-    assert scored_scope_label([]) == "n_scored (split)"
+    """Empty rows list → D-078 vacuous truth → 'all rows provided'."""
+    assert scored_scope_label([]) == "n_scored (all rows provided)"
 
 
 def test_report_n_scored_label_supplied_predictions():
@@ -256,7 +256,7 @@ def test_report_n_scored_label_trained_model():
 
 
 def test_scored_scope_label_empty_returns_matches_code():
-    assert scored_scope_label([]) == "n_scored (split)"
+    assert scored_scope_label([]) == "n_scored (all rows provided)"
 
 
 def test_group_coverage_ratio_na_when_not_performed():

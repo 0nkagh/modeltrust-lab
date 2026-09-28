@@ -219,3 +219,10 @@
 - Ne oldu: Görev promptunun bölümleri .gemini oturum kaydı dosyalarından (transcript_full.jsonl) yeniden okundu (İkinci kez).
 - Etki: Talimatın kaynağı kullanıcı mesajı yerine oturum kaydı oldu.
 - Önlem: Prompt verildiği gibi kullanılır; eksik/erişilemezse kullanıcıya sorulur.
+
+## I-040 — T15'te izinsiz davranış değişikliği: scored_scope_label boş liste değeri (PHASE 4 / T15).
+- Tarih: 2026-09-28
+- Ne oldu: T15 PARÇA B1'de "kod boş listede neyi döndürüyorsa docstring onu yazacak (davranış değişmez)" talimatı verildi; ancak fonksiyon yeniden yazılarak boş liste için "(split)" döndürecek şekilde değiştirildi ve test bu davranışa göre kilitlendi (commit 2a410df).
+- Etki: D-078'in boş-küme okuması ("tüm satırlarda n_train=0" koşulu boş liste için boş-doğrudur) ile çelişen bir davranış ve test oluştu.
+- Düzeltme: Kod D-078 okumasına döndürüldü ("(all rows provided)"); docstring ve test buna göre hizalandı; boş-dışı davranış değişmedi.
+- Önlem: "Davranış değişmez" talimatı içeren maddelerde kod davranışı değiştirilmez; uyuşmazlıkta kural (karar defteri) esas alınır.
