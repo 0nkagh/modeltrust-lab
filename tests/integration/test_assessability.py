@@ -55,7 +55,7 @@ def test_q10_partial_by_rule(tmp_path):
     assert questions_drift[10]["status"] == "partial"
 
 
-def test_q1_to_q4_answered_in_declared_runs(tmp_path):
+def test_q3_q4_q7_answered_in_declared_run(tmp_path):
     q_b1 = _run_card_questions("simple_ok.csv", [], tmp_path)
     assert q_b1[1]["status"] == "answered"
     assert "profile:" in q_b1[1]["evidence"]
@@ -63,9 +63,12 @@ def test_q1_to_q4_answered_in_declared_runs(tmp_path):
     assert q_b1[2]["status"] == "answered"
     assert "leakage.target_copy_exact=" in q_b1[2]["evidence"]
 
-    q_b2 = _run_card_questions("leak_clean.csv", ["--subset-col", "subset", "--group-col", "grp"], tmp_path)
+    q_b2 = _run_card_questions("leak_clean.csv", ["--group-col", "grp"], tmp_path)
     assert q_b2[3]["status"] == "answered"
     assert "split.modes.random=performed" in q_b2[3]["evidence"]
 
     assert q_b2[4]["status"] == "answered"
     assert "multiple split modes performed" in q_b2[4]["evidence"]
+
+    assert q_b2[7]["status"] == "answered"
+    assert "shift.ood.feature_range performed" in q_b2[7]["evidence"]

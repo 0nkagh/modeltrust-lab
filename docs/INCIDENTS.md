@@ -275,3 +275,9 @@
 - Etki: Bulgu doküman-depo uyumsuzluğu değil, denetim tarafındaki eşleme hatasıydı (yer tutucu data.csv, var olmayan bir ada çevrilmişti). Buna rağmen c14c51d commit mesajı README dosya adlarının hizalandığını beyan ettiği hâlde değişen tek dosya docs/INCIDENTS.md oldu; I-046 metni hatalı öncülü içeriyor.
 - Düzeltme: README değiştirilmedi; I-046 kaydına düzeltme notu eklendi; bu kayıt açıldı. README quickstart'taki genel data.csv yer tutucusunun gerçek fixture'a bağlanması PHASE 5 (README cilası) kapsamına alındı.
 - Önlem: Denetim bulguları da ham kanıtla doğrulanmadan görev kapsamına alınmaz; commit mesajı yalnız gerçekten değişen dosyaları tarif eder.
+## I-048 — Erişilebilirlik sözleşmesinde beyan edilen komutlar kilit testleriyle birebir değildi (PHASE 4 / T17-R3).
+- Tarih: 2026-09-28
+- Ne oldu: docs/ASSESSABILITY.md'de Q3/Q4/Q7 için "minimum komut" olarak beyan edilen komut ile tests/integration/test_assessability.py'de kilitlenen komut farklıydı; beyan edilen komut hiçbir testle kilitlenmemişti.
+- Etki: Sözleşme belgesindeki iddia ile kilit testinin kapsadığı komut ayrışıyordu; belgeyi birebir izleyen kullanıcı için beyan edilen komut doğrulanmış sayılamazdı (D-088'in "belgede listelenir + testle kilitlenir" ifadesi kısmen boşta kalıyordu).
+- Düzeltme: Beyan edilen komut ham koşuyla doğrulandı ve belge ile kilit testi birebir aynı komuta hizalandı (hangi tarafın değiştiği rapora yazılır).
+- Önlem: Sözleşme belgesindeki her beyan, aynı komutla kilit testine bağlanır; kod atıfları satır numarası + kararlı kontrol anahtarı biçiminde yazılır ve EXIT paketinde ham doğrulanır (D-089).
