@@ -37,6 +37,7 @@ also records the current `git.commit`, so a new commit changes its hash.
 - Question accessibility matrix: `docs/ASSESSABILITY.md`
 - Decision log: `docs/DECISIONS.md`
 - Incident log: `docs/INCIDENTS.md`
+- Case study (deliberately corrupted synthetic data): `docs/CASE_STUDY.md`
 
 ## 5. Scope
 - Tabular regression only
@@ -67,6 +68,7 @@ modeltrust card --input tests/fixtures/eval_preds.csv --target-col y --pred-col 
 modeltrust report --input tests/fixtures/shift_drift.csv --target-col y --time-col ts --shift --evaluate --card --out-dir ./reports/full_example
 ```
 All three commands exit with code 0 and write their outputs to the given --out-dir.
+A worked example on deliberately corrupted synthetic data: see docs/CASE_STUDY.md.
 
 ### `inspect`
 Validates schema and prints canonical JSON provenance to stdout:
