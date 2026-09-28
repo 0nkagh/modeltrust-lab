@@ -254,3 +254,10 @@
 - Etki: Belgelenmiş davranış bilgisi kayboldu; "tam tutarlılık garantilenir" ifadesi dürüstlük kuralına aykırı abartılı bir iddiadır ve D-085'teki eşdeğer-modül-kümesi koşulunu içermez.
 - Düzeltme: §7 notları geri getirildi (davranış değişmedi); §11.6 cümlesi D-085'e uygun ve iddiasız biçimde yeniden yazıldı.
 - Önlem: Mevcut doküman cümleleri gerekçesiz silinmez; dokümanlarda garanti/kesinlik iddiası kullanılmaz.
+
+## I-045 — --help çağrıları ValueError ile çöküyordu (PHASE 4 / T17-R1).
+- Tarih: 2026-09-28
+- Ne oldu: --nominal-coverage help metnindeki % karakteri escape edilmediğinden argparse biçimlendirme hatası (ValueError: unsupported format character ')') oluştu; report --help, card --help ve evaluate --help çöktü.
+- Etki: Kullanıcıya açık arayüzün ilk temas yüzeyi çalışmıyordu; hata en az T13'ten (help metninin eklendiği tur) beri mevcuttu ancak hiçbir turda --help denenmediği için görülmedi.
+- Düzeltme: Help metinleri biçim-güvenli hale getirildi; tüm alt komutlar için --help exit 0 kilit testi eklendi (D-086).
+- Önlem: Kullanıcıya açık her arayüz (--help dahil) EXIT GATE kapsamında koşulur; metin biçimlendirmesi testle kilitlenir.

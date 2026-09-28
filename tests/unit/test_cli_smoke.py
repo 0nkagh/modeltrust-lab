@@ -30,3 +30,25 @@ def test_unknown_command():
         capture_output=True, text=True
     )
     assert result.returncode == 2
+
+
+def test_all_subcommands_help_exit_zero():
+    subcommands = ["inspect", "profile", "leakage", "split", "report", "evaluate", "shift", "card"]
+    for sc in subcommands:
+        result = subprocess.run(
+            [sys.executable, "-m", "modeltrust", sc, "--help"],
+            capture_output=True, text=True
+        )
+        assert result.returncode == 0, f"{sc} --help returned {result.returncode}: {result.stderr}"
+        assert result.stderr == "", f"{sc} --help wrote to stderr: {result.stderr}"
+
+
+def test_help_texts_format_safe():
+    subcommands = ["inspect", "profile", "leakage", "split", "report", "evaluate", "shift", "card"]
+    for sc in subcommands:
+        result = subprocess.run(
+            [sys.executable, "-m", "modeltrust", sc, "--help"],
+            capture_output=True, text=True
+        )
+        assert result.returncode == 0, f"{sc} --help crashed: {result.stderr}"
+        assert "usage:" in result.stdout, f"{sc} --help output missing 'usage:'"

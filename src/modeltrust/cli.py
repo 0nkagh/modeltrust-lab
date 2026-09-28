@@ -56,7 +56,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--shift", action="store_true", help="Include distribution shift and OOD checks in report")
     report_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     report_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
-    report_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+    report_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%%)")
     report_parser.add_argument("--card", action="store_true", help="Also generate diagnostic card alongside the report")
 
     def _add_common_args(p):
@@ -90,7 +90,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     card_parser.add_argument("--folds", type=int, default=5)
     card_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     card_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
-    card_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+    card_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%%)")
     card_parser.add_argument("--manifest", action="store_true", help="Generate reproducibility manifest (manifest.json)")
 
     # Profile command
@@ -117,7 +117,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     eval_parser.add_argument("--folds", type=int, default=5)
     eval_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     eval_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
-    eval_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+    eval_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%%)")
 
     # Shift command
     shift_parser = subparsers.add_parser("shift")
