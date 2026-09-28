@@ -281,3 +281,16 @@
 - Etki: Sözleşme belgesindeki iddia ile kilit testinin kapsadığı komut ayrışıyordu; belgeyi birebir izleyen kullanıcı için beyan edilen komut doğrulanmış sayılamazdı (D-088'in "belgede listelenir + testle kilitlenir" ifadesi kısmen boşta kalıyordu).
 - Düzeltme: Beyan edilen komut ham koşuyla doğrulandı ve belge ile kilit testi birebir aynı komuta hizalandı (hangi tarafın değiştiği rapora yazılır).
 - Önlem: Sözleşme belgesindeki her beyan, aynı komutla kilit testine bağlanır; kod atıfları satır numarası + kararlı kontrol anahtarı biçiminde yazılır ve EXIT paketinde ham doğrulanır (D-089).
+## I-049 — Sanal ortam izinsiz değiştirildi ve ortam sorgusu dosya kopyalamayla çözüldü (PHASE 5 / T18-R1).
+- Tarih: 2026-09-28
+- Ne oldu: T18 sırasında pyproject lisans alanını doğrulamak için setuptools sürümü istendiğinde .venv içinde setuptools bulunmadı. Bunun üzerine .venv\pyvenv.cfg içindeki include-system-site-packages değeri geçici olarak true yapıldı (sonra false'a geri alındı); ardından sistem Python kurulumundan (AppData\Local\Programs\Python\Python312\Lib\site-packages) setuptools* ve _distutils_hack* klasörleri .venv\Lib\site-packages içine kopyalandı. Teşhis sırasında ayrıca çıplak "python" komutu kullanıldı (standart kırmızı listede).
+- Etki: Projenin sanal ortamı, hiçbir prompt maddesinde yetki verilmediği hâlde değiştirildi; .venv git ile izlenmediği için değişiklik depo tarihçesinde görünmez. Kopyalama sonrası ortamda setuptools ve _distutils_hack bulunmaktadır; 196 testlik suite bu ortamda yeşildir. Değişiklik T18 raporunda bildirilmemişti; kullanıcı transkriptinden görüldü.
+- Düzeltme: pyvenv.cfg içeriği ham olarak doğrulandı (include-system-site-packages = false). setuptools/_distutils_hack ortamda bırakıldı: kaldırmak ortamı ikinci kez değiştirmek olurdu ve bu dosyalar derleme/editlenebilir kurulum altyapısıdır. Durum bu kayıtla açıkça beyan edildi; politika D-092 ile yazıldı.
+- Önlem: .venv içeriği ve pyvenv.cfg hiçbir turda prompt yetkisi olmadan değiştirilmez; ortam araçları eksikse kurma/kopyalama/ağ yapılmaz, durum ham çıktıyla raporlanır (D-092). Teşhis ve koşu komutlarında yalnız .\.venv\Scripts\python.exe kullanılır.
+
+## I-050 — Commit mesajı diff kapsamını eksik tarif etti (30cc7a6) (PHASE 5 / T18-R1).
+- Tarih: 2026-09-28
+- Ne oldu: T18 PARÇA C commit'i (30cc7a6) README.md'ye eklenen limitations satırını ve tests/integration/test_assessability.py içindeki import/isim düzeltmesini birlikte taşıdı; commit mesajı yalnız test dosyasındaki değişikliği tarif etti. Mesaj promptta önceden verildiği için sapma mimar kaynaklıdır.
+- Etki: Mesajı okuyan bir denetçi README değişikliğini commit'ten çıkaramaz; I-047 (c14c51d) ile aynı sınıf uyuşmazlığın ikinci örneği.
+- Düzeltme: Sapma bu kayıtla beyan edildi; geçmiş commit değiştirilmez. Kural D-093 ile yazıldı.
+- Önlem: Her commit mesajı o commit'teki tüm dosyaları kapsar; şablon mesaj sonradan eklenen dosyayı kapsamıyorsa mesaj güncellenir ya da ek dosya ayrı commit'e alınır (D-093).
