@@ -76,6 +76,10 @@ modeltrust report --input data.csv --target-col y --group-col grp --out-dir ./re
 # With evaluation enabled (single command profile + leakage + split + model error evaluation):
 modeltrust report --input data.csv --target-col y --group-col grp --pred-col my_preds --evaluate --out-dir ./reports
 # Produces: ./reports/report.json and ./reports/report.md
+
+# To generate a diagnostic card simultaneously (single load):
+modeltrust report --input data.csv --target-col y --card --out-dir ./reports
+# Produces: report.json, report.md, card.json, and card.md
 ```
 *Note: This tool produces diagnostic indicators. It is not a certificate.*
 

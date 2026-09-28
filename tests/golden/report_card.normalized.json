@@ -1,0 +1,217 @@
+{
+  "checks_summary": [
+    {
+      "fail": 0,
+      "module": "leakage",
+      "not_assessable": 4,
+      "performed": 8,
+      "total": 12
+    },
+    {
+      "fail": 0,
+      "module": "split",
+      "not_assessable": 3,
+      "performed": 0,
+      "total": 3
+    },
+    {
+      "fail": 0,
+      "module": "shift",
+      "not_assessable": 2,
+      "performed": 2,
+      "total": 4
+    }
+  ],
+  "input": {
+    "bom_stripped": false,
+    "columns": [
+      "y",
+      "lo",
+      "hi"
+    ],
+    "columns_sha256": "b4b83fa31d0b0b5ff33c705deef1e83a6612d9f2edbe1342b4be410b63022c12",
+    "decimal": "dot",
+    "delimiter": ",",
+    "duplicate_headers": [],
+    "encoding": "utf-8-sig",
+    "format": "csv",
+    "ncols": 3,
+    "nrows_read": 200,
+    "nrows_total": 200,
+    "path": "normalized",
+    "sha256": "c61eac4bed2c9240add09ccc0223faa7458011faa7c9929fc354e44b24feb4b5",
+    "size_bytes": 4460,
+    "truncated": false,
+    "unnamed_columns": [],
+    "warnings": [
+      "subset_not_provided",
+      "group_not_provided",
+      "time_not_provided",
+      "split_not_requested"
+    ]
+  },
+  "interpretation": "This card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.",
+  "limitations": [
+    "Scope: tabular regression only.",
+    "Diagnostic indicators only. Absence of a flag does not establish absence of leakage.",
+    "Heuristic thresholds; no significance testing is performed.",
+    "Single split; finite sample; no distribution-free guarantee."
+  ],
+  "metrics": {
+    "cv_aggregate": null,
+    "interval_coverage": null,
+    "models": [
+      {
+        "dropped_rows": 0,
+        "mae": 0.81989,
+        "n_scored": 40,
+        "n_test": 40,
+        "n_train": 160,
+        "name": "mean_baseline",
+        "r2": -0.000487,
+        "r2_status": "performed",
+        "reason_code": null,
+        "rmse": 1.08366,
+        "status": "performed"
+      },
+      {
+        "dropped_rows": 0,
+        "mae": 0.546227,
+        "n_scored": 40,
+        "n_test": 40,
+        "n_train": 160,
+        "name": "ols_baseline",
+        "r2": 0.603501,
+        "r2_status": "performed",
+        "reason_code": null,
+        "rmse": 0.682194,
+        "status": "performed"
+      }
+    ],
+    "worst_groups_by_mae": null
+  },
+  "not_assessable": [
+    {
+      "check": "subset_row_overlap",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "subset_group_overlap",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "subset_time_ranges",
+      "module": "leakage",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "preprocess.fit_scope",
+      "module": "leakage",
+      "reason_code": "requires_pipeline_code"
+    },
+    {
+      "check": "modes.random",
+      "module": "split",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "modes.group",
+      "module": "split",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "modes.temporal",
+      "module": "split",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "drift.feature_ks",
+      "module": "shift",
+      "reason_code": "not_provided"
+    },
+    {
+      "check": "drift.target_ks",
+      "module": "shift",
+      "reason_code": "not_provided"
+    }
+  ],
+  "questions": [
+    {
+      "evidence": "profile: duplicate_rows=0, missing cells reported",
+      "id": 1,
+      "question": "Missing or duplicate records?",
+      "status": "answered"
+    },
+    {
+      "evidence": "leakage.target_copy_exact=pass, target_copy_near=pass",
+      "id": 2,
+      "question": "Target leakage suspicion?",
+      "status": "answered"
+    },
+    {
+      "evidence": "split.modes.random not performed (reason_code=not_provided)",
+      "id": 3,
+      "question": "Train/test or group leakage?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "split not performed (reason_code=not_provided)",
+      "id": 4,
+      "question": "Split strategy difference?",
+      "status": "partial"
+    },
+    {
+      "evidence": "group_errors not performed",
+      "id": 5,
+      "question": "Which groups have higher error?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "shift.drift.feature_ks not performed",
+      "id": 6,
+      "question": "Distribution drift?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "shift.ood.feature_range performed",
+      "id": 7,
+      "question": "Out-of-distribution (OOD) data?",
+      "status": "answered"
+    },
+    {
+      "evidence": "uncertainty not performed",
+      "id": 8,
+      "question": "Are uncertainty intervals calibrated?",
+      "status": "not_assessable"
+    },
+    {
+      "evidence": "see not_assessable",
+      "id": 9,
+      "question": "Which checks could not be performed?",
+      "status": "answered"
+    },
+    {
+      "evidence": "see limitations and not_assessable",
+      "id": 10,
+      "question": "How much can this report be trusted?",
+      "status": "partial"
+    }
+  ],
+  "scope": {
+    "external_data_downloaded": false,
+    "model_loaded": false,
+    "task": "tabular_regression",
+    "user_code_executed": false
+  },
+  "thresholds": {
+    "COVERAGE_GAP_TOL": 0.05,
+    "MIN_ROWS_FOR_COPY_CHECK": 5,
+    "OOD_MAHALANOBIS_RATIO_MIN": 2.0
+  },
+  "tool": {
+    "name": "modeltrust",
+    "version": "0.0.1.dev0"
+  }
+}

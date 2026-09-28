@@ -355,3 +355,102 @@ def test_report_uncertainty_golden():
             golden = f.read()
 
         assert normalized == golden
+
+
+import json
+import os
+import tempfile
+import hashlib
+from tests.conftest import run_cli
+
+def test_report_card_writes_four_files():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--evaluate', '--shift', '--card', '--out-dir', tmpdir])
+        assert res.returncode == 0
+        assert os.path.exists(os.path.join(tmpdir, 'report.json'))
+        assert os.path.exists(os.path.join(tmpdir, 'report.md'))
+        assert os.path.exists(os.path.join(tmpdir, 'card.json'))
+        assert os.path.exists(os.path.join(tmpdir, 'card.md'))
+        expected_msg = f'wrote {os.path.join(tmpdir, "report.json")}, {os.path.join(tmpdir, "report.md")}, {os.path.join(tmpdir, "card.json")} and {os.path.join(tmpdir, "card.md")}'
+        assert expected_msg in res.stderr
+
+def test_report_card_determinism():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        csv_path = os.path.join(tmpdir, 'dummy.csv')
+        with open(csv_path, 'w', encoding='utf-8') as f:
+            f.write("y,grp,pred,lo,hi\n1,a,0.9,0.5,1.5\n0,b,0.1,-0.5,0.5\n")
+        out_dir = os.path.join(tmpdir, 'out')
+        args = ['report', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', out_dir]
+        
+        res1 = run_cli(args)
+        assert res1.returncode == 0
+        hashes1 = {}
+        for fname in ['report.json', 'report.md', 'card.json', 'card.md']:
+            with open(os.path.join(out_dir, fname), 'rb') as f:
+                hashes1[fname] = hashlib.sha256(f.read()).hexdigest()
+                
+        res2 = run_cli(args)
+        assert res2.returncode == 0
+        for fname in ['report.json', 'report.md', 'card.json', 'card.md']:
+            with open(os.path.join(out_dir, fname), 'rb') as f:
+                assert hashes1[fname] == hashlib.sha256(f.read()).hexdigest()
+
+
+def test_report_card_consistency_with_card_command():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        csv_path = os.path.join(tmpdir, 'dummy.csv')
+        with open(csv_path, 'w', encoding='utf-8') as f:
+            f.write("y,grp,pred,lo,hi\n1,a,0.9,0.5,1.5\n0,b,0.1,-0.5,0.5\n")
+            
+        rep_dir = os.path.join(tmpdir, 'rep')
+        card_dir = os.path.join(tmpdir, 'card')
+        res_rep = run_cli(['report', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', rep_dir])
+        res_card = run_cli(['card', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--out-dir', card_dir])
+        assert res_rep.returncode == 0
+        assert res_card.returncode == 0
+        
+        with open(os.path.join(rep_dir, 'card.json'), 'r', encoding='utf-8') as f:
+            c1 = json.load(f)
+        with open(os.path.join(card_dir, 'card.json'), 'r', encoding='utf-8') as f:
+            c2 = json.load(f)
+            
+        blocks = ['questions', 'checks_summary', 'not_assessable', 'metrics', 'thresholds', 'scope']
+        for b in blocks:
+            assert c1.get(b) == c2.get(b)
+
+def test_report_card_golden():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--evaluate', '--shift', '--card', '--out-dir', tmpdir])
+        assert res.returncode == 0
+        
+        with open(os.path.join(tmpdir, 'card.json'), 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        for k in ['run', 'environment', 'reproduce_command']:
+            if k in data:
+                del data[k]
+        if 'input' in data and 'path' in data['input']:
+            data['input']['path'] = 'normalized'
+            
+        normalized = json.dumps(data, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False) + '\n'
+        golden_path = 'tests/golden/report_card.normalized.json'
+        
+        if os.environ.get('MODELTRUST_REGEN_GOLDEN') == '1':
+            with open(golden_path, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(normalized)
+                
+        with open(golden_path, 'r', encoding='utf-8') as f:
+            golden = f.read()
+            
+        assert normalized == golden
+
+def test_report_without_card_unchanged():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        res = run_cli(['report', '--input', 'tests/fixtures/simple_ok.csv', '--out-dir', tmpdir])
+        assert res.returncode == 0
+        
+        files = os.listdir(tmpdir)
+        assert sorted(files) == ['report.json', 'report.md']
+        
+        expected_msg = f'wrote {os.path.join(tmpdir, "report.json")} and {os.path.join(tmpdir, "report.md")}'
+        assert expected_msg in res.stderr

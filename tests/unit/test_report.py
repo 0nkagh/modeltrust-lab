@@ -284,3 +284,45 @@ def test_group_coverage_ratio_na_when_not_performed():
     assert "- Coverage ratio: N/A (not_provided)" in md
     assert "- Coverage ratio: 0.000000" not in md
 
+
+
+import pytest
+from unittest.mock import MagicMock
+from modeltrust.cli import main
+
+def test_report_card_single_load(monkeypatch, tmp_path):
+    mock_read = MagicMock(return_value=MagicMock(frame=MagicMock(columns=['y']), meta={'path': 'dummy.csv'}))
+    monkeypatch.setattr('modeltrust.cli.read_table', mock_read)
+    
+    mock_build = MagicMock(return_value={'schema': {'summary': {'fail': 0}, 'checks': []}, 'input': {'warnings': []}, 'run_metadata': {}, 'tool': {}, 'environment': {}, 'column_spec': {}})
+    monkeypatch.setattr('modeltrust.cli.build_provenance', mock_build)
+    monkeypatch.setattr('modeltrust.report.write_reports', MagicMock(return_value=('report.json', 'report.md')))
+    monkeypatch.setattr('modeltrust.card.write_card', MagicMock(return_value=('card.json', 'card.md')))
+    
+    # Run with --card
+    main(['report', '--input', 'dummy.csv', '--out-dir', str(tmp_path), '--card'])
+    
+    # Verify load_table was called exactly once
+    mock_read.assert_called_once()
+
+
+def test_report_card_same_prov(monkeypatch, tmp_path):
+    mock_read = MagicMock(return_value=MagicMock(frame=MagicMock(columns=['y']), meta={'path': 'dummy.csv'}))
+    monkeypatch.setattr('modeltrust.cli.read_table', mock_read)
+    
+    # Use a specific dict object to test identity
+    fake_prov = {'schema': {'summary': {'fail': 0}, 'checks': []}, 'input': {'warnings': []}, 'run_metadata': {}, 'tool': {}, 'environment': {}, 'column_spec': {}}
+    monkeypatch.setattr('modeltrust.cli.build_provenance', MagicMock(return_value=fake_prov))
+    
+    report_mock = MagicMock(return_value=('report.json', 'report.md'))
+    card_mock = MagicMock(return_value=('card.json', 'card.md'))
+    monkeypatch.setattr('modeltrust.report.write_reports', report_mock)
+    monkeypatch.setattr('modeltrust.card.write_card', card_mock)
+    
+    main(['report', '--input', 'dummy.csv', '--out-dir', str(tmp_path), '--card'])
+    
+    # Assert both were called with the exact same prov object
+    report_prov = report_mock.call_args[0][0]
+    card_prov = card_mock.call_args[0][0]
+    assert report_prov is fake_prov
+    assert card_prov is fake_prov

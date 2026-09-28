@@ -57,6 +57,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--lower-col", help="Lower bound column for uncertainty intervals")
     report_parser.add_argument("--upper-col", help="Upper bound column for uncertainty intervals")
     report_parser.add_argument("--nominal-coverage", type=float, help="Nominal coverage level (e.g. 0.9 for 90%)")
+    report_parser.add_argument("--card", action="store_true", help="Also generate diagnostic card alongside the report")
 
     def _add_common_args(p):
         p.add_argument("-i", "--input", required=True, help="Input data file (CSV/Parquet)")
@@ -353,7 +354,14 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.command == "report":
                 from modeltrust.report import write_reports
                 json_p, md_p = write_reports(prov, args.out_dir)
-                print(f"wrote {json_p} and {md_p}", file=sys.stderr)
+                if getattr(args, "card", False):
+                    from modeltrust.card import write_card
+                    import shlex
+                    reproduce_command = "python -m modeltrust " + " ".join(shlex.quote(a) for a in actual_argv[1:])
+                    card_json_p, card_md_p = write_card(prov, args.out_dir, reproduce_command)
+                    print(f"wrote {json_p}, {md_p}, {card_json_p} and {card_md_p}", file=sys.stderr)
+                else:
+                    print(f"wrote {json_p} and {md_p}", file=sys.stderr)
                 return 0
                 
             if args.command == "card":
