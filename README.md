@@ -26,6 +26,18 @@ modeltrust --version
 pytest
 ```
 
+**Determinism scope.** Re-running the same command with the same input and the *same* `--out-dir`
+produces byte-identical outputs (`report.json`, `report.md`, `card.json`, `card.md`, `manifest.json`).
+Output files embed the invocation string, so changing `--out-dir` changes their hashes; `manifest.json`
+also records the current `git.commit`, so a new commit changes its hash.
+
+## Documentation
+
+- Methods, thresholds and limitations: `docs/METHODS.md`
+- Question accessibility matrix: `docs/ASSESSABILITY.md`
+- Decision log: `docs/DECISIONS.md`
+- Incident log: `docs/INCIDENTS.md`
+
 ## 5. Scope
 - Tabular regression only
 - No pickle/joblib model loading
@@ -43,6 +55,18 @@ pytest
 - `4`: Input or validation error (schema fail, file not found, bad format)
 
 ## 8. CLI Commands
+
+The commands below use `data.csv` as a placeholder for your own file. To try them
+without preparing data, use the fixtures shipped with the repository (for example
+`tests/fixtures/simple_ok.csv`, `tests/fixtures/eval_preds.csv`, `tests/fixtures/shift_drift.csv`).
+
+```powershell
+modeltrust inspect --input tests/fixtures/simple_ok.csv --target-col y --delimiter "," --decimal dot
+modeltrust card --input tests/fixtures/eval_preds.csv --target-col y --pred-col pred --group-col grp --out-dir ./reports/card_example
+modeltrust report --input tests/fixtures/shift_drift.csv --target-col y --time-col ts --shift --evaluate --card --out-dir ./reports/full_example
+```
+All three commands exit with code 0 and write their outputs to the given --out-dir.
+
 ### `inspect`
 Validates schema and prints canonical JSON provenance to stdout:
 ```bash
