@@ -150,3 +150,6 @@ Example `manifest.json`:
 ```
 
 *Note: The card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.*
+## License
+
+MIT — see [LICENSE](LICENSE).
