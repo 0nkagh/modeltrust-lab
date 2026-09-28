@@ -268,3 +268,10 @@
 - Etki: Doküman ile depo arasında uyumsuzluk; README'deki genel data.csv yer tutucusuna karşı depo fixture adı bilinmiyordu.
 - Düzeltme: README gerçek fixture adını içermediğinden README değiştirilmedi; EXIT GATE test scriptindeki eşleme düzeltildi (leak_clean.csv). README'deki iki gerçek dosya adı (intervals_calibrated.csv, intervals_overconfident.csv) depoda mevcuttur.
 - Önlem: Dokümandaki her gerçek dosya adı ve komut, EXIT GATE kapsamında depoya karşı doğrulanır.
+- Düzeltme notu (2026-09-28 / T17-R2): Bu kaydın başlığı ve gerekçesi hatalı öncüle dayanıyordu; README'de "leakage_clean.csv" adı hiçbir yerde geçmiyor. Doğru kayıt I-047'dedir.
+## I-047 — README fixture adı bulgusu hatalı öncüle dayanıyordu; commit mesajı diff ile uyuşmadı (PHASE 4 / T17-R2).
+- Tarih: 2026-09-28
+- Ne oldu: T17 denetiminde "README'deki dosya adı depoyla uyuşmuyor" bulgusu raporlandı ve T17-R1 kapsamına alındı. T17-R1'deki ham kontrolde README'de "leakage_clean.csv" adının hiç geçmediği, README'nin veri dosyaları için genel "data.csv" yer tutucusu kullandığı, README'de geçen gerçek fixture adlarının yalnız intervals_calibrated.csv ve intervals_overconfident.csv olduğu ve ikisinin de depoda bulunduğu görüldü.
+- Etki: Bulgu doküman-depo uyumsuzluğu değil, denetim tarafındaki eşleme hatasıydı (yer tutucu data.csv, var olmayan bir ada çevrilmişti). Buna rağmen c14c51d commit mesajı README dosya adlarının hizalandığını beyan ettiği hâlde değişen tek dosya docs/INCIDENTS.md oldu; I-046 metni hatalı öncülü içeriyor.
+- Düzeltme: README değiştirilmedi; I-046 kaydına düzeltme notu eklendi; bu kayıt açıldı. README quickstart'taki genel data.csv yer tutucusunun gerçek fixture'a bağlanması PHASE 5 (README cilası) kapsamına alındı.
+- Önlem: Denetim bulguları da ham kanıtla doğrulanmadan görev kapsamına alınmaz; commit mesajı yalnız gerçekten değişen dosyaları tarif eder.
