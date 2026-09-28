@@ -376,11 +376,8 @@ def test_report_card_writes_four_files():
 
 def test_report_card_determinism():
     with tempfile.TemporaryDirectory() as tmpdir:
-        csv_path = os.path.join(tmpdir, 'dummy.csv')
-        with open(csv_path, 'w', encoding='utf-8') as f:
-            f.write("y,grp,pred,lo,hi\n1,a,0.9,0.5,1.5\n0,b,0.1,-0.5,0.5\n")
         out_dir = os.path.join(tmpdir, 'out')
-        args = ['report', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', out_dir]
+        args = ['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', out_dir]
         
         res1 = run_cli(args)
         assert res1.returncode == 0
@@ -398,25 +395,38 @@ def test_report_card_determinism():
 
 def test_report_card_consistency_with_card_command():
     with tempfile.TemporaryDirectory() as tmpdir:
-        csv_path = os.path.join(tmpdir, 'dummy.csv')
-        with open(csv_path, 'w', encoding='utf-8') as f:
-            f.write("y,grp,pred,lo,hi\n1,a,0.9,0.5,1.5\n0,b,0.1,-0.5,0.5\n")
-            
-        rep_dir = os.path.join(tmpdir, 'rep')
-        card_dir = os.path.join(tmpdir, 'card')
-        res_rep = run_cli(['report', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--shift', '--card', '--out-dir', rep_dir])
-        res_card = run_cli(['card', '--input', csv_path, '--target-col', 'y', '--group-col', 'grp', '--pred-col', 'pred', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--out-dir', card_dir])
-        assert res_rep.returncode == 0
-        assert res_card.returncode == 0
+        # Senaryo 1: eval_preds.csv
+        rep_dir1 = os.path.join(tmpdir, 'rep1')
+        card_dir1 = os.path.join(tmpdir, 'card1')
+        res_rep1 = run_cli(['report', '--input', 'tests/fixtures/eval_preds.csv', '--target-col', 'y', '--pred-col', 'pred', '--group-col', 'grp', '--evaluate', '--card', '--out-dir', rep_dir1])
+        res_card1 = run_cli(['card', '--input', 'tests/fixtures/eval_preds.csv', '--target-col', 'y', '--pred-col', 'pred', '--group-col', 'grp', '--out-dir', card_dir1])
+        assert res_rep1.returncode == 0
+        assert res_card1.returncode == 0
         
-        with open(os.path.join(rep_dir, 'card.json'), 'r', encoding='utf-8') as f:
-            c1 = json.load(f)
-        with open(os.path.join(card_dir, 'card.json'), 'r', encoding='utf-8') as f:
-            c2 = json.load(f)
+        with open(os.path.join(rep_dir1, 'card.json'), 'r', encoding='utf-8') as f:
+            c1_s1 = json.load(f)
+        with open(os.path.join(card_dir1, 'card.json'), 'r', encoding='utf-8') as f:
+            c2_s1 = json.load(f)
             
         blocks = ['questions', 'checks_summary', 'not_assessable', 'metrics', 'thresholds', 'scope']
         for b in blocks:
-            assert c1.get(b) == c2.get(b)
+            assert c1_s1.get(b) == c2_s1.get(b)
+
+        # Senaryo 2: intervals_calibrated.csv
+        rep_dir2 = os.path.join(tmpdir, 'rep2')
+        card_dir2 = os.path.join(tmpdir, 'card2')
+        res_rep2 = run_cli(['report', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--evaluate', '--card', '--out-dir', rep_dir2])
+        res_card2 = run_cli(['card', '--input', 'tests/fixtures/intervals_calibrated.csv', '--target-col', 'y', '--lower-col', 'lo', '--upper-col', 'hi', '--nominal-coverage', '0.9', '--out-dir', card_dir2])
+        assert res_rep2.returncode == 0
+        assert res_card2.returncode == 0
+        
+        with open(os.path.join(rep_dir2, 'card.json'), 'r', encoding='utf-8') as f:
+            c1_s2 = json.load(f)
+        with open(os.path.join(card_dir2, 'card.json'), 'r', encoding='utf-8') as f:
+            c2_s2 = json.load(f)
+            
+        for b in blocks:
+            assert c1_s2.get(b) == c2_s2.get(b)
 
 def test_report_card_golden():
     with tempfile.TemporaryDirectory() as tmpdir:
