@@ -47,6 +47,7 @@ also records the current `git.commit`, so a new commit changes its hash.
 ## 6. Limitations & evidence status
 - Current scenarios tested: Diagnostic indicator only.
 - No untested safety claims.
+- If a column named by `--group-col` / `--time-col` / `--pred-col` does not exist, the run fails with a non-zero exit code and an explicit message; the card/report is not produced.
 ## 7. Exit Codes
 - `0`: Success
 - `1`: Unexpected internal error

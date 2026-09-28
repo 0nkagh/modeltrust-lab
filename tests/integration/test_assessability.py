@@ -2,7 +2,6 @@ import os
 import sys
 import json
 import subprocess
-import pytest
 
 def _run_card_questions(fixture: str, args: list[str], tmp_path) -> dict[int, dict]:
     out_dir = str(tmp_path / fixture.replace(".csv", ""))
@@ -55,7 +54,7 @@ def test_q10_partial_by_rule(tmp_path):
     assert questions_drift[10]["status"] == "partial"
 
 
-def test_q3_q4_q7_answered_in_declared_run(tmp_path):
+def test_q1_to_q7_answered_in_declared_runs(tmp_path):
     q_b1 = _run_card_questions("simple_ok.csv", [], tmp_path)
     assert q_b1[1]["status"] == "answered"
     assert "profile:" in q_b1[1]["evidence"]
