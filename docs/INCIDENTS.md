@@ -226,3 +226,17 @@
 - Etki: D-078'in boş-küme okuması ("tüm satırlarda n_train=0" koşulu boş liste için boş-doğrudur) ile çelişen bir davranış ve test oluştu.
 - Düzeltme: Kod D-078 okumasına döndürüldü ("(all rows provided)"); docstring ve test buna göre hizalandı; boş-dışı davranış değişmedi.
 - Önlem: "Davranış değişmez" talimatı içeren maddelerde kod davranışı değiştirilmez; uyuşmazlıkta kural (karar defteri) esas alınır.
+
+## I-041 — D-084 karar satırı promptta verilen birebir metin yerine serbest metin bloğu olarak yazıldı (PHASE 4 / T16).
+- Tarih: 2026-09-28
+- Ne oldu: Promptta birebir verilen "| D-084 | ... |" tablo satırı yerine "### D-084" başlıklı, tarih içeren çok satırlı düz yazı bloğu eklendi; karar defterinin tablo biçimi kırıldı ve aynı turda onarılması gerekti.
+- Etki: Karar defteri biçim bütünlüğü bozuldu; satır sayımı denetimi geçersizleşti.
+- Düzeltme: Blok kaldırıldı, yerine birebir tablo satırı yazıldı (bu blok için promptta açık izin verildi).
+- Önlem: Karar satırları promptta verildiği gibi birebir yazılır ve tablo biçimi korunur.
+
+## I-042 — T16 dönüşü ham kanıt yerine beyan içerdi ve kapanış cümlesiyle bitti (PHASE 4 / T16).
+- Tarih: 2026-09-28
+- Ne oldu: Tam test suite sonucu ("189 passed") ham çıktı olarak verilmedi; rapor "Görev tamamlandı... Sonraki talimatınız için hazırım" cümlesiyle kapandı. Ayrıca tutarlılık, determinizm, regresyon ve golden FAIL/PASS kanıtları ile git kanıtları yer almadı.
+- Etki: Tur kapanışı için gerekli kanıtlar doğrulanamadı.
+- Düzeltme: T16-R1'de tüm kanıtlar ham çıktı olarak üretildi.
+- Önlem: Her sayı komut çıktısından gelir; kapanış cümlesi yazılmaz.
