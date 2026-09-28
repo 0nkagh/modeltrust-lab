@@ -294,3 +294,23 @@
 - Etki: Mesajı okuyan bir denetçi README değişikliğini commit'ten çıkaramaz; I-047 (c14c51d) ile aynı sınıf uyuşmazlığın ikinci örneği.
 - Düzeltme: Sapma bu kayıtla beyan edildi; geçmiş commit değiştirilmez. Kural D-093 ile yazıldı.
 - Önlem: Her commit mesajı o commit'teki tüm dosyaları kapsar; şablon mesaj sonradan eklenen dosyayı kapsamıyorsa mesaj güncellenir ya da ek dosya ayrı commit'e alınır (D-093).
+## I-051 — Vaka çalışması koşu seti, enjekte edilen kusurların hedef modlarını içermiyordu (PHASE 5 / T19).
+- Tarih: 2026-09-28
+- Ne oldu: T19 şartnamesindeki koşu listesi zaman-yerel dağılım kayması için temporal bölme koşusunu ve bölgesel hata yoğunlaşması için region grup kolonunu içermiyordu; CASE_STUDY.md'de D6 ve D8 "tespit edilmedi / incelenmedi" olarak yazıldı.
+- Etki: Belge, araç yeteneğinden çok komut seçimini ölçüyordu.
+- Düzeltme: Hedefli koşular eklendi (shift --split-mode temporal, report --split-mode temporal --shift, report --group-col region --evaluate) ve belge ham sonuçlarla güncellendi; mod/grup kolonu etkisi §4.1'de tablolandı.
+- Önlem: Her enjekte edilen kusur, tasarlandığı mod ve grup kolonuyla da koşulur (D-095).
+
+## I-052 — Sürdürme koşusunda süreç sapmaları: sarmalayıcı komutlar, kökte geçici çıktı ve --out-dir'siz koşu (PHASE 5 / T19-R1).
+- Tarih: 2026-09-28
+- Ne oldu: T19-R1 kesintisinden sonraki sürdürmede komutlar "powershell -NoProfile -Command '...'" sarmalayıcısıyla çalıştırıldı; rapor çıktıları repo kökündeki tmp_report ve tmp_report2 dizinlerine yazıldı; report komutu bir kez --out-dir verilmeden koşuldu.
+- Etki: Ürün dosyaları ve kalıcı kanıt etkilenmedi; dizinler commit edilmedi. Kökte iz bırakma riski (I-029/I-030 sınıfı) ve sözleşme dışı koşu oluştu.
+- Düzeltme: Çıktılar $env:TEMP altına kurtarıldı; dizinler hedefli silindi; sözleşme dışı koşu ham exit koduyla (EXIT_no_outdir=2) raporlandı ve doğru komutla tekrarlandı.
+- Önlem: Geçici çıktı yalnız $env:TEMP; komutlar sarmalayıcısız; çıktı üreten koşular --out-dir ile (D-096).
+
+## I-053 — Repo köküne izinsiz pytest.ini ve tmp_pytest dizinleri oluşturuldu (PHASE 5 / T19-R1).
+- Tarih: 2026-09-28
+- Ne oldu: Sürdürme koşusunda repo köküne pytest.ini dosyası ve tmp_pytest* geçici dizinleri oluşturuldu; bunlar hiçbir prompt maddesinde istenmemişti. pytest.ini önerisi arayüzde reddedildi ve dosya kaldırıldı.
+- Etki: Ürün ve kanıt etkilenmedi; ancak kök hijyeni bozuldu ve pytest yapılandırmasının iki kaynağa bölünme riski doğdu (pyproject.toml [tool.pytest.ini_options] ile pytest.ini çakışması rootdir/addopts davranışını değiştirebilir).
+- Düzeltme: pytest.ini reddedildi/silindi; tmp_pytest* dizinleri hedefli kaldırıldı; kök dosya listesi ve git durumu ham çıktıyla doğrulandı.
+- Önlem: Köke dosya/dizin ekleme yalnız promptta açıkça istendiğinde yapılır; pytest yapılandırmasının tek kaynağı pyproject.toml'dur (D-097).
