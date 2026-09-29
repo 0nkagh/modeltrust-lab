@@ -1,3 +1,14 @@
+## Unreleased
+
+### Added
+
+- GitHub Actions CI (`.github/workflows/ci.yml`): the full test suite on Python 3.11, 3.12 and 3.13 (Ubuntu) and Python 3.12 (Windows), a sha256 integrity check of the committed case-study data, a wheel build + clean-venv smoke test, and a byte-level determinism check of the canonical case-study run.
+- CI status badge in the README.
+
+### Changed
+
+- `requires-python` raised to `>=3.11` to match the CI-tested range; the previous `>=3.10` floor was never exercised (see `I-059`).
+
 # Changelog
 
 All notable changes to this project are documented in this file.

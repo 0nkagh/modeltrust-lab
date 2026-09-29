@@ -1,5 +1,7 @@
 # ModelTrust Lab
 
+[![CI](https://github.com/0nkagh/modeltrust-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/0nkagh/modeltrust-lab/actions/workflows/ci.yml)
+
 ## 1. What this is / what this is NOT
 Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research prototype; not production-ready, not a compliance or safety certification tool.
 
@@ -22,7 +24,7 @@ because it reports on the report itself).
 Phase history and governance records: `docs/DECISIONS.md`, `docs/INCIDENTS.md`, `CHANGELOG.md`.
 
 ## 3. Requirements
-- Python >=3.10
+- Python >=3.11
 
 ## 4. Quickstart
 ```bash
@@ -203,6 +205,17 @@ Three deliberate differences:
 - **Answerability semantics:** every check returns `answered` / `partial` / `not_assessable` with a `reason_code` and an evidence pointer. "This check cannot be run on this input, and here is why" is part of the contract.
 
 A measured side-by-side run, version metadata and scope differences: [`docs/COMPARISON.md`](docs/COMPARISON.md).
+
+## Continuous integration
+
+Every push to `main` and every pull request runs GitHub Actions (`.github/workflows/ci.yml`):
+
+- the full test suite on Python 3.11, 3.12 and 3.13 (Ubuntu) and Python 3.12 (Windows);
+- a sha256 integrity check of the committed case-study data (`examples/case_study/case_study.csv`);
+- a wheel build, a clean-venv install and a CLI smoke test of the built artifact;
+- a byte-level determinism check that runs the canonical case-study command twice into the same output directory and compares file hashes.
+
+Requires Python >= 3.11. Only the versions listed above are tested; no other version is claimed as supported.
 
 ## License
 

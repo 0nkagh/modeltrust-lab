@@ -347,3 +347,9 @@
 - Etki: Kayıt yanlış/doğrulanmamış bir nedene bağlanmıştı; kök neden analizi kanıtsız kalmıştı.
 - Düzeltme: I-056 append-only kuralı gereği değiştirilmedi; neden beyanı bu kayıtla düzeltildi ve `docs/COMPARISON.md` §4.c'ye kanonik koşunun T20 dosyasını bit-bit yeniden ürettiği yazıldı.
 - Önlem: Olay kayıtlarında neden beyanı ancak tekrarlanabilir bir koşuyla doğrulandıktan sonra yazılır (D-100).
+
+## I-059 — `requires-python` beyanı CI'nın test ettiği aralıktan düşüktü
+
+`pyproject.toml` T21'de `requires-python = ">=3.10"` olarak yayınlandı; ancak depo hiçbir turda Python 3.10'da kurulup koşulmadı. T23'te CI matrisi kurulurken PyPI metadata'sı kontrol edildi: `pandas 3.0.6` → `Requires-Python >=3.11`, `numpy 2.5.3` → `Requires-Python >=3.12`. Beyan kanıtsızdı.
+
+**Düzeltme:** `requires-python` CI'nın test ettiği en düşük sürüme çekildi (`>=3.11`), kural `D-109` olarak kayda geçti. Etki: yalnız paket metadatası; kod ve çıktı davranışı değişmedi.
