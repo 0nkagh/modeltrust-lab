@@ -20,7 +20,7 @@
   "seed": 42,
   "tool": {
     "name": "modeltrust",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "warnings": []
 }

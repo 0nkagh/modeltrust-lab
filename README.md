@@ -7,7 +7,7 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 
 ## 2. Status
 
-Version `0.1.0` — first release; the `v0.1.0` tag is created when the repository is published. All ten diagnostic questions are addressable;
+Version `0.2.0`. Release history: `v0.1.0` (first release) and `v0.2.0` (continuous integration, English narrative documentation, real-data case study). All ten diagnostic questions are addressable;
 see `docs/ASSESSABILITY.md` for the per-question accessibility matrix (Q10 is `partial` by design,
 because it reports on the report itself).
 
@@ -18,6 +18,7 @@ because it reports on the report itself).
 | Answerability semantics (`answered` / `partial` / `not_assessable`) | implemented |
 | Controls that cannot run | recorded with a `reason_code`; never silently skipped |
 | Case study on deliberately corrupted data | `docs/CASE_STUDY.md` |
+| Real-data case study (UCI Student Performance, CC BY 4.0) | `docs/CASE_STUDY_REAL.md` |
 | Measured comparison with Evidently | `docs/COMPARISON.md` |
 | Evidence status | research prototype; diagnostic indicators only; no production, compliance or safety claim |
 
@@ -179,7 +180,7 @@ Example `manifest.json`:
 ```json
 {
   "manifest_schema_version": 1,
-  "tool": {"name": "modeltrust", "version": "0.1.0"},
+  "tool": {"name": "modeltrust", "version": "0.2.0"},
   "command": "python -m modeltrust card --input data.csv --target-col y --manifest --out-dir ./card_reports",
   "input": {"path": "data.csv", "sha256": "...", "rows": 200, "columns": 3},
   "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.5.3", "platform": "win32"},

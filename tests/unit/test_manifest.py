@@ -6,7 +6,7 @@ from modeltrust.manifest import build_manifest, write_manifest
 
 def _dummy_prov():
     return {
-        "tool": {"name": "modeltrust", "version": "0.1.0"},
+        "tool": {"name": "modeltrust", "version": "0.2.0"},
         "input": {
             "path": "tests/fixtures/simple_ok.csv",
             "sha256": "97cbacf19b1474861bafe4ad7dd3f34a98ec7759d812eeedc34a8a4d84246529",

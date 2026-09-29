@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 from modeltrust.card import get_card_thresholds
+from . import __version__
 
 
 def _get_git_info() -> dict:
@@ -37,7 +38,7 @@ def build_manifest(prov: dict, command: str, input_path: str, outputs_sha256: di
     tool_info = prov.get("tool", {})
     tool = {
         "name": tool_info.get("name", "modeltrust"),
-        "version": tool_info.get("version", "0.1.0"),
+        "version": tool_info.get("version", __version__),
     }
 
     inp = prov.get("input", {})

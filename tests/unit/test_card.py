@@ -4,7 +4,7 @@ from modeltrust.card import build_card_json, build_card_md
 def test_card_full_equipment():
     # Full equipment
     prov = {
-        "tool": {"name": "modeltrust", "version": "0.1.0"},
+        "tool": {"name": "modeltrust", "version": "0.2.0"},
         "environment": {"python": "3.11", "pandas": "2.0", "numpy": "1.24", "platform": "Windows"},
         "run_metadata": {"seed": 42},
         "profile": {"duplicate_rows": {"exact_duplicate_count": 0}},
