@@ -5,7 +5,7 @@ This project uses `0.x` versioning: before 1.0, the CLI contract and output sche
 
 ## [0.1.0] - 2026-09-29
 
-First tagged release. A model-agnostic diagnostic toolkit that answers ten trustworthiness
+First release. A model-agnostic diagnostic toolkit that answers ten trustworthiness
 questions about a tabular regression setup from a single CSV file.
 
 ### Added

@@ -5,7 +5,7 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 
 ## 2. Status
 
-Version `0.1.0` — first tagged release. All ten diagnostic questions are addressable;
+Version `0.1.0` — first release; the `v0.1.0` tag is created when the repository is published. All ten diagnostic questions are addressable;
 see `docs/ASSESSABILITY.md` for the per-question accessibility matrix (Q10 is `partial` by design,
 because it reports on the report itself).
 
