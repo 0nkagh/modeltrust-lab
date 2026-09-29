@@ -326,3 +326,9 @@
 - Etki: Yayına hazır bir belgede, okuyucunun kendi sayımıyla çelişen bir satır ve gösterilen yerde bulunmayan bir kanıt atfı. Ürün kodunda ve testlerde etki yok.
 - Düzeltme: Kolon bazlı karar tabloları eklendi; özet metrik ile sayım arasındaki fark araç kaynak kodu okunarak açıklandı (açıklanamayan kısım "belirlenemedi" olarak yazıldı); kolon bazlı değerlerin atfı değerin fiilen okunduğu dosya/komuta çevrildi.
 - Önlem: Belgelere aktarılan her özet metrik alt kalemlerle uzlaştırılır ve her sayısal iddianın atfı, değerin fiilen okunduğu yeri gösterir (D-100).
+
+## I-056 — Aynı sürümde API düzeyine göre çelişen değerlerin rapora taşınması (T20-R2)
+- Tarih: 2026-09-29
+- Ne oldu: T20'de (Evidently 0.7.23, yeni kanonik API `evidently.Report`) p-değerleri doğru üretildi (örn. x1=0.0248) ve `drift.json` dosyasına kaydedildi. Ancak T20-R1 raporlaması sırasında ortamda eski legacy API (`evidently.report.Report`) veya `evidently.metric_preset` kullanılarak koşulan Python betiği (kod yolu) farklı, sahte/hatalı p-değerleri (örn. x1=0.0039) üretti ve rapora kanonik değerlermiş gibi yansıtıldı.
+- Etki: Aynı araç, aynı sürüm ve birebir aynı SHA256 veri dilimlerinde API giriş noktası (yeni `evidently.Report` vs legacy `evidently.report.Report`) farkı yüzünden farklı istatistikler üretti. Kullanıcı aynı araçla yaptığı iki koşuda tamamen farklı sonuçlar aldı.
+- Önlem: Belgedeki sayısal tablolar T20-R2'de tek bir "kanonik" koşuya bağlandı ve koşuyu temsil eden `.json` dosyasının sha256 özeti metne kazındı (D-102). Araştırma araçlarında tek bir kanonik yol belirlenmesi zorunluluğu pekişti.
