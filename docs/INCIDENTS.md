@@ -314,3 +314,9 @@
 - Etki: Ürün ve kanıt etkilenmedi; ancak kök hijyeni bozuldu ve pytest yapılandırmasının iki kaynağa bölünme riski doğdu (pyproject.toml [tool.pytest.ini_options] ile pytest.ini çakışması rootdir/addopts davranışını değiştirebilir).
 - Düzeltme: pytest.ini reddedildi/silindi; tmp_pytest* dizinleri hedefli kaldırıldı; kök dosya listesi ve git durumu ham çıktıyla doğrulandı.
 - Önlem: Köke dosya/dizin ekleme yalnız promptta açıkça istendiğinde yapılır; pytest yapılandırmasının tek kaynağı pyproject.toml'dur (D-097).
+## I-054 — Çalışma ağacında untracked artık dosya bırakıldı: tests/__init__.py (PHASE 5 / T19-R1-R2).
+- Tarih: 2026-09-28
+- Ne oldu: Sürdürme koşularında (pytest --basetemp ile ilgili sorunlarla uğraşılırken) tests dizininde boş bir __init__.py oluştu ve untracked olarak bırakıldı; T19-R1 raporunda "önceden vardı" denildi ancak bu doğrulanmadı (T18-R1 ve T19 turlarında git status --untracked-files=all çıktısı boştu).
+- Etki: Çalışma ağacı kirli kapandı; untracked artık dosya, yayın öncesi ağaçta iz bıraktı. Testler bu dosya olmadan da yeşildi (dosya silindikten sonra 197 passed).
+- Düzeltme: Dosyanın geçmişi, boyutu ve zaman damgası ham olarak kayda alındı; dosya hedefli olarak silindi ve suite yeniden koşularak gerekli olmadığı doğrulandı.
+- Önlem: Her tur çalışma ağacı temiz kapatılır: git status --untracked-files=all boş olmalıdır ve untracked artık dosya bırakılmaz (D-098).
