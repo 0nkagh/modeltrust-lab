@@ -3,7 +3,7 @@
 All notable changes to this project are documented in this file.
 This project uses `0.x` versioning: before 1.0, the CLI contract and output schemas may change.
 
-## Unreleased
+## [0.2.0] - 2026-09-29
 
 ### Added
 
