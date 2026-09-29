@@ -288,5 +288,5 @@ Leakage modülünde fail döndüren kontrollerin tam JSON çıktısı:
 ## 7. Sınırlar
 
 - **Genellenemezlik**: Bu vaka çalışmasında elde edilen tespit ve başarısızlıklar yalnızca kasten tasarlanan sentetik `case_study.csv` verisi için geçerlidir; farklı veri kümelerine, farklı gürültü rejimlerine veya karmaşık doğrusal olmayan ilişkilere genellenemez.
-- **Tek sürüm**: Sonuçlar ModelTrust Lab `0.0.1.dev0` sürümünün mevcut eşikleri ve kuralları altında elde edilmiştir.
+- **Ölçüm sürümü**: Sonuçlar, o tarihte kurulu olan `0.0.1.dev0` geliştirme sürümüyle elde edilmiştir; `0.1.0` aynı kod tabanının sürümlenmiş hâlidir.
 - **Yalnızca tanı göstergesi**: Flaglenen bulgular kesin kanıt değil tanısal göstergedir; bayrak üretilmemesi de sızıntı veya kusur bulunmadığının kanıtı sayılamaz.

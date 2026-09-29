@@ -103,7 +103,7 @@ Her iki araca da birebir aynı veri satırları ve aynı dilimler sağlanmışt�
 - **Evidently özet metriği**: `DriftedColumnsCount(drift_share=0.5)` -> `{'count': 9.0, 'share': 0.75}` (9/12 kolon sürüklenmiş) [kaynak: `drift.json:DriftedColumnsCount` — `evidently:metric_v2:DriftedColumnsCount`].
 - **Kolon bazlı sayım**: 8/12 sayısal/kategorik kolon (`row_id, x1, x2, y, pred, lo, hi, y_proxy`) eşik değerini (0.05) aştığı için kayma tespit edilmiştir.
 - **Farkın Açıklaması (9 ↔ 8)**: 9. sürüklenen kolon `ts` metin kolonudur. Kütüphane kaynak kodu incelendiğinde (`evidently/legacy/calculations/stattests/text_content_drift.py:10-15` ve `evidently/legacy/utils/data_drift_utils.py:224-257`), `ts` için alan sınıflandırıcısı eğitildiği görülür. Karar kuralı "ROC-AUC > rastgele sınıflandırıcı yüzdeliği (~0.55)" şeklinde çalışmaktadır; `ts` için ROC-AUC skoru 0.9335'tir.
-- **İki Kod Yolu (API Farkı)**: Aynı sürümde iki API yolu aynı dilimlerde farklı değerler üretti; kanonik yol (Yeni API: `evidently.Report`) §4.b'dedir. Legacy yol (Eski API: `evidently.report.Report` ve `evidently.metric_preset.DataDriftPreset`) çalıştırılamamıştır (`ModuleNotFoundError`).
+- **Belirlenemeyen koşu**: T20-R1'de belgeye giren farklı değerlerin hangi koşudan geldiği belirlenemedi: bu sürümde `evidently.report` giriş noktası bulunmuyor (`ModuleNotFoundError`) ve legacy hesaplama yolu (`evidently.legacy.calculations.data_drift`) aynı dilimlerle koşulamadı (`ValueError: column_mapping should be present`). Kanonik yol §4.b'dedir; kaynağı belirlenemeyen sayılar bu belgede kullanılmaz.
 - **ModelTrust tarafı**: 4 shift denetiminden 3 `fail` (`drift.feature_ks`, `drift.target_ks`, `ood.feature_range`), 1 `pass` (`ood.mahalanobis`).
 - **Gözlem Notları**:
   - `x1`: ModelTrust pratik etki büyüklüğü eşiği (KS stat 0.15 < 0.25) altında kaldığı için `pass` verirken; Evidently istatistiksel anlamlılık (p=0.0249 < 0.05) nedeniyle `Drift` bildirmiştir. Bu, etki büyüklüğü ile hipotez testi yaklaşımı arasındaki metodoloji farkını yansıtır.
@@ -188,3 +188,5 @@ $env:ITERATIVE_DO_NOT_TRACK = "1"
 - **Kapsam**: Karşılaştırma yalnızca tek bir sentetik veri kümesi (`case_study.csv`) ve temporal bölme senaryosu üzerinde yapılmıştır.
 - **Sürüm Bağımlılığı**: Bulgular ModelTrust Lab `0.0.1.dev0` ve Evidently `0.7.23` sürümleri için geçerlidir; gelecekteki sürümlerde test yöntemleri veya varsayılan eşikler değişebilir.
 - **Tanısal Nitelik**: Elde edilen p-değerleri veya KS istatistikleri tanısal göstergelerdir; modelin üretim ortamındaki genel güvenilirliğine dair kesin bir garanti oluşturmaz.
+
+- **Ölçüm sürümü**: Bu belge, o tarihte kurulu olan `0.0.1.dev0` geliştirme sürümüyle yapılan ölçümleri kaydeder; `0.1.0` bu belgenin kod tabanının sürümlenmiş hâlidir.
