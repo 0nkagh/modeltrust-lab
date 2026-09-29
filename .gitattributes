@@ -2,3 +2,4 @@
 *.csv text eol=lf
 tests/fixtures/** -text
 *.parquet binary
+examples/case_study_real/*.csv -text
