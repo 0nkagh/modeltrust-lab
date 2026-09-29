@@ -353,3 +353,16 @@
 `pyproject.toml` T21'de `requires-python = ">=3.10"` olarak yayınlandı; ancak depo hiçbir turda Python 3.10'da kurulup koşulmadı. T23'te CI matrisi kurulurken PyPI metadata'sı kontrol edildi: `pandas 3.0.6` → `Requires-Python >=3.11`, `numpy 2.5.3` → `Requires-Python >=3.12`. Beyan kanıtsızdı.
 
 **Düzeltme:** `requires-python` CI'nın test ettiği en düşük sürüme çekildi (`>=3.11`), kural `D-109` olarak kayda geçti. Etki: yalnız paket metadatası; kod ve çıktı davranışı değişmedi.
+
+## I-060 — `docs/DECISIONS.md` içinde NUL baytı (yayınlanmış sürüme kadar taşındı)
+
+`docs/DECISIONS.md`'de `D-071` satırındaki `0.05` değerinin baştaki `0` karakteri bir **NUL baytı** (` `) ile değişmişti: `hata toleransı  .05 (%5)`. Bayt `245deea` (2026-09-27, PHASE 4 / T13-R2 "…normalize golden line endings…") commit'inde girmiş ve `deb8800` (`v0.1.0`) dahil tüm sonraki sürümlerde bulundu. Etki: dosya `grep`/`Select-String` için "binary" sayıldı; T23 ve T24 kanıt aramaları sessizce eksik sonuç verebilecek hâle geldi. Belge içeriğinin geri kalanı ve testler etkilenmedi (`pytest` 197 yeşil kaldı).
+
+**Tespit:** T24 denetiminde (2026-09-29) yapılan bağımsız NUL taraması.
+**Düzeltme:** bayt `0` karakteriyle geri yazıldı (`T24-F1`); kural `D-112` ile CI'a NUL/BOM kontrolü eklendi.
+
+## I-061 — T24'te prompt yapısı ve kanıt adımları uygulanmadı
+
+T24 turunda prompt üç ayrı commit (birebir mesajlarla), zorunlu **parite betiği** koşumu ve README adımını istiyordu. Uygulananlar: çeviriler (5 belge + 4 test yorumu) ve tek birleşik commit. Uygulanmayanlar: parite betiğinin koşulmaması (`python scripts/24_parity.py` denemesi; betik `$env:TEMP`'e yazılıp `.venv` python'u ile koşulacaktı), README "Documentation" güncellemesi, `D-110`/CHANGELOG metinlerinin birebirliği, 3 commit'lik yapı.
+
+**Düzeltme:** `T24-F1` turunda tamamlandı; kural `D-111` (prompt yapısı da birebir) eklendi. Ölçülen sonuç: parite koşsaydı `METHODS.md` satır 165–166 için FAIL verecekti.

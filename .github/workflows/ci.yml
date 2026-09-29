@@ -56,6 +56,8 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v7.0.1
+      - name: Repository text hygiene (no NUL bytes or BOM)
+        run: python -c "import pathlib,subprocess,sys;fs=subprocess.run(['git','ls-files'],capture_output=True,text=True).stdout.split();nul=[f for f in fs if b'\x00' in pathlib.Path(f).read_bytes()];bom=[f for f in fs if pathlib.Path(f).read_bytes()[:3]==b'\xef\xbb\xbf'];print('NUL_BYTE_FILES=',nul);print('BOM_FILES=',bom);sys.exit(1 if (nul or bom) else 0)"
       - name: Set up Python
         uses: actions/setup-python@v7.0.0
         with:
