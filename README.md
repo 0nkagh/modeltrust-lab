@@ -7,7 +7,7 @@ Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research pro
 | Phase | Task | Status | Description |
 |---|---|---|---|
 | PHASE 2 | T1 | ✅ repo skeleton | Repo initialization |
-| PHASE 2 | T2 | ✅ inspect | CSV/Parquet okuma, şema doğrulama, provenance |
+| PHASE 2 | T2 | ✅ inspect | CSV/Parquet reading, schema validation, provenance |
 | PHASE 2 | T3 | ✅ profile | Dataset profiling |
 | PHASE 2 | T5 | ✅ split | Data splitting |
 | PHASE 2 | T6 | ✅ report (this task) | JSON and Markdown report generation |
@@ -96,7 +96,7 @@ modeltrust split --input data.csv --target-col y --group-col grp --time-col ts
 ```
 
 ### `report`
-Generates full JSON and Markdown diagnostic reports, writing them to a directory. Tek komutta profil + leakage + split + model hatası denetimi gerçekleştirilebilir.
+Generates full JSON and Markdown diagnostic reports, writing them to a directory. A single command runs profiling, leakage, split and model-error auditing.
 ```bash
 modeltrust report --input data.csv --target-col y --group-col grp --out-dir ./reports
 
@@ -177,24 +177,24 @@ Example `manifest.json`:
 ```
 
 *Note: The card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.*
-## Benzer araçlar ve konum
+## Related tools and positioning
 
-ModelTrust Lab yeni bir istatistiksel yöntem icat etmez; aşağıdaki soruların çoğunu başka araçlar da yanıtlar:
+ModelTrust Lab does not invent a new statistical method; most of the questions this tool addresses are also answered by other tools:
 
-| Araç | Ne yapar | Örtüşen sorular |
+| Tool | What it does | Overlapping questions |
 |---|---|---|
-| [Evidently](https://github.com/evidentlyai/evidently) (Apache-2.0) | Sürüklenme testleri, veri kalitesi, performans panoları | eksik/yinelenen kayıt, sürüklenme, OOD |
-| [Deepchecks](https://github.com/deepchecks/deepchecks) (AGPL) | Doğrulama paketi (veri bütünlüğü, train/test sızıntısı, sürüklenme) | eksik/yinelenen kayıt, hedef/grup sızıntısı, bölme, sürüklenme, OOD |
-| [NannyML](https://github.com/NannyML/nannyML) (Apache-2.0) | Etiketsiz performans tahmini, sürüklenme zamanlaması | sürüklenme |
-| [Great Expectations](https://greatexpectations.io/) | Şema/veri doğrulama (expectation suites) | eksik/yinelenen kayıt |
+| [Evidently](https://github.com/evidentlyai/evidently) (Apache-2.0) | Drift tests, data quality, performance dashboards | missing/duplicate records, drift, OOD |
+| [Deepchecks](https://github.com/deepchecks/deepchecks) (AGPL) | Validation suite (data integrity, train/test leakage, drift) | missing/duplicate records, target/group leakage, split, drift, OOD |
+| [NannyML](https://github.com/NannyML/nannyML) (Apache-2.0) | Label-free performance estimation, drift timing | drift |
+| [Great Expectations](https://greatexpectations.io/) | Schema and data validation (expectation suites) | missing/duplicate records |
 
-Bilinçli fark üç maddede toplanır:
+Three deliberate differences:
 
-- **Bağımlılık disiplini:** yalnız `numpy` + `pandas`. scipy/sklearn/torch yok; KS testi ve Wilson aralığı elle uygulanır.
-- **Determinizm ve çevrimdışılık:** aynı çıktı dizininde iki koşu bit-bit aynı sonucu verir; manifest girdinin sha256 değerini taşır; telemetri, ağ erişimi ve model yükleme yoktur.
-- **Cevap verilebilirlik semantiği:** her kontrol `answered` / `partial` / `not_assessable` + `reason_code` + kanıt döndürür. "Bu kontrol bu girdiyle yapılamaz, nedeni şu" ayrımı sözleşmenin parçasıdır.
+- **Dependency discipline:** only `numpy` + `pandas`. No scipy/sklearn/torch; the KS test and Wilson intervals are implemented by hand.
+- **Determinism and offline operation:** two runs into the same output directory are byte-identical; the manifest carries the input's sha256; there is no telemetry, no network access and no model loading.
+- **Answerability semantics:** every check returns `answered` / `partial` / `not_assessable` with a `reason_code` and an evidence pointer. "This check cannot be run on this input, and here is why" is part of the contract.
 
-Ölçülen yan yana koşu, sürüm künyesi ve kapsam farkları: [`docs/COMPARISON.md`](docs/COMPARISON.md).
+A measured side-by-side run, version metadata and scope differences: [`docs/COMPARISON.md`](docs/COMPARISON.md).
 
 ## License
 
