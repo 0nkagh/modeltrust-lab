@@ -94,7 +94,7 @@ D-017…D-022 satırları, karar metinleri prompt içinde verilmediği için uyg
 
 | D-069 | Test fixture'larındaki belirsizlik değerleri testlerdeki teorik/ideal oranlar yerine ampirik ölçümlere (tolerans payıyla birlikte) bağlanır. |
 | D-070 | Belirsizlik aralık genişlikleri değerlendirilirken numpy.inf değerleri dışlanmaz; metriklerde aralıkların doğası gereği hesaba katılır, ancak bucket hesaplamalarında veya test verilerinde sonsuz değer beklenmediği için standart yaklaşımlar kullanılır. |
-| D-071 | Kapsama metriklerinde hata toleransı  .05 (%5) olarak sabitlenmiştir. |
+| D-071 | Kapsama metriklerinde hata toleransı 0.05 (%5) olarak sabitlenmiştir. |
 | D-072 | Belirsizlik fixture'ları hata σ'sına göre ölçeklenmiş yarıçaplarla üretilir (σ=1; R=1.645 kalibre, R=0.4 aşırı güvenli); testler ölçülen kapsamaya şartname bandıyla bağlanır. |
 | D-073 | Golden dosyaları depoda LF satır sonuyla saklanır; Windows çalışma kopyasındaki CRLF git normalizasyonuyla commit edilir. |
 | D-074 | Model card bir sertifika değildir; yalnız bu veri kümesi ve bu ayarlarla üretilmiş teşhis özetini taşır ve performans garantisi içermez. |
