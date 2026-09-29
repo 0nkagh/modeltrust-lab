@@ -177,6 +177,23 @@ Example `manifest.json`:
 ```
 
 *Note: The card is a diagnostic summary, not a certificate. It contains no performance guarantee and no compliance claim.*
+## Benzer araçlar ve konum
+
+ModelTrust Lab yeni bir istatistiksel yöntem icat etmez; aşağıdaki soruların çoğunu başka araçlar da yanıtlar:
+
+| Araç | Ne yapar | Örtüşen sorular |
+|---|---|---|
+| [Evidently](https://github.com/evidentlyai/evidently) (Apache-2.0) | Sürüklenme testleri, veri kalitesi, performans panoları | eksik/yinelenen kayıt, sürüklenme, OOD |
+| [Deepchecks](https://github.com/deepchecks/deepchecks) (AGPL) | Doğrulama paketi (veri bütünlüğü, train/test sızıntısı, sürüklenme) | eksik/yinelenen kayıt, hedef/grup sızıntısı, bölme, sürüklenme, OOD |
+| [NannyML](https://github.com/NannyML/nannyML) (Apache-2.0) | Etiketsiz performans tahmini, sürüklenme zamanlaması | sürüklenme |
+| [Great Expectations](https://greatexpectations.io/) | Şema/veri doğrulama (expectation suites) | eksik/yinelenen kayıt |
+
+Bilinçli fark üç maddede toplanır:
+
+- **Bağımlılık disiplini:** yalnız `numpy` + `pandas`. scipy/sklearn/torch yok; KS testi ve Wilson aralığı elle uygulanır.
+- **Determinizm ve çevrimdışılık:** aynı çıktı dizininde iki koşu bit-bit aynı sonucu verir; manifest girdinin sha256 değerini taşır; telemetri, ağ erişimi ve model yükleme yoktur.
+- **Cevap verilebilirlik semantiği:** her kontrol `answered` / `partial` / `not_assessable` + `reason_code` + kanıt döndürür. "Bu kontrol bu girdiyle yapılamaz, nedeni şu" ayrımı sözleşmenin parçasıdır.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
