@@ -112,6 +112,8 @@ Her iki araca da birebir aynı veri satırları ve aynı dilimler sağlanmışt�
   - `OOD aralık ve Mahalanobis`: ModelTrust'ta bağımsız tanı kontrolleri olarak yer alırken, Evidently `DataDriftPreset` içinde doğrudan karşılığı bulunmamaktadır.
   - `Kategorik kolonlar`: ModelTrust numerik odaklı çalışırken, Evidently otomatik olarak ki-kare testi uygulamıştır.
 
+- **Kanonik koşunun tekrarlanabilirliği**: Aynı komut ve aynı dilimlerle yapılan yeni koşu, T20'de kaydedilen `drift.json` dosyasını bit-bit yeniden üretti (sha256: `9EE1D72256B63C45B7E0173F9959B25A4903BB4DC3D40AA885F987984FD2DEA1`). [A6-B] T20-R1'de belgeye giren farklı değerlerin kaynağı **belirlenemedi**; bu sayılar bu belgede kullanılmaz.
+
 ## 5. Sözleşme farkları
 
 1. **Cevap Verilebilirlik Semantiği (`not_assessable`)**: Evidently'de "bu girdiyle bu kontrol yapılamaz + nedeni" (`status: not_assessable`, `reason_code`) ayrımı bulunmaz; araç uygun veri türü bulduğunda çalışır, bulamadığında hata verir veya sessiz kalır. ModelTrust Lab'de eksik parametre (örn. zaman/grup kolonu verilmemesi) veya boru hattı kodu zorunluluğu açık bir sözleşme durumudur.
