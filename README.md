@@ -4,15 +4,22 @@
 Model-agnostic diagnostic audits for ML evaluation trustworthiness. Research prototype; not production-ready, not a compliance or safety certification tool.
 
 ## 2. Status
-| Phase | Task | Status | Description |
-|---|---|---|---|
-| PHASE 2 | T1 | ✅ repo skeleton | Repo initialization |
-| PHASE 2 | T2 | ✅ inspect | CSV/Parquet reading, schema validation, provenance |
-| PHASE 2 | T3 | ✅ profile | Dataset profiling |
-| PHASE 2 | T5 | ✅ split | Data splitting |
-| PHASE 2 | T6 | ✅ report (this task) | JSON and Markdown report generation |
 
-**Unimplemented modules:** None.
+Version `0.1.0` — first tagged release. All ten diagnostic questions are addressable;
+see `docs/ASSESSABILITY.md` for the per-question accessibility matrix (Q10 is `partial` by design,
+because it reports on the report itself).
+
+| Area | State |
+|---|---|
+| CLI surface (8 commands) | implemented; contract-locked by tests |
+| Deterministic JSON + Markdown output | implemented; scope documented above |
+| Answerability semantics (`answered` / `partial` / `not_assessable`) | implemented |
+| Controls that cannot run | recorded with a `reason_code`; never silently skipped |
+| Case study on deliberately corrupted data | `docs/CASE_STUDY.md` |
+| Measured comparison with Evidently | `docs/COMPARISON.md` |
+| Evidence status | research prototype; diagnostic indicators only; no production, compliance or safety claim |
+
+Phase history and governance records: `docs/DECISIONS.md`, `docs/INCIDENTS.md`, `CHANGELOG.md`.
 
 ## 3. Requirements
 - Python >=3.10
@@ -33,6 +40,7 @@ also records the current `git.commit`, so a new commit changes its hash.
 
 ## Documentation
 
+- Changelog: `CHANGELOG.md`
 - Methods, thresholds and limitations: `docs/METHODS.md`
 - Question accessibility matrix: `docs/ASSESSABILITY.md`
 - Decision log: `docs/DECISIONS.md`
@@ -164,7 +172,7 @@ Example `manifest.json`:
 ```json
 {
   "manifest_schema_version": 1,
-  "tool": {"name": "modeltrust", "version": "0.0.1.dev0"},
+  "tool": {"name": "modeltrust", "version": "0.1.0"},
   "command": "python -m modeltrust card --input data.csv --target-col y --manifest --out-dir ./card_reports",
   "input": {"path": "data.csv", "sha256": "...", "rows": 200, "columns": 3},
   "environment": {"python": "3.12.8", "pandas": "3.0.6", "numpy": "2.5.3", "platform": "win32"},
