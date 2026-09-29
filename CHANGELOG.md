@@ -13,7 +13,8 @@ This project uses `0.x` versioning: before 1.0, the CLI contract and output sche
 ### Changed
 
 - `requires-python` raised to `>=3.11` to match the CI-tested range; the previous `>=3.10` floor was never exercised (see `I-059`).
-- Refined language policy (`D-110`): Narrative documents translated to English, historical logs retained in Turkish.
+- Narrative documentation translated to English: `docs/METHODS.md`, `docs/ASSESSABILITY.md`, `docs/CASE_STUDY.md`, `docs/COMPARISON.md`, `docs/ENVIRONMENT.md`. Historical records in `docs/` remain Turkish (see `D-110`).
+- Four Turkish code comments in `tests/` translated to English (comments only; no behaviour change).
 
 ## [0.1.0] - 2026-09-29
 

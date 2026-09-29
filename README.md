@@ -45,9 +45,13 @@ also records the current `git.commit`, so a new commit changes its hash.
 - Changelog: `CHANGELOG.md`
 - Methods, thresholds and limitations: `docs/METHODS.md`
 - Question accessibility matrix: `docs/ASSESSABILITY.md`
-- Decision log: `docs/DECISIONS.md`
-- Incident log: `docs/INCIDENTS.md`
 - Case study (deliberately corrupted synthetic data): `docs/CASE_STUDY.md`
+- External tool comparison (Evidently): `docs/COMPARISON.md`
+- Environment and setup evidence: `docs/ENVIRONMENT.md`
+- Decision log: `docs/DECISIONS.md` *(kept in Turkish: append-only historical record)*
+- Incident log: `docs/INCIDENTS.md` *(kept in Turkish: append-only historical record)*
+
+`docs/PHASE-1-PLAN.md` and `docs/PHASE-3-EXIT.md` are also kept in Turkish for the same reason. See `D-110` in the decision log.
 
 ## 5. Scope
 - Tabular regression only
