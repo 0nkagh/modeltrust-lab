@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "modeltrust"
-version = "0.0.1.dev0"
+version = "0.1.0"
 description = "Diagnostic audits for ML evaluation trustworthiness (research prototype)."
 readme = "README.md"
 license = "MIT"
