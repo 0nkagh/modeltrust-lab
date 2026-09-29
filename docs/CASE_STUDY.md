@@ -251,7 +251,7 @@ Bu tablo, bölme modu ve grup kolonu seçiminin tespit kapasitesini doğrudan et
 
 ## 6. Kapsam Envanteri
 
-`cs_report/card.json` içinden alınan ham denetim özeti (`checks_summary`):
+Koşu çıktısındaki `card.json` içinden alınan ham denetim özeti (`checks_summary`):
 
 ```json
 [
