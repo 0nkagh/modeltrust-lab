@@ -356,7 +356,7 @@
 
 ## I-060 — `docs/DECISIONS.md` içinde NUL baytı (yayınlanmış sürüme kadar taşındı)
 
-`docs/DECISIONS.md`'de `D-071` satırındaki `0.05` değerinin baştaki `0` karakteri bir **NUL baytı** (` `) ile değişmişti: `hata toleransı  .05 (%5)`. Bayt `245deea` (2026-09-27, PHASE 4 / T13-R2 "…normalize golden line endings…") commit'inde girmiş ve `deb8800` (`v0.1.0`) dahil tüm sonraki sürümlerde bulundu. Etki: dosya `grep`/`Select-String` için "binary" sayıldı; T23 ve T24 kanıt aramaları sessizce eksik sonuç verebilecek hâle geldi. Belge içeriğinin geri kalanı ve testler etkilenmedi (`pytest` 197 yeşil kaldı).
+`docs/DECISIONS.md`'de `D-071` satırındaki `0.05` değerinin baştaki `0` karakteri bir **NUL baytı** (`\x00`) ile değişmişti: `hata toleransı \x00.05 (%5)`. Bayt `245deea` (2026-09-27, PHASE 4 / T13-R2 "…normalize golden line endings…") commit'inde girmiş ve `deb8800` (`v0.1.0`) dahil tüm sonraki sürümlerde bulundu. Etki: dosya `grep`/`Select-String` için "binary" sayıldı; T23 ve T24 kanıt aramaları sessizce eksik sonuç verebilecek hâle geldi. Belge içeriğinin geri kalanı ve testler etkilenmedi (`pytest` 197 yeşil kaldı).
 
 **Tespit:** T24 denetiminde (2026-09-29) yapılan bağımsız NUL taraması.
 **Düzeltme:** bayt `0` karakteriyle geri yazıldı (`T24-F1`); kural `D-112` ile CI'a NUL/BOM kontrolü eklendi.
@@ -366,3 +366,9 @@
 T24 turunda prompt üç ayrı commit (birebir mesajlarla), zorunlu **parite betiği** koşumu ve README adımını istiyordu. Uygulananlar: çeviriler (5 belge + 4 test yorumu) ve tek birleşik commit. Uygulanmayanlar: parite betiğinin koşulmaması (`python scripts/24_parity.py` denemesi; betik `$env:TEMP`'e yazılıp `.venv` python'u ile koşulacaktı), README "Documentation" güncellemesi, `D-110`/CHANGELOG metinlerinin birebirliği, 3 commit'lik yapı.
 
 **Düzeltme:** `T24-F1` turunda tamamlandı; kural `D-111` (prompt yapısı da birebir) eklendi. Ölçülen sonuç: parite koşsaydı `METHODS.md` satır 165–166 için FAIL verecekti.
+
+## I-062 — Hijyen kontrolü kasıtlı BOM fikstürüyle çelişti (kapsam hatası; tur DUR'a gitti)
+
+T24-F1'de verilen CI metin hijyeni kontrolü, izlenen **tüm** dosyalarda BOM arıyordu. Oysa `tests/fixtures/turkish_bom_semicolon.csv` BOM'u **bilerek** taşır ve `tests/unit/test_fixture_hygiene.py` bunu zorunlu kılar; fikstür `tests/fixtures/README.md`'de belgelidir. Kontrol yerelde koşulduğunda fikstürün BOM'u yüzünden kırmızı verdi ve ajan push etmeden DUR'a gitti (T24-F1).
+
+**Düzeltme:** kontrolün kapsamı `tests/fixtures/` hariç tutulacak şekilde daraltıldı, `D-112` metni bu istisnayla güncellendi (T24-F2). Ders: kapsam kuralı yazılırken depodaki **kasıtlı aykırı örnekler** (fikstürler) hesaba katılmalıdır. Ajanın fikstür BOM'unu geçici olarak silip testin kırmızı olduğunu görüp geri koyması doğru bir fix-forward adımıydı; fikstür baytları son hâlde `HEAD` ile aynıdır.
