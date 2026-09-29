@@ -77,6 +77,7 @@ def read_table(
     decimal: Optional[str] = None,
     max_rows: Optional[int] = None,
     chunk_rows: Optional[int] = None,
+    exclude_cols: Optional[list[str]] = None,
 ) -> LoadedTable:
     path_obj = Path(path)
     if not path_obj.exists():
@@ -204,6 +205,16 @@ def read_table(
             meta["duplicate_headers"] = sorted(list(dups))
             raise InputError(f"duplicate column names found: {meta['duplicate_headers']}")
 
+    # Record original file columns for validation
+    meta["file_columns"] = list(df.columns)
+
+    if exclude_cols is not None:
+        deduped = list(dict.fromkeys(exclude_cols))
+        cols_to_drop = [c for c in deduped if c in df.columns]
+        if cols_to_drop:
+            df = df.drop(columns=cols_to_drop)
+        meta["excluded_columns"] = deduped
+
     # Columns check
     cols = list(df.columns)
     meta["ncols"] = len(cols)
@@ -220,3 +231,7 @@ def read_table(
     meta["truncated"] = (max_rows is not None) and (meta["nrows_total"] > max_rows)
     
     return LoadedTable(frame=df, meta=meta)
+
+
+load = read_table
+

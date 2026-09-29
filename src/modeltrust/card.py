@@ -275,6 +275,8 @@ def build_card_md(card):
     lines.append(f"- **Path:** {inp.get('path', 'unknown')}")
     lines.append(f"- **SHA256:** {inp.get('sha256', 'unknown')}")
     lines.append(f"- **Rows/Cols:** {inp.get('nrows_total', 0)} / {inp.get('ncols', 0)}")
+    if inp.get("excluded_columns"):
+        lines.append(f"- **Excluded columns:** {', '.join(inp['excluded_columns'])}")
     lines.append(f"- **Seed:** {run.get('seed', 'unknown')}")
     lines.append("")
     

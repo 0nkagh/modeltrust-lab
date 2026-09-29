@@ -22,28 +22,32 @@ def build_provenance(loaded: LoadedTable, spec: ColumnSpec, *, seed: int, path_a
     if loaded.meta["truncated"]: warnings.append("truncated_input")
     if "non_finite_excluded" in old_warnings: warnings.append("non_finite_excluded")
     
+    input_block = {
+        "path": path_as_given,
+        "format": loaded.meta["format"],
+        "sha256": loaded.meta["sha256"],
+        "size_bytes": loaded.meta["size_bytes"],
+        "encoding": loaded.meta["encoding"],
+        "bom_stripped": loaded.meta.get("bom_stripped", False),
+        "delimiter": loaded.meta["delimiter"],
+        "decimal": loaded.meta.get("decimal", "dot"), # not strictly tracked in meta, default to dot or from meta if passed
+        "nrows_total": loaded.meta["nrows_total"],
+        "nrows_read": loaded.meta["nrows_read"],
+        "truncated": loaded.meta["truncated"],
+        "ncols": loaded.meta["ncols"],
+        "columns": loaded.meta["columns"],
+        "columns_sha256": loaded.meta["columns_sha256"],
+        "duplicate_headers": loaded.meta.get("duplicate_headers", []),
+        "unnamed_columns": loaded.meta.get("unnamed_columns", []),
+        "warnings": warnings
+    }
+    if "excluded_columns" in loaded.meta and loaded.meta["excluded_columns"]:
+        input_block["excluded_columns"] = loaded.meta["excluded_columns"]
+
     return {
         "tool": {"name": "modeltrust", "version": __version__},
         "run_metadata": {"generated_at": None, "seed": seed},
-        "input": {
-            "path": path_as_given,
-            "format": loaded.meta["format"],
-            "sha256": loaded.meta["sha256"],
-            "size_bytes": loaded.meta["size_bytes"],
-            "encoding": loaded.meta["encoding"],
-            "bom_stripped": loaded.meta.get("bom_stripped", False),
-            "delimiter": loaded.meta["delimiter"],
-            "decimal": loaded.meta.get("decimal", "dot"), # not strictly tracked in meta, default to dot or from meta if passed
-            "nrows_total": loaded.meta["nrows_total"],
-            "nrows_read": loaded.meta["nrows_read"],
-            "truncated": loaded.meta["truncated"],
-            "ncols": loaded.meta["ncols"],
-            "columns": loaded.meta["columns"],
-            "columns_sha256": loaded.meta["columns_sha256"],
-            "duplicate_headers": loaded.meta.get("duplicate_headers", []),
-            "unnamed_columns": loaded.meta.get("unnamed_columns", []),
-            "warnings": warnings
-        },
+        "input": input_block,
         "column_spec": {
             "target": spec.target,
             "prediction": spec.prediction,

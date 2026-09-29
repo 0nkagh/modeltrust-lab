@@ -38,6 +38,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     report_parser.add_argument("--group-col", help="Group column")
     report_parser.add_argument("--time-col", help="Time column")
     report_parser.add_argument("--subset-col", help="Subset column")
+    report_parser.add_argument("--exclude-cols", help="Comma-separated column names to exclude from analysis")
     report_parser.add_argument("--format", choices=["csv", "parquet"], help="File format")
     report_parser.add_argument("--delimiter", help="CSV delimiter")
     report_parser.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
@@ -66,6 +67,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         p.add_argument("--group-col", help="Group column")
         p.add_argument("--time-col", help="Time column")
         p.add_argument("--subset-col", help="Subset column")
+        p.add_argument("--exclude-cols", help="Comma-separated column names to exclude from analysis")
         p.add_argument("--format", choices=["csv", "parquet"], help="File format")
         p.add_argument("--delimiter", help="CSV delimiter")
         p.add_argument("--encoding", default="utf-8-sig", help="File encoding (default utf-8-sig)")
@@ -142,6 +144,30 @@ def main(argv: Optional[list[str]] = None) -> int:
         if args.out_dir:
             print('use "modeltrust report --out-dir" to write report files', file=sys.stderr)
             return 0
+
+    # Validate --exclude-cols syntax and role constraints across all commands
+    exclude_cols = None
+    if getattr(args, "exclude_cols", None) is not None:
+        raw_excl = [c.strip() for c in args.exclude_cols.split(",") if c.strip()]
+        if not raw_excl:
+            print("Error: --exclude-cols requires at least one column name", file=sys.stderr)
+            return 2
+        exclude_cols = list(dict.fromkeys(raw_excl))
+
+        role_cols = {
+            getattr(args, "target_col", None),
+            getattr(args, "pred_col", None),
+            getattr(args, "group_col", None),
+            getattr(args, "time_col", None),
+            getattr(args, "subset_col", None),
+        } - {None}
+        for col in exclude_cols:
+            if col in role_cols:
+                print(
+                    f"Error: --exclude-cols may not contain a column used as a role (target/prediction/group/time/subset): {col}",
+                    file=sys.stderr,
+                )
+                return 2
 
     if args.command in ["report", "card"]:
         if not args.out_dir:
@@ -260,8 +286,18 @@ def main(argv: Optional[list[str]] = None) -> int:
                 delimiter=args.delimiter,
                 encoding=args.encoding,
                 decimal=args.decimal,
-                max_rows=args.max_rows
+                max_rows=args.max_rows,
+                exclude_cols=exclude_cols,
             )
+
+            if exclude_cols:
+                unknown = [c for c in exclude_cols if c not in loaded.meta["file_columns"]]
+                if unknown:
+                    print(
+                        f"Error: --exclude-cols refers to unknown columns: {', '.join(unknown)}",
+                        file=sys.stderr,
+                    )
+                    return 2
             
             # set decimal for provenance if provided
             if args.decimal:
