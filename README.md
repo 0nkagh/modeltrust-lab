@@ -194,6 +194,8 @@ Bilinçli fark üç maddede toplanır:
 - **Determinizm ve çevrimdışılık:** aynı çıktı dizininde iki koşu bit-bit aynı sonucu verir; manifest girdinin sha256 değerini taşır; telemetri, ağ erişimi ve model yükleme yoktur.
 - **Cevap verilebilirlik semantiği:** her kontrol `answered` / `partial` / `not_assessable` + `reason_code` + kanıt döndürür. "Bu kontrol bu girdiyle yapılamaz, nedeni şu" ayrımı sözleşmenin parçasıdır.
 
+Ölçülen yan yana koşu, sürüm künyesi ve kapsam farkları: [`docs/COMPARISON.md`](docs/COMPARISON.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
