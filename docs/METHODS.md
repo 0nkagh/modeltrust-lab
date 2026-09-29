@@ -162,8 +162,8 @@ The ModelTrust Lab `shift` module (`src/modeltrust/audit/shift.py`) diagnoses da
 
 ### 9.z `shift` Command Contract (CLI Rules)
 - **`--target-col` is required** (for the `shift` command and `report --shift`). If missing, it returns `exit 2` (`Error: --target-col is required`). Rationale: The `drift.target_ks` check is calculated over the target column; if there is no column, the check becomes meaningless.
-- **`--split-mode group`** için **`--group-col` zorunludur**; eksikse `exit 4` döner (`Error: --split-mode group requires --group-col`).
-- **`--split-mode temporal`** için **`--time-col` zorunludur**; eksikse `exit 4` döner (`Error: --split-mode temporal requires --time-col`).
+- **`--split-mode group`** requires **`--group-col`**; if missing it returns `exit 4` (`Error: --split-mode group requires --group-col`).
+- **`--split-mode temporal`** requires **`--time-col`**; if missing it returns `exit 4` (`Error: --split-mode temporal requires --time-col`).
 - **If `--time-col` is missing**, drift checks (`drift.feature_ks`, `drift.target_ks`) are marked as `not_assessable (not_provided)`; OOD checks (`ood.feature_range`, `ood.mahalanobis`) continue to operate.
 - **`--split-mode`/`--test-size`** can be used together with **`report --shift`**; these flags now require the presence of `--evaluate` or `--shift`, not just `--evaluate`. If neither is present, it returns `exit 2` (`Error: {flag} requires --evaluate or --shift`).
 
