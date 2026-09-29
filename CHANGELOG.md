@@ -7,6 +7,8 @@ This project uses `0.x` versioning: before 1.0, the CLI contract and output sche
 
 ### Added
 
+- Real-data case study: the UCI "Student Performance" dataset (`student-por.csv`, CC BY 4.0) is committed byte-identical under `examples/case_study_real/` with full provenance and a pinned sha256; see `docs/CASE_STUDY_REAL.md`.
+- CI integrity step for the real case-study dataset.
 - GitHub Actions CI (`.github/workflows/ci.yml`): the full test suite on Python 3.11, 3.12 and 3.13 (Ubuntu) and Python 3.12 (Windows), a sha256 integrity check of the committed case-study data, a wheel build + clean-venv smoke test, and a byte-level determinism check of the canonical case-study run.
 - CI status badge in the README.
 

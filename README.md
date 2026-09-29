@@ -46,6 +46,7 @@ also records the current `git.commit`, so a new commit changes its hash.
 - Methods, thresholds and limitations: `docs/METHODS.md`
 - Question accessibility matrix: `docs/ASSESSABILITY.md`
 - Case study (deliberately corrupted synthetic data): `docs/CASE_STUDY.md`
+- Real-data case study (UCI Student Performance, CC BY 4.0): `docs/CASE_STUDY_REAL.md`
 - External tool comparison (Evidently): `docs/COMPARISON.md`
 - Environment and setup evidence: `docs/ENVIRONMENT.md`
 - Decision log: `docs/DECISIONS.md` *(kept in Turkish: append-only historical record)*
@@ -57,7 +58,7 @@ also records the current `git.commit`, so a new commit changes its hash.
 - Tabular regression only
 - No pickle/joblib model loading
 - No external APIs
-- No data download
+- No data download (the tool never downloads data; the repository ships one real dataset for the case study)
 
 ## 6. Limitations & evidence status
 - Current scenarios tested: Diagnostic indicator only.
