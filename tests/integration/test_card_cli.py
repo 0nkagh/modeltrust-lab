@@ -369,7 +369,7 @@ def test_card_split_skipped_recorded_with_reason(tmpdir):
     with open(os.path.join(out, "card.json"), "r", encoding="utf-8") as f:
         card = json.load(f)
 
-    # §4'te split satırı var
+    # split row is present in §4
     sp_summary = next((cs for cs in card["checks_summary"] if cs["module"] == "split"), None)
     assert sp_summary is not None
     assert sp_summary["total"] == 3
@@ -377,7 +377,7 @@ def test_card_split_skipped_recorded_with_reason(tmpdir):
     assert sp_summary["fail"] == 0
     assert sp_summary["not_assessable"] == 3
 
-    # §5'te split kaydı reason_code ile var
+    # split record is present in §5 with reason_code
     sp_na = [na for na in card["not_assessable"] if na["module"] == "split"]
     assert len(sp_na) == 3
     for na in sp_na:

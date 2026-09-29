@@ -2,7 +2,7 @@ import json
 from modeltrust.card import build_card_json, build_card_md
 
 def test_card_full_equipment():
-    # Tam donanım
+    # Full equipment
     prov = {
         "tool": {"name": "modeltrust", "version": "0.1.0"},
         "environment": {"python": "3.11", "pandas": "2.0", "numpy": "1.24", "platform": "Windows"},
@@ -91,8 +91,8 @@ def test_card_q9_q10_static():
     assert q_dict[10]["status"] == "partial"
 
 def test_forbidden_words():
-    # 5. Yasaklı dil testi: card.md ve card.json içinde 
-    # production-ready, guaranteed, certified, compliant, leakage-proof, fully reliable dizeleri yok.
+    # 5. Forbidden language test: inside card.md and card.json 
+    # no strings like production-ready, guaranteed, certified, compliant, leakage-proof, fully reliable.
     card = build_card_json({}, "cmd")
     md = build_card_md(card)
     j = json.dumps(card).lower()

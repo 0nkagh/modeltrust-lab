@@ -1,45 +1,45 @@
-# Vaka Çalışması: Kasten Bozulmuş Sentetik Veri ile Tanı Denetimi
+# Case Study: Diagnostic Audit on Deliberately Corrupted Synthetic Data
 
-## 1. Amaç ve Dürüstlük Çerçevesi
+## 1. Purpose and Honesty Framing
 
-Bu bir kıyaslama (benchmark) değildir.
-Kusurlar veriye bilinerek enjekte edilmiştir; tespit başarısı gerçek dünya dağılımlarına genellenemez.
-Sonuçlar yalnız bu veri kümesi, bu araç sürümü ve bu komutlar için geçerlidir.
+This is not a benchmark.
+Flaws have been deliberately injected into the data; detection success cannot be generalized to real-world distributions.
+Results apply only to this dataset, this tool version, and these commands.
 
-Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profile`, `leakage`, `split`, `evaluate`, `shift`, `card`, `report`) bilinen veri ve model kusurları karşısındaki davranışını, hangi kusurları tespit edebildiğini ve hangi kusurları kapsamı dışında bıraktığını şeffaf ve somut kanıtlarla belgelemektir.
+The purpose of this study is to document, with transparent and concrete evidence, the behavior of ModelTrust Lab diagnostic modules (`inspect`, `profile`, `leakage`, `split`, `evaluate`, `shift`, `card`, `report`) against known data and model flaws, which flaws they can detect, and which flaws they leave out of scope.
 
-## 2. Veri Kümesi Künyesi
+## 2. Dataset Metadata
 
-- **Dosya yolu**: `examples/case_study/case_study.csv`
-- **Satır sayısı**: 600 veri satırı (başlık dâhil 601 satır)
-- **Kolon sayısı**: 12 kolon (`row_id, ts, site, region, x1, x2, x3, y, pred, lo, hi, y_proxy`)
+- **File path**: `examples/case_study/case_study.csv`
+- **Row count**: 600 data rows (601 rows including header)
+- **Column count**: 12 columns (`row_id, ts, site, region, x1, x2, x3, y, pred, lo, hi, y_proxy`)
 - **RNG Seed**: `20260928`
-- **Üretici komutu**: `python examples/case_study/generate_case_study.py --out-dir examples/case_study`
+- **Generator command**: `python examples/case_study/generate_case_study.py --out-dir examples/case_study`
 - **CSV SHA-256**: `9587b66886a942ee9e9589fe65f000406f6f9f40f41ba7e7bf0b5e0cf9e942da`
-- **Zaman damgası (`ts`) biçimi**: `YYYY-MM-DD` (ISO-8601 takvim günü, `2024-01-01` ile `2025-08-16` arası)
-- **Sayısal biçim**: Ondalık nokta, `float_format="%.6f"`, UTF-8 kodlama, LF satır sonu.
+- **Timestamp (`ts`) format**: `YYYY-MM-DD` (ISO-8601 calendar day, between `2024-01-01` and `2025-08-16`)
+- **Numerical format**: Decimal point, `float_format="%.6f"`, UTF-8 encoding, LF line ending.
 
-## 3. Enjekte Edilen Kusurlar
+## 3. Injected Flaws
 
-| # | Kusur Türü | Nasıl Enjekte Edildi (Kod / Ölçek) | Ölçek Referansı |
+| # | Flaw Type | How it was Injected (Code / Scale) | Scale Reference |
 |---|---|---|---|
-| D1 | **Yinelenen satırlar** | 6 satırın tüm kolonlarıyla birebir kopyası (satır 10, 20, 30, 40, 50, 60 kopyalanıp sona eklendi) | `split_dupes.csv` / `profile_dirty.csv` |
-| D2 | **Eksik hücreler** | `x3` kolonu içinde 12 hücre `NaN` yapıldı | `profile_dirty.csv` |
-| D3 | **Hedefe yakın kopya** | `y_proxy = 0.98 * y + N(0, 0.005)` (hedefle korelasyon > 0.999) | `leak_nearcopy.csv` |
-| D4 | **Yüksek kardinaliteli id** | `row_id = 1..N` (tekilleştirici tamsayı kimlik) | `high_card_id.csv` |
-| D5 | **Grup sızıntısı** | `site` ∈ {S1..S10}; her siteye sabit `y` kayması (site etkisi); rastgele bölmede gruplar iki tarafa da düşer | `leak_group_overlap.csv`, `split_groups.csv` |
-| D6 | **Dağılım kayması** | Satırların son %30'unda (zaman sıralı) `x2 += 2.0` ve gürültü ölçeği 1.0 → 1.5; `ts` artan | `shift_drift.csv` |
-| D7 | **Aşırı dar aralıklar** | `lo = pred - 0.2`, `hi = pred + 0.2`; aralık genişliği model artık ölçeğinden dar | `intervals_overconfident.csv` |
-| D8 | **Bölgesel hata yoğunlaşması** | `region` ∈ {A, B, C}; B bölgesinde gerçek hata ~3× daha yüksek | `eval_preds.csv` |
-| D9 | **Etiket gürültüsü** | Rastgele %4 satırda `y` değerine büyük sapma (±15..25) eklendi | — (araç bu kontrolü yapmaz; tespit yok) |
+| D1 | **Duplicate rows** | Exact copy of 6 rows with all columns (rows 10, 20, 30, 40, 50, 60 copied and appended to the end) | `split_dupes.csv` / `profile_dirty.csv` |
+| D2 | **Missing cells** | 12 cells in the `x3` column were set to `NaN` | `profile_dirty.csv` |
+| D3 | **Target near copy** | `y_proxy = 0.98 * y + N(0, 0.005)` (correlation with target > 0.999) | `leak_nearcopy.csv` |
+| D4 | **High cardinality id** | `row_id = 1..N` (unique integer identity) | `high_card_id.csv` |
+| D5 | **Group leakage** | `site` ∈ {S1..S10}; constant `y` shift for each site (site effect); in random split, groups fall on both sides | `leak_group_overlap.csv`, `split_groups.csv` |
+| D6 | **Distribution shift** | In the last 30% of rows (time-ordered) `x2 += 2.0` and noise scale 1.0 → 1.5; `ts` increasing | `shift_drift.csv` |
+| D7 | **Overly narrow intervals** | `lo = pred - 0.2`, `hi = pred + 0.2`; interval width is narrower than the model residual scale | `intervals_overconfident.csv` |
+| D8 | **Regional error concentration** | `region` ∈ {A, B, C}; true error in region B is ~3× higher | `eval_preds.csv` |
+| D9 | **Label noise** | Large deviation (±15..25) added to `y` value in random 4% of rows | — (the tool does not perform this check; no detection) |
 
-## 4. Gözlenen Tespitler
+## 4. Observed Detections
 
-### D1 — Yinelenen Satırlar
-- **İlgili Soru**: Q1 ("Missing or duplicate records?")
-- **Koşulan Komut**: `modeltrust report --input examples/case_study/case_study.csv --target-col y --time-col ts --pred-col pred --group-col site --evaluate --shift --card --out-dir $t/cs_report`
-- **Durum**: `answered` (tespit edildi)
-- **Ham Kanıt Alıntısı**:
+### D1 — Duplicate Rows
+- **Relevant Question**: Q1 ("Missing or duplicate records?")
+- **Executed Command**: `modeltrust report --input examples/case_study/case_study.csv --target-col y --time-col ts --pred-col pred --group-col site --evaluate --shift --card --out-dir $t/cs_report`
+- **Status**: `answered` (detected)
+- **Raw Evidence Excerpt**:
   ```json
   "duplicate_rows": {
     "duplicate_row_ratio": 0.01,
@@ -48,14 +48,14 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "null_equals_null": true
   }
   ```
-  Ayrıca `split` komutunda `warnings: ["duplicate_rows_cross_split"]` ve `random` modunda `row_overlap_count: 3` olarak gözlenmiştir.
-- **Yorum**: Araç tüm kolonları aynı olan 6 yinelenen satırı profilleme aşamasında tespit etmiş ve bölme denetiminde çapraz sızıntı uyarısı üretmiştir.
+  Also observed as `warnings: ["duplicate_rows_cross_split"]` in the `split` command and `row_overlap_count: 3` in `random` mode.
+- **Interpretation**: The tool detected 6 duplicate rows with all columns identical during the profiling phase and produced a cross-leakage warning in the split audit.
 
-### D2 — Eksik Hücreler
-- **İlgili Soru**: Q1 ("Missing or duplicate records?")
-- **Koşulan Komut**: `modeltrust report` (ve `card`)
-- **Durum**: `answered` (tespit edildi)
-- **Ham Kanıt Alıntısı**:
+### D2 — Missing Cells
+- **Relevant Question**: Q1 ("Missing or duplicate records?")
+- **Executed Command**: `modeltrust report` (and `card`)
+- **Status**: `answered` (detected)
+- **Raw Evidence Excerpt**:
   ```json
   {
     "name": "x3",
@@ -66,13 +66,13 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "missing_ratio": 0.02
   }
   ```
-- **Yorum**: `x3` kolonundaki 12 eksik değer (oran: %2.0) profil özetinde tam sayı ve oran olarak bildirilmiştir.
+- **Interpretation**: The 12 missing values in the `x3` column (ratio: 2.0%) were reported as exact count and ratio in the profile summary.
 
-### D3 — Hedefe Yakın Kopya
-- **İlgili Soru**: Q2 ("Target leakage or future leakage?")
-- **Koşulan Komut**: `modeltrust leakage --input examples/case_study/case_study.csv --target-col y --group-col site`
-- **Durum**: `answered` (check: `fail`, tespit edildi)
-- **Ham Kanıt Alıntısı**:
+### D3 — Target Near Copy
+- **Relevant Question**: Q2 ("Target leakage or future leakage?")
+- **Executed Command**: `modeltrust leakage --input examples/case_study/case_study.csv --target-col y --group-col site`
+- **Status**: `answered` (check: `fail`, detected)
+- **Raw Evidence Excerpt**:
   ```json
   {
     "name": "target_copy_near",
@@ -88,13 +88,13 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     ]
   }
   ```
-- **Yorum**: `y_proxy` hedefle 0.999 eşiğinin üzerinde mutlak korelasyona sahip olduğundan `target_copy_near` tarafından sızıntı göstergesi olarak bayraklandırılmıştır.
+- **Interpretation**: Since `y_proxy` has an absolute correlation with the target above the 0.999 threshold, it was flagged as a diagnostic indicator of leakage by `target_copy_near`.
 
-### D4 — Yüksek Kardinaliteli Kimlik
-- **İlgili Soru**: Q2 ("Target leakage or future leakage?")
-- **Koşulan Komut**: `modeltrust leakage` / `report`
-- **Durum**: `performed` (check: `pass`, **tespit edilmedi**)
-- **Ham Kanıt Alıntısı**:
+### D4 — High Cardinality Identity
+- **Relevant Question**: Q2 ("Target leakage or future leakage?")
+- **Executed Command**: `modeltrust leakage` / `report`
+- **Status**: `performed` (check: `pass`, **not detected**)
+- **Raw Evidence Excerpt**:
   ```json
   {
     "name": "index_like_feature",
@@ -104,13 +104,13 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "evidence": null
   }
   ```
-- **Yorum**: `row_id` kolonu tamsayıdır; ancak D1 kusuruyla eklenen yinelenen satırlar nedeniyle seride ardışık farkların tümü kesin pozitif (`diffs > 0`) kalmamış, bu sebeple katı monotonluk koşulu sağlanamadığından `index_like_feature` tetiklenmemiştir. Şartnameye sadık kalınmış, veride yapay düzeltme yapılmamıştır.
+- **Interpretation**: The `row_id` column is an integer; however, due to the duplicate rows added by the D1 flaw, not all consecutive differences in the series remained strictly positive (`diffs > 0`), therefore `index_like_feature` was not triggered because the strict monotonicity condition could not be satisfied. The specification was strictly followed, no artificial correction was made to the data.
 
-### D5 — Grup Sızıntısı
-- **İlgili Soru**: Q3 ("Train/test split strategy and group/time leakage?")
-- **Koşulan Komut**: `modeltrust split --input examples/case_study/case_study.csv --target-col y --group-col site --time-col ts`
-- **Durum**: `answered` (rastgele bölmede `fail`, grup bölmesinde `pass`)
-- **Ham Kanıt Alıntısı**:
+### D5 — Group Leakage
+- **Relevant Question**: Q3 ("Train/test split strategy and group/time leakage?")
+- **Executed Command**: `modeltrust split --input examples/case_study/case_study.csv --target-col y --group-col site --time-col ts`
+- **Status**: `answered` (`fail` in random split, `pass` in group split)
+- **Raw Evidence Excerpt**:
   ```json
   "random": {
     "group_overlap": {
@@ -129,17 +129,17 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     }
   }
   ```
-- **Yorum**: `random` modunda 10 sitenin tamamı eğitim ve test kümeleri arasında sızmış (`ratio_of_smaller: 1.0`), buna karşılık `group` modunda grupların kesin ayrıklığı (`count: 0`) doğrulanmıştır.
+- **Interpretation**: In the `random` mode, all 10 sites leaked between the train and test sets (`ratio_of_smaller: 1.0`), whereas in the `group` mode, the strict disjointness of the groups (`count: 0`) was verified.
 
-### D6 — Dağılım Kayması
-- **İlgili Soru**: Q6 ("Distribution drift?") ve Q7 ("Out-of-distribution (OOD) data?")
-- **Koşulan Komutlar**:
-  - Varsayılan (rastgele bölme): `modeltrust shift --input examples/case_study/case_study.csv --target-col y --time-col ts`
-  - Temporal bölme: `modeltrust report --input ... --target-col y --time-col ts --split-mode temporal --shift --out-dir $t/t19r1_temporal`
-- **Durum**:
-  - Varsayılan (random) modda: `pass` (eşik altı, tespit edilmedi)
-  - Temporal modda: `fail` (tespit edildi)
-- **Ham Kanıt Alıntısı (varsayılan mod)**:
+### D6 — Distribution Shift
+- **Relevant Question**: Q6 ("Distribution drift?") and Q7 ("Out-of-distribution (OOD) data?")
+- **Executed Commands**:
+  - Default (random split): `modeltrust shift --input examples/case_study/case_study.csv --target-col y --time-col ts`
+  - Temporal split: `modeltrust report --input ... --target-col y --time-col ts --split-mode temporal --shift --out-dir $t/t19r1_temporal`
+- **Status**:
+  - In default (random) mode: `pass` (below threshold, not detected)
+  - In temporal mode: `fail` (detected)
+- **Raw Evidence Excerpt (default mode)**:
   ```json
   {
     "name": "drift.feature_ks",
@@ -154,7 +154,7 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "detail": "Diagnostic indicator: 0.008333 max outside ratio (heuristic threshold 0.10)"
   }
   ```
-- **Ham Kanıt Alıntısı (temporal mod)**:
+- **Raw Evidence Excerpt (temporal mode)**:
   ```json
   {
     "name": "drift.feature_ks",
@@ -175,14 +175,14 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "detail": "Diagnostic indicator: 1.000000 max outside ratio (heuristic threshold 0.10)"
   }
   ```
-  Temporal modda en yüksek KS istatistiği `x2` kolonunda 0.65 (`row_id` hariç, zaten tamsayı kimlik); hedef KS 0.331250; OOD `row_id` dışında `x1` ve `x2`'de birer satır eğitim aralığı dışında.
-- **Yorum**: Varsayılan rastgele bölmede zamanın son %30'undaki kayma eğitim ve test alt kümelerine eşit dağılmış, KS 0.1146 seviyesinde kalarak 0.25 eşiğini aşmamıştır. Temporal bölmede ise eğitim=ilk %80, test=son %20 olduğundan `x2 += 2.0` kayması doğrudan yakalanmış ve `drift.feature_ks`, `drift.target_ks`, `ood.feature_range` kontrolleri fail döndürmüştür. Bu, bölme modunun tespit kapasitesini doğrudan etkilediğini gösterir (I-051, D-095).
+  In temporal mode, the highest KS statistic is 0.65 in the `x2` column (excluding `row_id`, which is already an integer identity); target KS is 0.331250; OOD has one row each outside the training range in `x1` and `x2` excluding `row_id`.
+- **Interpretation**: In the default random split, the shift in the last 30% of time was equally distributed to the train and test subsets, the KS remained at the 0.1146 level and did not exceed the 0.25 threshold. In the temporal split, since train=first 80% and test=last 20%, the `x2 += 2.0` shift was directly caught and the `drift.feature_ks`, `drift.target_ks`, `ood.feature_range` checks returned fail. This shows that the split mode directly affects the detection capacity (I-051, D-095).
 
-### D7 — Aşırı Dar Aralıklar
-- **İlgili Soru**: Q8 ("Uncertainty intervals?")
-- **Koşulan Komut**: `modeltrust evaluate --input examples/case_study/case_study.csv --target-col y --lower-col lo --upper-col hi --nominal-coverage 0.9`
-- **Durum**: `performed` (check: `fail`, tespit edildi)
-- **Ham Kanıt Alıntısı**:
+### D7 — Overly Narrow Intervals
+- **Relevant Question**: Q8 ("Uncertainty intervals?")
+- **Executed Command**: `modeltrust evaluate --input examples/case_study/case_study.csv --target-col y --lower-col lo --upper-col hi --nominal-coverage 0.9`
+- **Status**: `performed` (check: `fail`, detected)
+- **Raw Evidence Excerpt**:
   ```json
   "uncertainty": {
     "coverage": 0.191667,
@@ -192,18 +192,18 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "warnings": ["non_nominal_coverage"]
   }
   ```
-  Ve kontrol sonucu: `"name": "interval.nominal_gap", "result": "fail", "detail": "gap=-0.708333"`.
-- **Yorum**: %90 nominal kapsama karşılık gerçekleşen kapsam %19.17 olarak ölçülmüş, fark toleransı (0.05) aşıldığı için aralık güvenilirliği doğrudan fail olarak raporlanmıştır.
+  And check result: `"name": "interval.nominal_gap", "result": "fail", "detail": "gap=-0.708333"`.
+- **Interpretation**: The realized coverage was measured as 19.17% against 90% nominal coverage, and since the gap tolerance (0.05) was exceeded, the interval reliability was directly reported as a fail.
 
-### D8 — Bölgesel Hata Yoğunlaşması
-- **İlgili Soru**: Q5 ("Subpopulation or fairness disparities?")
-- **Koşulan Komutlar**:
-  - İlk koşu: `modeltrust report ... --group-col site --evaluate` (site düzeyi)
-  - Hedefli koşu: `modeltrust report --input ... --target-col y --pred-col pred --group-col region --evaluate --out-dir $t/t19r1_region`
-- **Durum**:
-  - `--group-col site`: `answered` (site düzeyinde `worst_by_mae: ["S5", "S8", "S4"]`)
-  - `--group-col region`: `answered` (bölgesel eşitsizlik tespit edildi)
-- **Ham Kanıt Alıntısı (region koşusu)**:
+### D8 — Regional Error Concentration
+- **Relevant Question**: Q5 ("Subpopulation or fairness disparities?")
+- **Executed Commands**:
+  - First run: `modeltrust report ... --group-col site --evaluate` (site level)
+  - Targeted run: `modeltrust report --input ... --target-col y --pred-col pred --group-col region --evaluate --out-dir $t/t19r1_region`
+- **Status**:
+  - `--group-col site`: `answered` (`worst_by_mae: ["S5", "S8", "S4"]` at site level)
+  - `--group-col region`: `answered` (regional disparity detected)
+- **Raw Evidence Excerpt (region run)**:
   ```json
   "group_errors": {
     "groups": [
@@ -214,44 +214,44 @@ Bu çalışmanın amacı, ModelTrust Lab tanı modüllerinin (`inspect`, `profil
     "worst_by_mae": ["B", "C", "A"]
   }
   ```
-  Genel model: `supplied_predictions MAE: 0.771342, RMSE: 1.092136, n=600`.
-- **Yorum**: B bölgesinde MAE (1.352) A (0.465) ve C (0.497) bölgelerinin yaklaşık 3 katıdır; RMSE oranı da benzerdir (1.699 vs 0.569/0.606). `--group-col region` verildiğinde araç bölgesel hata yoğunlaşmasını doğrudan raporlamıştır. İlk koşuda `--group-col site` kullanıldığı için bölge düzeyindeki eşitsizlik gözlenmemişti; girdi parametresi ne verildiyse araç yalnız onu denetler (I-051, D-095).
+  Overall model: `supplied_predictions MAE: 0.771342, RMSE: 1.092136, n=600`.
+- **Interpretation**: The MAE (1.352) in region B is approximately 3 times that of regions A (0.465) and C (0.497); the RMSE ratio is also similar (1.699 vs 0.569/0.606). When `--group-col region` was provided, the tool directly reported the regional error concentration. Since `--group-col site` was used in the first run, the disparity at the region level was not observed; whatever input parameter is provided, the tool only audits that (I-051, D-095).
 
-### D9 — Etiket Gürültüsü
-- **İlgili Soru**: —
-- **Koşulan Komut**: Tüm komutlar
-- **Durum**: **Tespit edilmedi / Kontrol mevcut değil**
-- **Yorum**: ModelTrust Lab v1 tanı kapsamında ham tablolarda etiket gürültüsünü (ground-truth label corruption) doğrudan tespit eden bağımsız bir denetim modülü bulunmamaktadır. Bu durum tasarım gereği kapsam dışıdır ve bir bulgu olarak not edilmiştir.
+### D9 — Label Noise
+- **Relevant Question**: —
+- **Executed Command**: All commands
+- **Status**: **Not detected / Check not available**
+- **Interpretation**: Within the ModelTrust Lab v1 diagnostic scope, there is no independent diagnostic module that directly detects ground-truth label corruption in raw tables. This is deliberately out of scope by design and is noted as a finding.
 
-## 4.1. Mod ve Grup Kolonu Seçiminin Etkisi
+## 4.1. Impact of Mode and Group Column Selection
 
-Aşağıdaki tablo, aynı veri kümesi üzerinde farklı bölme modu ve grup kolonu seçimlerinin tespit sonuçlarını nasıl değiştirdiğini göstermektedir.
+The table below shows how different split mode and group column selections change the detection results on the same dataset.
 
-| Komut | Ölçüm | Sonuç |
+| Command | Measurement | Result |
 |---|---|---|
-| `shift --split-mode random` (varsayılan) | `drift.feature_ks` max KS=0.114583, eşik 0.25 | `pass` |
-| `shift --split-mode random` (varsayılan) | `ood.feature_range` max outside=0.008333, eşik 0.10 | `pass` |
-| `report --split-mode temporal --shift` | `drift.feature_ks` max KS=1.000000, eşik 0.25 | `fail` |
-| `report --split-mode temporal --shift` | `drift.target_ks` KS=0.331250, eşik 0.25 | `fail` |
-| `report --split-mode temporal --shift` | `ood.feature_range` max outside=1.000000, eşik 0.10 | `fail` |
+| `shift --split-mode random` (default) | `drift.feature_ks` max KS=0.114583, threshold 0.25 | `pass` |
+| `shift --split-mode random` (default) | `ood.feature_range` max outside=0.008333, threshold 0.10 | `pass` |
+| `report --split-mode temporal --shift` | `drift.feature_ks` max KS=1.000000, threshold 0.25 | `fail` |
+| `report --split-mode temporal --shift` | `drift.target_ks` KS=0.331250, threshold 0.25 | `fail` |
+| `report --split-mode temporal --shift` | `ood.feature_range` max outside=1.000000, threshold 0.10 | `fail` |
 | `report --group-col site --evaluate` | `worst_by_mae` | `["S5", "S8", "S4"]` |
-| `report --group-col region --evaluate` | B bölgesi MAE=1.352, A=0.465, C=0.497 | `worst_by_mae: ["B", "C", "A"]` |
+| `report --group-col region --evaluate` | region B MAE=1.352, A=0.465, C=0.497 | `worst_by_mae: ["B", "C", "A"]` |
 
-Bu tablo, bölme modu ve grup kolonu seçiminin tespit kapasitesini doğrudan etkilediğini göstermektedir: D6 kusurunun hedeflendiği zaman-yerel kayma yalnız temporal modda yakalanır; D8'in bölgesel hata yoğunlaşması yalnız `--group-col region` ile görülür.
+This table shows that the split mode and group column selection directly affect the detection capacity: the time-local shift targeted by the D6 flaw is only caught in temporal mode; the regional error concentration of D8 is only seen with `--group-col region`.
 
-## 5. Tespit Edilmeyenler ve Değerlendirilemeyenler
+## 5. What is Not Detected and Not Assessable
 
-1. **D9 (Etiket Gürültüsü)**: Yukarıda açıklandığı üzere, araç bu kontrolü yapacak modüle sahip değildir (`kontrol mevcut değil`).
-2. **D4 (Yüksek Kardinaliteli ID)**: `row_id` tamsayıdır ancak D1 ile gelen kopyalar nedeniyle katı monotonluk bozulduğundan `index_like_feature` tetiklenmemiştir. Kod referansı: [`leakage.py:170`](file:///c:/Users/agah/Documents/modeltrust-lab/src/modeltrust/audit/leakage.py#L170) — `if is_int and unique_ratio >= INDEX_LIKE_UNIQUE_RATIO_MIN and is_monotonic:`.
-3. **D6 (Dağılım Kayması, varsayılan mod)**: `shift` çağrısında `--split-mode temporal` verilmediğinde varsayılan rastgele bölme kullanıldığı için KS eşiği aşılmamıştır. Temporal modda ise üç kontrol fail döndürmüştür (bkz. §4, D6 ve §4.1).
-4. **Değerlendirilemeyen Kontroller (`not_assessable`)**:
-   - `leakage.preprocess.fit_scope` (`requires_pipeline_code`): Bir CSV tablosundan veri ön işleme adımlarının (scaler, encoder) yalnız eğitim kümesinde fit edilip edilmediği anlaşılamaz. Boru hattı kodu zorunludur.
-   - `leakage.subset_row_overlap`, `subset_group_overlap`, `subset_time_ranges` (`not_provided`): Girdi tablosunda ayrık bir `subset` kolonu (örn. `train`/`test`) sağlanmamıştır.
-   - `card` tekil koşusunda (C1) `shift.drift.feature_ks` (`not_provided`): `card` komutuna `--time-col` parametresi girilmediğinde zaman serisi kayması değerlendirilemez.
+1. **D9 (Label Noise)**: As explained above, the tool does not have a module to perform this check (`check not available`).
+2. **D4 (High Cardinality ID)**: `row_id` is an integer, but since strict monotonicity is broken due to the duplicates introduced by D1, `index_like_feature` was not triggered. Code reference: [`leakage.py:170`](file:///c:/Users/agah/Documents/modeltrust-lab/src/modeltrust/audit/leakage.py#L170) — `if is_int and unique_ratio >= INDEX_LIKE_UNIQUE_RATIO_MIN and is_monotonic:`.
+3. **D6 (Distribution Shift, default mode)**: Since default random split is used when `--split-mode temporal` is not provided in the `shift` call, the KS threshold was not exceeded. In temporal mode, three checks returned fail (see §4, D6 and §4.1).
+4. **Not Assessable Checks (`not_assessable`)**:
+   - `leakage.preprocess.fit_scope` (`requires_pipeline_code`): It cannot be understood from a CSV table whether data preprocessing steps (scaler, encoder) are fitted only on the training set. Pipeline code is strictly required.
+   - `leakage.subset_row_overlap`, `subset_group_overlap`, `subset_time_ranges` (`not_provided`): A distinct `subset` column (e.g., `train`/`test`) was not provided in the input table.
+   - `shift.drift.feature_ks` (`not_provided`) in `card` single run (C1): Time series drift cannot be evaluated when the `--time-col` parameter is not entered in the `card` command.
 
-## 6. Kapsam Envanteri
+## 6. Coverage Inventory
 
-Koşu çıktısındaki `card.json` içinden alınan ham denetim özeti (`checks_summary`):
+The raw audit summary (`checks_summary`) taken from inside `card.json` in the run output:
 
 ```json
 [
@@ -261,9 +261,9 @@ Koşu çıktısındaki `card.json` içinden alınan ham denetim özeti (`checks_
 ]
 ```
 
-Bu envanter, aracın neleri fiilen değerlendirdiğini, neleri fail olarak bayraklandırdığını ve nelerin eksik parametre ya da boru hattı kodu gereksinimi nedeniyle değerlendirilemediğini net biçimde göstermektedir.
+This inventory clearly demonstrates what the tool actually evaluated, what it flagged as fail, and what it could not evaluate due to missing parameters or pipeline code requirements.
 
-Leakage modülünde fail döndüren kontrollerin tam JSON çıktısı:
+Full JSON output of the checks returning fail in the leakage module:
 
 ```json
 {
@@ -285,8 +285,8 @@ Leakage modülünde fail döndüren kontrollerin tam JSON çıktısı:
 }
 ```
 
-## 7. Sınırlar
+## 7. Limitations
 
-- **Genellenemezlik**: Bu vaka çalışmasında elde edilen tespit ve başarısızlıklar yalnızca kasten tasarlanan sentetik `case_study.csv` verisi için geçerlidir; farklı veri kümelerine, farklı gürültü rejimlerine veya karmaşık doğrusal olmayan ilişkilere genellenemez.
-- **Ölçüm sürümü**: Sonuçlar, o tarihte kurulu olan `0.0.1.dev0` geliştirme sürümüyle elde edilmiştir; `0.1.0` aynı kod tabanının sürümlenmiş hâlidir.
-- **Yalnızca tanı göstergesi**: Flaglenen bulgular kesin kanıt değil tanısal göstergedir; bayrak üretilmemesi de sızıntı veya kusur bulunmadığının kanıtı sayılamaz.
+- **Lack of generalizability**: The detections and failures obtained in this case study apply only to the deliberately designed synthetic `case_study.csv` data; they cannot be generalized to different datasets, different noise regimes, or complex non-linear relationships.
+- **Measurement version**: The results were obtained with the `0.0.1.dev0` development version installed at that time; `0.1.0` is the versioned state of the exact same codebase.
+- **Diagnostic indicator only**: The flagged findings are diagnostic indicators, not absolute proof; similarly, the absence of a generated flag cannot be considered proof that there is no leakage or flaw.

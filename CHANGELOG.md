@@ -1,3 +1,8 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+This project uses `0.x` versioning: before 1.0, the CLI contract and output schemas may change.
+
 ## Unreleased
 
 ### Added
@@ -8,11 +13,7 @@
 ### Changed
 
 - `requires-python` raised to `>=3.11` to match the CI-tested range; the previous `>=3.10` floor was never exercised (see `I-059`).
-
-# Changelog
-
-All notable changes to this project are documented in this file.
-This project uses `0.x` versioning: before 1.0, the CLI contract and output schemas may change.
+- Refined language policy (`D-110`): Narrative documents translated to English, historical logs retained in Turkish.
 
 ## [0.1.0] - 2026-09-29
 
