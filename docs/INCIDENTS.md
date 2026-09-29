@@ -372,3 +372,9 @@ T24 turunda prompt üç ayrı commit (birebir mesajlarla), zorunlu **parite beti
 T24-F1'de verilen CI metin hijyeni kontrolü, izlenen **tüm** dosyalarda BOM arıyordu. Oysa `tests/fixtures/turkish_bom_semicolon.csv` BOM'u **bilerek** taşır ve `tests/unit/test_fixture_hygiene.py` bunu zorunlu kılar; fikstür `tests/fixtures/README.md`'de belgelidir. Kontrol yerelde koşulduğunda fikstürün BOM'u yüzünden kırmızı verdi ve ajan push etmeden DUR'a gitti (T24-F1).
 
 **Düzeltme:** kontrolün kapsamı `tests/fixtures/` hariç tutulacak şekilde daraltıldı, `D-112` metni bu istisnayla güncellendi (T24-F2). Ders: kapsam kuralı yazılırken depodaki **kasıtlı aykırı örnekler** (fikstürler) hesaba katılmalıdır. Ajanın fikstür BOM'unu geçici olarak silip testin kırmızı olduğunu görüp geri koyması doğru bir fix-forward adımıydı; fikstür baytları son hâlde `HEAD` ile aynıdır.
+
+## I-063 — T26'da beklenen literal sayımı yanlış hesaplandı (mimar; DUR doğru uygulandı)
+
+T26 promptunda sürüm yükseltmesi sonrası kalan eski sürüm literalinin "tam 5 dosya / 5 geçiş" olması bekleniyordu. Oysa aynı promptta `README.md` §2 için birebir verilen yayın geçmişi cümlesi, eski sürüm etiketini (`v0.1.0`) anıyor; alt dize eşleşmesi sayımı 6 dosyaya çıkarıyor. Ajan sapmayı fark etti, hiçbir commit atmadan DUR'a gitti ve kalan satırları ham çıktıyla gösterdi (T26).
+
+**Düzeltme:** ölçüt "izinli liste" olarak yeniden yazıldı (README'deki etiket referansı kasıtlı ve doğrudur) ve tur T26-F1 ile devam ettirildi; kural `D-117` olarak kayda geçti.
