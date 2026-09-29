@@ -9,7 +9,7 @@ description = "Diagnostic audits for ML evaluation trustworthiness (research pro
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.2,<4",
     "numpy>=1.26,<3",
