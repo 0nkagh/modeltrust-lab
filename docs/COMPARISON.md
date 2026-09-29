@@ -47,7 +47,7 @@ Evidently, açık kaynak dünyasında tabular veri kalitesi ve sürüklenme izle
   formulaic==1.2.2
   fsspec==2026.9.0
   ```
-- **Telemetri Bulgusu**: Paket kod tabanında (`evidently/telemetry.py`) `iterative_telemetry` kütüphanesine ve `DO_NOT_TRACK_ENV = "DO_NOT_TRACK"` ortam değişkenine rastlanmıştır (`TELEMETRY_ADDRESS = "https://telemetry-321112.ew.r.appspot.com/post_data"`). Koşu sırasında `DO_NOT_TRACK=1` tanımlanarak telemetri devre dışı bırakılmıştır.
+- **Telemetri**: Evidently `iterative_telemetry` kütüphanesini kullanmaktadır (kaynak: `iterative_telemetry/__init__.py:29-166` — `DO_NOT_TRACK_ENV = "ITERATIVE_DO_NOT_TRACK"`, `is_enabled` metodunda `os.environ.get(DO_NOT_TRACK_ENV) is None` kontrolü). Koşu sırasında `DO_NOT_TRACK=1` tanımlanarak telemetri çağrıları engellenmiştir.
 
 ## 3. Girdi hizalaması
 
@@ -55,8 +55,8 @@ Her iki araca da birebir aynı veri satırları ve aynı dilimler sağlanmışt�
 
 - **Kaynak Veri**: `examples/case_study/case_study.csv` (600 satır, 12 kolon, SHA-256: `9587B66886A942EE9E9589FE65F000406F6F9F40F41BA7E7BF0B5E0CF9E942DA`)
 - **Bölme Yöntemi**: Zaman damgasına (`ts`) göre kararlı sıralama (`mergesort`), ilk %80 (480 satır) referans/eğitim, son %20 (120 satır) test/akım dilimi olarak ayrılmıştır.
-- **ModelTrust Eşlemesi**: `modeltrust report --split-mode temporal` (`report.json` içindeki `split.modes.temporal` alanında `n_train: 480`, `n_test: 120`).
-- **Evidently Eşlemesi**: `Report.run(reference_data=ref, current_data=cur)` çağrısında `ref` ve `cur` dilimleri kullanılmıştır.
+- **ModelTrust Eşlemesi**: `report.json` içindeki `split.modes.temporal` (ve `shift.split.mode: "temporal"`) alanında `n_train: 480`, `n_test: 120`. `time_ranges`: `train_max: 2025-04-18 00:00:00`, `test_min: 2025-04-19 00:00:00`. Blok sıralama kuralını doğrudan metin olarak belirtmez; ancak `ts` kolonunun artan sıralanmasıyla ilk 480 satır eğitim, son 120 satır test olarak ayrılmış ve `train_row_indices_sha256` ile kilitlenmiştir.
+- **Evidently Eşlemesi**: `Report.run(reference_data=ref, current_data=cur)` çağrısında `reference.csv` ve `current.csv` dilimleri kullanılmıştır.
 - **Dilim Dosyaları**:
   - `reference.csv`: 480 satır, SHA-256: `C8168216AAA1A859B25194A6AEE8D4F04774844FD82B71AD2D79FBFDEC3FD26D`
   - `current.csv`: 120 satır, SHA-256: `0F1502DF4EA780D77B70881C9A080CA2200F798139B88442ADA0CC02A724788D`
@@ -65,21 +65,51 @@ Her iki araca da birebir aynı veri satırları ve aynı dilimler sağlanmışt�
 
 ## 4. Ölçülen sonuçlar (yan yana)
 
-Aşağıdaki tablo, temporal bölme üzerinde ModelTrust Lab ve Evidently (`DataDriftPreset`) tarafından üretilen tanı sonuçlarını yan yana özetlemektedir.
+### 4.a ModelTrust Lab (temporal bölme) — kolon bazlı KS
 
-| Kontrol / Değişken | ModelTrust Lab (ham değer, eşik) | Evidently (ham değer, eşik / kural) | Not |
-|---|---|---|---|
-| `x2` (enjekte edilen kayma) | KS stat = 0.650000, eşik 0.25 (`fail`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 3.722e-39, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(x2)`] | Her iki araç da `x2` üzerindeki yapay dağılım kaymasını güçlü biçimde tespit etti. |
-| `x1` (küçük sapma) | KS stat = 0.150000, eşik 0.25 (`pass`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 0.024860, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(x1)`] | ModelTrust etki büyüklüğü eşiği (0.25) altında kaldığı için geçirdi; Evidently p < 0.05 nedeniyle kayma bildirdi. |
-| `x3` (eksik verili kolon) | KS stat = 0.123932, eşik 0.25 (`pass`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 0.096779, eşik 0.05 (No Drift) [kaynak: `drift.json:ValueDrift(x3)`] | Her iki araç da kayma tespit etmedi (eşik altı / p > 0.05). |
-| `row_id` (tamsayı kimlik) | KS stat = 1.000000, eşik 0.25 (`fail`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 1.988e-129, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(row_id)`] | Monoton artan indeks her iki tarafta da zaman dilimleri arası kayma olarak bayraklandı. |
-| `y_proxy` (hedef kopyası) | KS stat = 0.333333, eşik 0.25 (`fail`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 6.294e-10, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(y_proxy)`] | Her iki araç da kayma tespit etti. |
-| `pred, lo, hi` | KS stat = 0.314583, eşik 0.25 (`fail`) [kaynak: `report.json:shift.drift.feature_ks`] | KS p-value = 7.167e-09, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(pred)`] | Her iki araç da tahmin ve aralık kolonlarında kayma tespit etti. |
-| Hedef kolonu `y` | KS stat = 0.331250, eşik 0.25 (`fail`) [kaynak: `report.json:shift.drift.target_ks`] | KS p-value = 8.309e-10, eşik 0.05 (Drift) [kaynak: `drift.json:ValueDrift(y)`] | Her iki araç da hedef dağılımı kaymasını tespit etti. |
-| Kategorik (`site`, `region`) | Hesaplanmadı (`shift` numerik odaktadır) | `site`: chi-square p=0.999999, `region`: chi-square p=1.0 (No Drift) | Evidently kategorik kolonlarda otomatik ki-kare testi uyguladı. |
-| Aralık Dışı Oran (OOD Range) | max outside ratio = 1.000000 (`row_id`), `x1`/`x2` = 0.008333, eşik 0.10 (`fail`) [kaynak: `report.json:shift.ood.feature_range`] | Karşılığı yok (DataDriftPreset kapsamında değil) | ModelTrust eğitim kümesi min/max aralığı dışına çıkan satır oranını bağımsız OOD metriği olarak ölçer. |
-| Mahalanobis Mesafesi | Oran = 1.516192, eşik 2.00 (`pass`) [kaynak: `report.json:shift.ood.mahalanobis`] | Karşılığı yok (DataDriftPreset kapsamında değil) | ModelTrust çok değişkenli mesafe oranını kontrol eder; Evidently önayarlı sürüklenme raporunda yer almaz. |
-| Veri Kümesi Sürüklenme Kararı | 4 kontrolden 3 `fail`, 1 `pass` [kaynak: `report.json:shift.checks`] | 9 / 12 kolon sürüklenmiş (%75.0 > %50 eşiği, Dataset Drift) [kaynak: `drift.json:DriftedColumnsCount`] | Her iki araç da veri kümesinin bütününde sürüklenme olduğu sonucuna vardı. |
+| Kolon | KS istatistiği | Eşik | Karar | Kaynak |
+|---|---|---|---|---|
+| `row_id` | 1.000000 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[3]` |
+| `x1` | 0.150000 | 0.25 | pass | `report.json:shift.drift.feature_ks.features[4]` |
+| `x2` | 0.650000 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[5]` |
+| `x3` | 0.123932 | 0.25 | pass | `report.json:shift.drift.feature_ks.features[6]` |
+| `pred` | 0.314583 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[2]` |
+| `lo` | 0.314583 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[1]` |
+| `hi` | 0.314583 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[0]` |
+| `y_proxy` | 0.333333 | 0.25 | fail | `report.json:shift.drift.feature_ks.features[7]` |
+| `y` (hedef, `drift.target_ks`) | 0.331250 | 0.25 | fail | `report.json:shift.drift.target_ks.ks_stat` |
+
+Ayrıca `ood.feature_range` kontrolünde max outside ratio = 1.000000 (`fail`, eşik 0.10, kaynak: `report.json:shift.ood.feature_range`) ve `ood.mahalanobis` kontrolünde mesafe oranı = 1.516192 (`pass`, eşik 2.00, kaynak: `report.json:shift.ood.mahalanobis`) ölçülmüştür.
+
+### 4.b Evidently (`DataDriftPreset`) — kolon bazlı (12 kolon)
+
+| Kolon | Yöntem | Değer | Eşik | Karar | Kaynak (`drift.json` metrik yapılandırması) |
+|---|---|---|---|---|---|
+| `row_id` | K-S p_value | 1.987767e-129 | 0.05 | Drift | `ValueDrift(column=row_id,method=K-S p_value,threshold=0.05)` |
+| `x1` | K-S p_value | 0.024860 | 0.05 | Drift | `ValueDrift(column=x1,method=K-S p_value,threshold=0.05)` |
+| `x2` | K-S p_value | 3.722182e-39 | 0.05 | Drift | `ValueDrift(column=x2,method=K-S p_value,threshold=0.05)` |
+| `x3` | K-S p_value | 0.096779 | 0.05 | No Drift | `ValueDrift(column=x3,method=K-S p_value,threshold=0.05)` |
+| `y` | K-S p_value | 8.309481e-10 | 0.05 | Drift | `ValueDrift(column=y,method=K-S p_value,threshold=0.05)` |
+| `pred` | K-S p_value | 7.167164e-09 | 0.05 | Drift | `ValueDrift(column=pred,method=K-S p_value,threshold=0.05)` |
+| `lo` | K-S p_value | 7.167164e-09 | 0.05 | Drift | `ValueDrift(column=lo,method=K-S p_value,threshold=0.05)` |
+| `hi` | K-S p_value | 7.167164e-09 | 0.05 | Drift | `ValueDrift(column=hi,method=K-S p_value,threshold=0.05)` |
+| `y_proxy` | K-S p_value | 6.293809e-10 | 0.05 | Drift | `ValueDrift(column=y_proxy,method=K-S p_value,threshold=0.05)` |
+| `site` | chi-square p_value | 0.999999 | 0.05 | No Drift | `ValueDrift(column=site,method=chi-square p_value,threshold=0.05)` |
+| `region` | chi-square p_value | 1.000000 | 0.05 | No Drift | `ValueDrift(column=region,method=chi-square p_value,threshold=0.05)` |
+| `ts` | Percentile text content drift | 0.933528 | 0.95 | Drift | `ValueDrift(column=ts,method=Percentile text content drift,threshold=0.95)` |
+
+### 4.c Uzlaştırma (özet ↔ kolon bazlı)
+
+- **Evidently özet metriği**: 9/12 kolon (%75.0) sürüklenmiş (`Dataset Drift: True`, eşik `drift_share=0.5`) [kaynak: `drift.json:DriftedColumnsCount`].
+- **Kolon bazlı p-değerleriyle sayım**: 8/12 kolon (%66.7). Sayısal kolonlardan 8 tanesinde p-değeri < 0.05 olduğu için kayma tespit edilmiştir (`row_id, x1, x2, y, pred, lo, hi, y_proxy`). `x3` (p=0.0968) ile kategorik `site` (p=0.999999) ve `region` (p=1.0) eşik altındadır.
+- **Farkın Açıklaması (9 ↔ 8)**: 9. sürüklenen kolon `ts` metin kolonudur. Bu kolonda kullanılan `Percentile text content drift` yönteminde raporlanan değer (0.933528) bir p-değeri değil, referans ve akım metinlerini ayırt etmek üzere eğitilen alan sınıflandırıcısının ROC-AUC skorudur. Karar kuralı `ROC-AUC > rastgele sınıflandırıcı yüzdeliği (~0.55)` şeklinde çalışır (kaynak: `evidently/legacy/utils/data_drift_utils.py:256`). ROC-AUC skoru rastgele sınıflandırıcı eşiğini aştığından `ts` kolonu da sürüklenmiş olarak işaretlenir. Böylece özet sayımdaki 9 kolon (8 sayısal + 1 metin) kolon bazlı sonuçlarla tam olarak uzlaşır.
+- **ModelTrust tarafı**: 4 shift denetiminden 3 `fail` (`drift.feature_ks`, `drift.target_ks`, `ood.feature_range`), 1 `pass` (`ood.mahalanobis`).
+- **Gözlem Notları**:
+  - `x2` (enjekte edilen kayma): Her iki araçta da güçlü biçimde `fail` / `Drift`.
+  - `x1`: ModelTrust pratik etki büyüklüğü eşiği (KS stat 0.15 < 0.25) altında kaldığı için `pass` verirken; Evidently istatistiksel anlamlılık (p=0.0249 < 0.05) nedeniyle `Drift` bildirmiştir. Bu, etki büyüklüğü ile hipotez testi yaklaşımı arasındaki metodoloji farkını yansıtır.
+  - `row_id`: Monoton artan kimlik kolonu her iki araçta da yapay olarak kayma üretmiştir.
+  - `OOD aralık ve Mahalanobis`: ModelTrust'ta bağımsız tanı kontrolleri olarak yer alırken, Evidently `DataDriftPreset` içinde doğrudan karşılığı bulunmamaktadır.
+  - `Kategorik kolonlar`: ModelTrust numerik odaklı çalışırken, Evidently otomatik olarak ki-kare testi uygulamıştır.
 
 ## 5. Sözleşme farkları
 
@@ -106,17 +136,18 @@ Aşağıdaki adımlar geçici bir ortamda sonuçları yeniden üretmek için kul
 ```powershell
 # 1. Geçici venv oluştur ve Evidently kur
 $ev = "$env:TEMP\mt_ev_venv"
-python -m venv $ev
+.\.venv\Scripts\python.exe -m venv $ev
 & "$ev\Scripts\python.exe" -m pip install --disable-pip-version-check evidently
 
-# 2. Veri dilimlerini üret
-python -c "import pandas as pd; df = pd.read_csv('examples/case_study/case_study.csv').sort_values('ts', kind='mergesort'); k=int(len(df)*0.8); df.iloc[:k].to_csv('$env:TEMP/ref.csv', index=False); df.iloc[k:].to_csv('$env:TEMP/cur.csv', index=False)"
+# 2. Veri dilimlerini üret (Windows üzerinde to_csv satır sonu os.linesep (
+) kullanır, hash'ler platforma bağlıdır)
+python -c "import pandas as pd; df = pd.read_csv('examples/case_study/case_study.csv').sort_values('ts', kind='mergesort'); k=int(len(df)*0.8); df.iloc[:k].to_csv('$env:TEMP/reference.csv', index=False); df.iloc[k:].to_csv('$env:TEMP/current.csv', index=False)"
 
 # 3. ModelTrust temporal raporunu çalıştır
 python -m modeltrust report --input examples/case_study/case_study.csv --target-col y --time-col ts --split-mode temporal --shift --out-dir "$env:TEMP/mt_rep"
 
 # 4. Evidently raporunu çalıştır
-& "$ev\Scripts\python.exe" -c "import pandas as pd; from evidently import Report; from evidently.presets import DataDriftPreset; rep=Report([DataDriftPreset()]); snap=rep.run(reference_data=pd.read_csv('$env:TEMP/ref.csv'), current_data=pd.read_csv('$env:TEMP/cur.csv')); snap.save_html('$env:TEMP/drift.html')"
+& "$ev\Scripts\python.exe" -c "import pandas as pd; from evidently import Report; from evidently.presets import DataDriftPreset; rep=Report([DataDriftPreset()]); snap=rep.run(reference_data=pd.read_csv('$env:TEMP/reference.csv'), current_data=pd.read_csv('$env:TEMP/current.csv')); snap.save_html('$env:TEMP/drift.html')"
 
 # 5. Geçici venv ortamı istendiğinde silinebilir
 # Remove-Item -Recurse -Force $ev

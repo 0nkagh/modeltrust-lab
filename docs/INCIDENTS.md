@@ -320,3 +320,9 @@
 - Etki: Çalışma ağacı kirli kapandı; untracked artık dosya, yayın öncesi ağaçta iz bıraktı. Testler bu dosya olmadan da yeşildi (dosya silindikten sonra 197 passed).
 - Düzeltme: Dosyanın geçmişi, boyutu ve zaman damgası ham olarak kayda alındı; dosya hedefli olarak silindi ve suite yeniden koşularak gerekli olmadığı doğrulandı.
 - Önlem: Her tur çalışma ağacı temiz kapatılır: git status --untracked-files=all boş olmalıdır ve untracked artık dosya bırakılmaz (D-098).
+## I-055 — Karşılaştırma belgesinde kanıt kusurları: uzlaştırılmayan özet metrik ve yanlış kaynak atfı (PHASE 5 / T20).
+- Tarih: 2026-09-29
+- Ne oldu: (a) `docs/COMPARISON.md` §4'te Evidently'ın veri kümesi düzeyindeki kararı özet metrikten (9/12 kolon, %75) alındı; aynı koşunun kolon bazlı p-değerleriyle sayıldığında 8 kolon eşik altındadır ve belge bu farkı açıklamıyordu. (b) Kolon bazlı ModelTrust KS değerleri `report.json:shift.drift.feature_ks` olarak atıflandı; oysa aynı turda o nesnenin tam dökümü bu değerleri içermiyordu, gerçek kaynak başka bir çıktıdır.
+- Etki: Yayına hazır bir belgede, okuyucunun kendi sayımıyla çelişen bir satır ve gösterilen yerde bulunmayan bir kanıt atfı. Ürün kodunda ve testlerde etki yok.
+- Düzeltme: Kolon bazlı karar tabloları eklendi; özet metrik ile sayım arasındaki fark araç kaynak kodu okunarak açıklandı (açıklanamayan kısım "belirlenemedi" olarak yazıldı); kolon bazlı değerlerin atfı değerin fiilen okunduğu dosya/komuta çevrildi.
+- Önlem: Belgelere aktarılan her özet metrik alt kalemlerle uzlaştırılır ve her sayısal iddianın atfı, değerin fiilen okunduğu yeri gösterir (D-100).
