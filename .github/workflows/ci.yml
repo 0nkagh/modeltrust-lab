@@ -48,6 +48,8 @@ jobs:
         run: python -m pytest
       - name: Case-study data integrity (sha256 of the committed CSV)
         run: python -c "import hashlib,pathlib,sys;p=pathlib.Path('examples/case_study/case_study.csv');h=hashlib.sha256(p.read_bytes()).hexdigest().upper();print('CASE_STUDY_SHA256='+h);sys.exit(0 if h=='9587B66886A942EE9E9589FE65F000406F6F9F40F41BA7E7BF0B5E0CF9E942DA' else 1)"
+      - name: Real case-study data integrity (sha256 of the committed CSV)
+        run: python -c "import hashlib,pathlib,sys;p=pathlib.Path('examples/case_study_real/student-por.csv');h=hashlib.sha256(p.read_bytes()).hexdigest().upper();print('REAL_CASE_STUDY_SHA256='+h);sys.exit(0 if h=='A7594A11D7771C0EFE1A740824E0E833DA9C4CAD07C39A9766A874575563FB3F' else 1)"
 
   package:
     name: package (ubuntu-latest, py3.12)
